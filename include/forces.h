@@ -88,6 +88,8 @@ void create_collision(
     free_func_t freer
 );
 
+void create_constant_force(scene_t *scene, vector_t *a, body_t *body){
+    
 /**
  * Adds a force creator to a scene that destroys two bodies when they collide.
  * The bodies should be destroyed by calling body_remove().

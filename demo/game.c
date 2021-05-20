@@ -84,8 +84,10 @@ void initialize_player(scene_t *scene) {
     entity_t *entity = entity_init("PLAYER", false, true);
     list_t *coords = compute_rect_points(center, 2 * PLAYER_RADIUS, 2 * PLAYER_RADIUS);
     body_t *player = body_init_with_info(coords, PLAYER_MASS, PLAYER_COLOR, entity, entity_free);
-    body_add_force(player, vec_multiply(body_get_mass(player), DEFAULT_GRAVITY));
     scene_add_body(scene, player);
+    vector_t *grav = malloc(sizeof(vector_t));
+    *grav = DEFAULT_GRAVITY;
+    create_constant_force(scene, grav, player);
 }
 
 //TODO: this function will be changed into derek's terrain implementation eventually

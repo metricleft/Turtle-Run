@@ -61,7 +61,6 @@ void create_constant_force(scene_t *scene, vector_t *a, body_t *body){
     list_t *bodies = list_init(1, body_free);
     list_add(bodies, body);
     scene_add_bodies_force_creator(scene, const_force_creator, force_param, bodies, free);
-
 }
 
 void spring_creator(param_t *aux){
