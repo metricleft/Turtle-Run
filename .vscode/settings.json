@@ -45,6 +45,7 @@
     "terminal.integrated.defaultProfile.windows": "Visual Studio Developer Prompt",
     "files.associations": {
         "polygon.h": "c",
-        "forces.h": "c"
+        "forces.h": "c",
+        "stdlib.h": "c"
     }
 }

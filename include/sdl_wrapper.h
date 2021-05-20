@@ -15,6 +15,12 @@ typedef enum {
     DOWN_ARROW = 4
 } arrow_key_t;
 
+typedef enum {
+    LEFT_CLICK = 1, 
+    RIGHT_CLICK = 2, 
+    SCROLL_CLICK = 3 
+} mouse_button_t;
+
 /**
  * The possible types of key events.
  * Enum types in C are much more primitive than in Java; this is equivalent to:
@@ -27,6 +33,11 @@ typedef enum {
     KEY_RELEASED
 } key_event_type_t;
 
+typedef enum {
+    BUTTON_PRESSED,
+    BUTTON_RELEASED
+} mouse_event_type_t;
+
 /**
  * A keypress handler.
  * When a key is pressed or released, the handler is passed its char value.
@@ -37,8 +48,9 @@ typedef enum {
  * @param type the type of key event (KEY_PRESSED or KEY_RELEASED)
  * @param held_time if a press event, the time the key has been held in seconds
  */
-typedef void (*key_handler_t)(char key, key_event_type_t type, double held_time,
+typedef void (*event_handler_t)(char key, void *type, double held_time,
                               void *scene);
+
 
 /**
  * Initializes the SDL window and renderer.
@@ -111,7 +123,17 @@ void sdl_render_scene(scene_t *scene);
  *
  * @param handler the function to call with each key press
  */
-void sdl_on_key(key_handler_t handler);
+void sdl_on_key(event_handler_t handler);
+
+void sdl_on_click(event_handler_t handler);
+
+/**
+ * Gets the current position of the mouse
+ *
+ * @return vector_t of the mouse position
+ */
+
+vector_t sdl_mouse_pos();    
 
 /**
  * Gets the amount of time that has passed since the last time

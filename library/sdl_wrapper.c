@@ -30,7 +30,12 @@ SDL_Renderer *renderer;
 /**
  * The keypress handler, or NULL if none has been configured.
  */
-key_handler_t key_handler = NULL;
+event_handler_t key_handler = NULL;
+/**
+ * The mousepress handler, or NULL if none has been configured.
+ */
+event_handler_t mouse_handler = NULL;
+
 /**
  * SDL's timestamp when a key was last pressed or released.
  * Used to mesasure how long a key has been held.
@@ -99,6 +104,14 @@ char get_keycode(SDL_Keycode key) {
     }
 }
 
+char get_mousecode(SDL_MouseButtonEvent mouse) {
+    switch (mouse.button) {
+        case SDL_BUTTON_LEFT:   return LEFT_CLICK;
+        case SDL_BUTTON_RIGHT:  return RIGHT_CLICK;
+        case SDL_BUTTON_MIDDLE: return SCROLL_CLICK;
+    }
+}
+
 void sdl_init(vector_t min, vector_t max) {
     // Check parameters
     assert(min.x < max.x);
@@ -141,9 +154,19 @@ bool sdl_is_done(void *scene) {
                 key_event_type_t type =
                     event->type == SDL_KEYDOWN ? KEY_PRESSED : KEY_RELEASED;
                 double held_time = (timestamp - key_start_timestamp) / MS_PER_S;
-                key_handler(key, type, held_time, scene);
+                key_handler(key, (void *)type, held_time, scene);
                 break;
-        }
+            case SDL_MOUSEBUTTONDOWN:
+            case SDL_MOUSEBUTTONUP:
+                if (mouse_handler == NULL) break;
+                char button = get_mousecode(event->button);
+                if (button == '\0') break;
+                                
+                mouse_event_type_t click =
+                    event->type == SDL_MOUSEBUTTONUP ? BUTTON_PRESSED : BUTTON_RELEASED;
+                mouse_handler(button, (void *)click, 0, scene);
+                break;
+        } 
     }
     free(event);
     return false;
@@ -217,8 +240,24 @@ void sdl_render_scene(scene_t *scene) {
     sdl_show();
 }
 
-void sdl_on_key(key_handler_t handler) {
+void sdl_on_key(event_handler_t handler) {
     key_handler = handler;
+}
+
+void sdl_on_click(event_handler_t handler) {
+    mouse_handler = handler;
+}
+
+vector_t sdl_mouse_pos(){
+    vector_t window_center = get_window_center();
+    int *mouse_x = malloc(sizeof(int));
+    int *mouse_y = malloc(sizeof(int));
+    SDL_GetMouseState(mouse_x, mouse_y);
+    vector_t mouse = (vector_t){*mouse_x, *mouse_y};
+    free(mouse_x);
+    free(mouse_y);
+    return get_window_position(mouse, window_center);
+
 }
 
 double time_since_last_tick(void) {
