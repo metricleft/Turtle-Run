@@ -12,7 +12,7 @@
 const double SMALL_DISTANCE = 5;
 
 typedef struct param {
-    double constant;
+    void *constant;
     body_t *body1;
     body_t *body2;
 } param_t;
@@ -35,7 +35,7 @@ void gravity_creator(param_t *aux){
     double mass_product = body_get_mass(aux->body1)* body_get_mass(aux->body2);
     vector_t force = VEC_ZERO;
     if (sqrt(vec_dot(r, r)) > SMALL_DISTANCE){
-        force = vec_multiply(-aux->constant * mass_product / pow(sqrt(vec_dot(r,r)), 3.0) , r);
+        force = vec_multiply(-(double) aux->constant * mass_product / pow(sqrt(vec_dot(r,r)), 3.0) , r);
     }
     body_add_force(aux->body1, force);
     body_add_force(aux->body2, vec_negate(force));
@@ -43,23 +43,37 @@ void gravity_creator(param_t *aux){
 
 void create_newtonian_gravity(scene_t *scene, double G, body_t *body1, body_t *body2){
     param_t *force_param = malloc(sizeof(param_t));
-    *force_param = (param_t){G, body1, body2};
+    *force_param = (param_t){(void *) G, body1, body2};
     list_t *bodies = list_init(2, body_free);
     list_add(bodies, body1);
     list_add(bodies, body2);
     scene_add_bodies_force_creator(scene, gravity_creator, force_param, bodies, free);
 }
 
+void const_force_creator(param_t *aux){
+    vector_t force = vec_multiply(body_get_mass(aux->body1), *(vector_t *) aux->constant);
+    body_add_force(aux->body1, force);
+}
+
+void create_constant_force(scene_t *scene, vector_t *a, body_t *body){
+    param_t *force_param = malloc(sizeof(param_t));
+    *force_param = (param_t){a, body, NULL};
+    list_t *bodies = list_init(1, body_free);
+    list_add(bodies, body);
+    scene_add_bodies_force_creator(scene, const_force_creator, force_param, bodies, free);
+
+}
+
 void spring_creator(param_t *aux){
     vector_t r = vec_subtract(body_get_centroid(aux->body1), body_get_centroid(aux->body2));
-    vector_t force = vec_multiply(-1 * aux->constant, r);
+    vector_t force = vec_multiply(-1 * (double) aux->constant, r);
     body_add_force(aux->body1, force);
     body_add_force(aux->body2, vec_negate(force));
 } 
 
 void create_spring(scene_t *scene, double k, body_t *body1, body_t *body2){
     param_t *force_param = malloc(sizeof(param_t));
-    *force_param = (param_t){k, body1, body2};
+    *force_param = (param_t){(void *)k, body1, body2};
     list_t *bodies = list_init(2, body_free);
     list_add(bodies, body1);
     list_add(bodies, body2);
@@ -67,13 +81,13 @@ void create_spring(scene_t *scene, double k, body_t *body1, body_t *body2){
 }
 
 void drag_creator(param_t *aux){
-    vector_t force = vec_multiply(-aux->constant, body_get_velocity(aux->body1));
+    vector_t force = vec_multiply(- (double) aux->constant, body_get_velocity(aux->body1));
     body_add_force(aux->body1, force);
 }
 
 void create_drag(scene_t *scene, double gamma, body_t *body){
     param_t *force_param = malloc(sizeof(param_t));
-    *force_param = (param_t){gamma, body, NULL};
+    *force_param = (param_t){(void *) gamma, body, NULL};
     list_t *bodies = list_init(1, body_free);
     list_add(bodies, body);
     scene_add_bodies_force_creator(scene, drag_creator, force_param, bodies, free);

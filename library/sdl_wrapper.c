@@ -2,8 +2,11 @@
 #include <math.h>
 #include <stdlib.h>
 #include <time.h>
+#include <SDL2/SDL_image.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL2_gfxPrimitives.h>
+#include <SDL2/SDL_mouse.h>
+#include <SDL2/SDL_surface.h>
 #include "sdl_wrapper.h"
 
 const char WINDOW_TITLE[] = "CS 3";
@@ -208,6 +211,17 @@ void sdl_draw_polygon(list_t *points, rgb_color_t color) {
     free(x_points);
     free(y_points);
 }
+/*
+//incomplet
+void sdl_draw_image(){
+    SDL_Surface *surface = IMG_Load("turtle.png");
+    SDL_Texture *texture = NULL;
+    if(surface){
+        texture = SDL_CreateTextureFromSurface(renderer, surface);
+        SDL_FreeSurface(surface);
+    }
+}
+*/
 
 void sdl_show(void) {
     // Draw boundary lines
@@ -237,6 +251,7 @@ void sdl_render_scene(scene_t *scene) {
         sdl_draw_polygon(shape, body_get_color(body));
         list_free(shape);
     }
+    sdl_draw_image();
     sdl_show();
 }
 
