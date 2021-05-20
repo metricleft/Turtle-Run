@@ -15,6 +15,7 @@ typedef enum {
     DOWN_ARROW = 4
 } arrow_key_t;
 
+// Values passed to a mouse handler when the given button is clicked
 typedef enum {
     LEFT_CLICK = 1, 
     RIGHT_CLICK = 2, 
@@ -33,22 +34,24 @@ typedef enum {
     KEY_RELEASED
 } key_event_type_t;
 
+
+/**
+ * The possible types of mouse button events.
+ */
 typedef enum {
     BUTTON_PRESSED,
     BUTTON_RELEASED
 } mouse_event_type_t;
 
 /**
- * A keypress handler.
- * When a key is pressed or released, the handler is passed its char value.
- * Most keys are passed as their char value, e.g. 'a', '1', or '\r'.
- * Arrow keys have the special values listed above.
- *
- * @param key a character indicating which key was pressed
- * @param type the type of key event (KEY_PRESSED or KEY_RELEASED)
+ * A event handler.
+ * When a key or button is pressed or released, the handler is passed its char value.
+ * 
+ * @param event a character indicating which key or button was pressed
+ * @param type the type of event (KEY_PRESSED/KEY_RELEASED or BUTTONP_PRESSED/BUTTON_RELEASED)
  * @param held_time if a press event, the time the key has been held in seconds
  */
-typedef void (*event_handler_t)(char key, void *type, double held_time,
+typedef void (*event_handler_t)(char event, void *type, double held_time,
                               void *scene);
 
 
@@ -124,6 +127,14 @@ void sdl_render_scene(scene_t *scene);
  * @param handler the function to call with each key press
  */
 void sdl_on_key(event_handler_t handler);
+
+
+/**
+ * Registers a function to be called every time a mouse button is pressed.
+ * Overwrites any existing handler.
+ *
+ * @param handler the function to call with each button press
+ */
 
 void sdl_on_click(event_handler_t handler);
 
