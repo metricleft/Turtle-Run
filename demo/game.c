@@ -3,8 +3,10 @@
 #include <string.h>
 
 #include "body.h"
+#include "polygon.h"
 #include "scene.h"
 #include "forces.h"
+#include "entity.h"
 #include "sdl_wrapper.h"
 #include "SDL2/SDL_mouse.h"
 
@@ -18,13 +20,14 @@ const double BULLET_MASS = 0.2;
 
 const rgb_color_t ENEMY_BULLET_COLOR = {1, 0, 0};
 
-
-
 const rgb_color_t PLAYER_BULLET_COLOR = {0, 1, 0};
 const double PLAYER_SPEED = 600;
 const double PLAYER_RADIUS = 16;
 const double PLAYER_MASS = 10;
 const rgb_color_t PLAYER_COLOR = {0, 1, 0};
+
+const vector_t DEFAULT_GRAVITY = {0, -50};
+const vector_t DEFAULT_SCROLL_SPEED = {-0.1, 0};
 
 bool game_end() {
     sdl_on_key(NULL);
@@ -46,8 +49,9 @@ list_t *compute_circle_points(vector_t center, double radius) {
 }
 
 bool check_game_end(scene_t *scene) {
-    //Check if player is gone: lose condition. 
-    if (strcmp(body_get_info(scene_get_body(scene, 0)), "PLAYER")) {
+    //Check if player is gone: lose condition.
+    entity_t *entity = body_get_info(scene_get_body(scene, 0));
+    if (strcmp(entity_get_type(entity), "PLAYER")) {
         game_end();
         return true;
     }
@@ -77,37 +81,57 @@ list_t *compute_rect_points(vector_t center, double width, double height) {
 
 void initialize_player(scene_t *scene) {
     vector_t center = {MAX.x / 2, MAX.y / 2};
+    entity_t *entity = entity_init("PLAYER", false, true);
     list_t *coords = compute_rect_points(center, 2 * PLAYER_RADIUS, 2 * PLAYER_RADIUS);
-    body_t *player = body_init_with_info(coords, PLAYER_MASS, PLAYER_COLOR, "PLAYER", body_free);
+    body_t *player = body_init_with_info(coords, PLAYER_MASS, PLAYER_COLOR, entity, entity_free);
+    body_add_force(player, vec_multiply(body_get_mass(player), DEFAULT_GRAVITY));
     scene_add_body(scene, player);
+}
+
+//TODO: this function will be changed into derek's terrain implementation eventually
+void initialize_terrain(scene_t *scene) {
     vector_t fc = (vector_t){MAX.x/2, 10};
+    entity_t *entity = entity_init("TERRAIN", true, false);
     list_t *floor_coords = compute_rect_points(fc, MAX.x, 50);
-    body_t *floor = body_init_with_info(floor_coords, INFINITY, BLACK, "FLOOR", body_free);
+    body_t *floor = body_init_with_info(floor_coords, INFINITY, BLACK, entity, entity_free);
     scene_add_body(scene, floor);
-    //create_newtonian_gravity()
 }
 
 void add_bullet (scene_t *scene, vector_t center, rgb_color_t color,
-                    vector_t velocity, char *bullet_type, char *target_type) {
+                    vector_t velocity, entity_t *bullet_entity, char *target_type) {
     body_t *bullet = body_init_with_info(
-        compute_circle_points(center, BULLET_RADIUS, 0),
-        BULLET_MASS, color, bullet_type, free);
+        compute_circle_points(center, BULLET_RADIUS),
+        BULLET_MASS, color, bullet_entity, entity_free);
     body_set_velocity(bullet, velocity);
 
     scene_add_body(scene, bullet);
 
     for (size_t i = 0; i < scene_bodies(scene); i++) {
         body_t *body = scene_get_body(scene, i);
-        if (!strcmp(body_get_info(body), target_type)) {
+        entity_t *entity = body_get_info(body);
+        if (!strcmp(entity_get_type(entity), target_type)) {
             create_destructive_collision(scene, body, bullet);
         }
     }
 }
 
+void sidescroll(scene_t *scene, vector_t *scroll_speed) {
+    //Applies a leftwards velocity to all objects with the "SCROLLABLE" tag
+    for (size_t i = 0; i < scene_bodies(scene); i++) {
+        body_t *body = scene_get_body(scene, i);
+        entity_t *entity = body_get_info(body);
+        if (entity_get_scrollable(entity)) {
+            body_set_velocity(body, vec_add(body_get_velocity(body), *scroll_speed));
+        }
+        /*//Applies a downwards force (gravity) to all objects with the "FALLABLE" tag
+        if (entity_get_fallable(entity)) {
+            body_add_force(body, vec_multiply(body_get_mass(body), DEFAULT_GRAVITY));
+        }*/
+    }
+}
 
 void player_move (char key, key_event_type_t type, double held_time, void *scene) {
     body_t *player = scene_get_body(scene, 0);
-    printf("check 3\n");
     vector_t new_velocity = {0, body_get_velocity(player).y};
     if (type == KEY_PRESSED) {
         switch (key) {
@@ -122,7 +146,7 @@ void player_move (char key, key_event_type_t type, double held_time, void *scene
                 }
                 break;
             case (char)32: //spacebar
-                if (held_time < 10) {
+                if (held_time < 0.2) {
                     new_velocity.y = PLAYER_SPEED;
                 }
                 break;
@@ -132,21 +156,17 @@ void player_move (char key, key_event_type_t type, double held_time, void *scene
 }
 
 void player_shoot(char key, mouse_event_type_t type, double held_time, void *scene){
-    printf("check 3\n");
     body_t *player = scene_get_body(scene, 0);
-    printf("check 4\n");
     vector_t new_velocity = {0, 0};
     if (type == BUTTON_PRESSED) {
         switch (key) {
             case LEFT_CLICK:
                 vector_t mouse = sdl_mouse_pos();
-                printf("%d %d \n", mouse.x, mouse.y);
                 vector_t center = body_get_centroid(player);
-                printf("center: %f %f \n", center.x, center.y);
                 vector_t shoot = vec_unit(vec_subtract(mouse, center));
-                printf("shoot: %f %f \n", shoot.x, shoot.y);
+                entity_t *entity = entity_init("BULLET", false, false);
                 add_bullet(scene, center, PLAYER_BULLET_COLOR,
-                        vec_multiply(200, shoot), "BULLET", "ENEMY");
+                        vec_multiply(200, shoot), entity, "ENEMY");
                 break;
         }
     }
@@ -155,18 +175,21 @@ void player_shoot(char key, mouse_event_type_t type, double held_time, void *sce
 int main(int argc, char *argv[]) {
     scene_t *scene = scene_init();
 
+    vector_t *scroll_speed = malloc(sizeof(vector_t));
+    *scroll_speed = DEFAULT_SCROLL_SPEED;
+
     sdl_init(MIN,MAX);
+    sdl_on_key(player_move);
+    sdl_on_click(player_shoot);
 
     while (true) {
         scene = scene_init();
-        printf("check 1");
         initialize_player(scene);
-        printf("check 2");
-        sdl_on_key(player_move);
-        sdl_on_click(player_shoot);
-        double time_since_last_bullet = 0;
+        initialize_terrain(scene);
+        //double time_since_last_enemy = 0;
         while (!check_game_end(scene)) {
             double dt = time_since_last_tick();
+            sidescroll(scene, scroll_speed);
             scene_tick(scene, dt);
             if (sdl_is_done(scene)) {
                 scene_free(scene);
@@ -176,5 +199,7 @@ int main(int argc, char *argv[]) {
         }
         scene_free(scene);
     }
+
+    free(scroll_speed);
     return 0;
 }
