@@ -26,8 +26,11 @@ const double PLAYER_RADIUS = 16;
 const double PLAYER_MASS = 10;
 const rgb_color_t PLAYER_COLOR = {0, 1, 0};
 
-const vector_t DEFAULT_GRAVITY = {0, -50};
+const vector_t DEFAULT_GRAVITY = {0, -200};
 const vector_t DEFAULT_SCROLL_SPEED = {-0.1, 0};
+
+const double ELASTIC_COLLISION = 1;
+const double INELASTIC_COLLISION = 0;
 
 bool game_end() {
     sdl_on_key(NULL);
@@ -90,11 +93,13 @@ void initialize_player(scene_t *scene) {
 
 //TODO: this function will be changed into derek's terrain implementation eventually
 void initialize_terrain(scene_t *scene) {
+    body_t *player = scene_get_body(scene, 0);
     vector_t fc = (vector_t){MAX.x/2, 10};
     entity_t *entity = entity_init("TERRAIN", true, false);
     list_t *floor_coords = compute_rect_points(fc, MAX.x, 50);
     body_t *floor = body_init_with_info(floor_coords, INFINITY, BLACK, entity, entity_free);
     scene_add_body(scene, floor);
+    create_physics_collision(scene, INELASTIC_COLLISION, player, floor);
 }
 
 void add_bullet (scene_t *scene, vector_t center, rgb_color_t color,
@@ -116,17 +121,17 @@ void add_bullet (scene_t *scene, vector_t center, rgb_color_t color,
 }
 
 void sidescroll(scene_t *scene, vector_t *scroll_speed) {
-    //Applies a leftwards velocity to all objects with the "SCROLLABLE" tag
     for (size_t i = 0; i < scene_bodies(scene); i++) {
         body_t *body = scene_get_body(scene, i);
         entity_t *entity = body_get_info(body);
+        //Applies a leftwards velocity to all objects with the "SCROLLABLE" tag
         if (entity_get_scrollable(entity)) {
             body_set_velocity(body, vec_add(body_get_velocity(body), *scroll_speed));
         }
-        /*//Applies a downwards force (gravity) to all objects with the "FALLABLE" tag
+        //Applies a downwards force (gravity) to all objects with the "FALLABLE" tag
         if (entity_get_fallable(entity)) {
             body_add_force(body, vec_multiply(body_get_mass(body), DEFAULT_GRAVITY));
-        }*/
+        }
     }
 }
 
@@ -135,11 +140,13 @@ void player_move (char key, key_event_type_t type, double held_time, void *scene
     vector_t new_velocity = {0, body_get_velocity(player).y};
     if (type == KEY_PRESSED) {
         switch (key) {
+            case 'a':
             case LEFT_ARROW:
                 if (body_get_centroid(player).x - PLAYER_RADIUS > MIN.x) {
                     new_velocity.x = -PLAYER_SPEED;
                 }
                 break;
+            case 'd':
             case RIGHT_ARROW:
                 if (body_get_centroid(player).x + PLAYER_RADIUS < MAX.x) {
                     new_velocity.x = PLAYER_SPEED;
@@ -147,7 +154,7 @@ void player_move (char key, key_event_type_t type, double held_time, void *scene
                 break;
             case (char)32: //spacebar
                 if (held_time < 0.2) {
-                    new_velocity.y = PLAYER_SPEED;
+                    new_velocity.y = PLAYER_SPEED/3;
                 }
                 break;
         }
