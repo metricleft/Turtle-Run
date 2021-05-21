@@ -155,9 +155,11 @@ void player_move (char key, key_event_type_t type, double held_time, void *scene
                     new_velocity.x = PLAYER_SPEED;
                 }
                 break;
+            case 'w':
+            case (char)32: //spacebar
             case UP_ARROW:
                 if (held_time < 0.2) {
-                    new_velocity.y = PLAYER_SPEED/3;
+                    new_velocity.y = PLAYER_SPEED/2;
                 }
                 break;
         }
