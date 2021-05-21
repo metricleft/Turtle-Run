@@ -5,6 +5,8 @@
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL2_gfxPrimitives.h>
+#include <SDL2/SDL_mouse.h>
+#include <SDL2/SDL_surface.h>
 #include "sdl_wrapper.h"
 
 const char WINDOW_TITLE[] = "CS 3";
@@ -28,6 +30,8 @@ SDL_Window *window;
  * The renderer used to draw the scene.
  */
 SDL_Renderer *renderer;
+
+SDL_Texture *texture;
 /**
  * The keypress handler, or NULL if none has been configured.
  */
@@ -96,13 +100,9 @@ vector_t get_window_position(vector_t scene_pos, vector_t window_center) {
 char get_keycode(SDL_Keycode key) {
     switch (key) {
         case SDLK_LEFT:  return LEFT_ARROW;
-        case SDLK_a:  return LEFT_ARROW;
         case SDLK_UP:    return UP_ARROW;
-        case SDLK_w:    return UP_ARROW;
         case SDLK_RIGHT: return RIGHT_ARROW;
-        case SDLK_d: return RIGHT_ARROW;
         case SDLK_DOWN:  return DOWN_ARROW;
-        case SDLK_s:  return DOWN_ARROW;
         default:
             // Only process 7-bit ASCII characters
             return key == (SDL_Keycode) (char) key ? key : '\0';
@@ -134,6 +134,8 @@ void sdl_init(vector_t min, vector_t max) {
         SDL_WINDOW_RESIZABLE
     );
     renderer = SDL_CreateRenderer(window, -1, 0);
+    texture  = IMG_LoadTexture(renderer,"static/turtle_spritesheet.png");
+ 
 }
 
 bool sdl_is_done(void *scene) {
@@ -214,16 +216,34 @@ void sdl_draw_polygon(list_t *points, rgb_color_t color) {
     free(y_points);
 }
 
-//incomplete
-void sdl_draw_image(){
-    SDL_Surface *surface = IMG_Load("turtle.png");
+void sdl_draw_image(void) {
+    SDL_Surface *surface = IMG_Load("static/turtle_spritesheet.png");
     SDL_Texture *texture = NULL;
     if(surface){
         texture = SDL_CreateTextureFromSurface(renderer, surface);
         SDL_FreeSurface(surface);
+        SDL_RenderCopy(renderer, texture, NULL, NULL);        
     }
-}*/
+}
 
+void sdl_animate(SDL_Texture *texture, int frames, int FPS){
+    double time  = (double)clock() /CLOCKS_PER_SEC;
+    int tick = MS_PER_S / FPS;
+    int *w = malloc(sizeof(int));
+    int *h = malloc(sizeof(int));
+    SDL_QueryTexture(texture, NULL, NULL, w, h);
+    SDL_Rect *in = malloc(sizeof(SDL_Rect));
+    SDL_Rect *out = malloc(sizeof(SDL_Rect));
+    int frame = ((int)(time * MS_PER_S) / tick) % frames;
+    printf("%d\n", frame);
+    *in = (SDL_Rect) { frame* (*w/frames), 0, *w/frames, *h };
+    *out = (SDL_Rect) {0,0, *w/frames *2, *h*2};
+    SDL_RenderCopy(renderer, texture, in, out );
+    free(w);
+    free(h);
+    free(in);
+    free(out);
+}
 
 void sdl_show(void) {
     // Draw boundary lines
@@ -253,9 +273,10 @@ void sdl_render_scene(scene_t *scene) {
         sdl_draw_polygon(shape, body_get_color(body));
         list_free(shape);
     }
-    //sdl_draw_image();
+    sdl_animate(texture, 8, 12);
     sdl_show();
 }
+
 
 void sdl_on_key(event_handler_t handler) {
     key_handler = handler;
