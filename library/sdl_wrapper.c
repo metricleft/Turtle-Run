@@ -222,7 +222,7 @@ void sdl_draw_image(){
         texture = SDL_CreateTextureFromSurface(renderer, surface);
         SDL_FreeSurface(surface);
     }
-}
+}*/
 
 
 void sdl_show(void) {
@@ -253,7 +253,7 @@ void sdl_render_scene(scene_t *scene) {
         sdl_draw_polygon(shape, body_get_color(body));
         list_free(shape);
     }
-    sdl_draw_image();
+    //sdl_draw_image();
     sdl_show();
 }
 

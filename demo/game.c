@@ -143,13 +143,11 @@ void player_move (char key, key_event_type_t type, double held_time, void *scene
     vector_t new_velocity = {0, body_get_velocity(player).y};
     if (type == KEY_PRESSED) {
         switch (key) {
-            case 'a':
             case LEFT_ARROW:
                 if (body_get_centroid(player).x - PLAYER_RADIUS > MIN.x) {
                     new_velocity.x = -PLAYER_SPEED;
                 }
                 break;
-            case 'd':
             case RIGHT_ARROW:
                 if (body_get_centroid(player).x + PLAYER_RADIUS < MAX.x) {
                     new_velocity.x = PLAYER_SPEED;
@@ -157,7 +155,7 @@ void player_move (char key, key_event_type_t type, double held_time, void *scene
                 break;
             case UP_ARROW:
                 if (held_time < 0.2) {
-                    new_velocity.y = PLAYER_SPEED/3;
+                    new_velocity.y = PLAYER_SPEED/2;
                 }
                 break;
         }

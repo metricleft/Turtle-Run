@@ -151,7 +151,6 @@ void normal_handler(collision_param_t *param){
     collision_info_t collision = find_collision(shape1, shape2);
     if (collision.collided) {
         if (!(param->collided)){
-            printf("check");
             body_set_velocity(param->body1, VEC_ZERO);
             param->collided = true; 
         }
