@@ -46,6 +46,7 @@
     "files.associations": {
         "polygon.h": "c",
         "forces.h": "c",
-        "stdlib.h": "c"
+        "stdlib.h": "c",
+        "sdl2_gfxprimitives.h": "c"
     }
 }
