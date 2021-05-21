@@ -1,5 +1,5 @@
 # List of demo programs
-DEMOS = spaceinvaders breakout game
+DEMOS = spaceinvaders breakout game imgtest
 # List of C files in "libraries" that we provide
 STAFF_LIBS = test_util sdl_wrapper
 # List of C files in "libraries" that you will write.
@@ -88,6 +88,8 @@ bin/breakout: out/breakout.o out/sdl_wrapper.o $(STUDENT_OBJS)
 		$(CC) $(CFLAGS) $(LIBS) $^ -o $@
 
 bin/game: out/game.o out/sdl_wrapper.o $(STUDENT_OBJS)
+		$(CC) $(CFLAGS) $(LIBS) $^ -o $@
+bin/imgtest: out/imgtest.o $(STUDENT_OBJS)
 		$(CC) $(CFLAGS) $(LIBS) $^ -o $@
 # Builds the test suite executables from the corresponding test .o file
 # and the library .o files. The only difference from the demo build command
@@ -238,6 +240,9 @@ bin/breakout.exe: out/breakout.obj out/sdl_wrapper.obj $(STUDENT_OBJS)
 
 bin/game.exe: out/game.obj out/sdl_wrapper.obj $(STUDENT_OBJS)
 	$(CC) $^ $(CFLAGS) -link $(LINKEROPTS) $(LIBS) -out:"$@"
+bin/imgtest.exe: out/imgtest.obj  $(STUDENT_OBJS)
+	$(CC) $^ $(CFLAGS) -link $(LINKEROPTS) $(LIBS) -out:"$@"
+
 # Builds the test suite executables from the corresponding test .o file
 # and the library .o files. The only difference from the demo build command
 # is that it doesn't link the SDL libraries.
@@ -254,6 +259,8 @@ bin/spaceinvaders bin\spaceinvaders: bin/spaceinvaders.exe;
 bin/pegs bin\pegs: bin/pegs.exe;
 bin/breakout bin\breakout: bin/breakout.exe;
 bin/game bin\game: bin/game.exe;
+bin/imgtest bin\imgtest: bin/imgtest.exe;
+
 
 bin/test_suite_% bin\test_suite_%: bin/test_suite_%.exe ;
 
