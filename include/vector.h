@@ -110,5 +110,13 @@ vector_t vec_rotate(vector_t v, double angle);
  */
 vector_t vec_unit(vector_t v);
 
+/**
+ * Finds the magnitude of a given vector
+ * 
+ * @param v the vector to find the magnitude for
+ * @return magnitude of v
+ */
+double vec_mag(vector_t v);
+
 
 #endif // #ifndef __VECTOR_H__
