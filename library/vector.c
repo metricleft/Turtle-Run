@@ -49,3 +49,8 @@ vector_t vec_unit(vector_t v){
     vector_t unit  = vec_multiply(1 / sqrt(vec_dot(v,v)) , v);
     return unit;
 }
+
+double vec_mag(vector_t v){
+    double ret = sqrt(vec_dot(v, v));
+    return ret;
+}

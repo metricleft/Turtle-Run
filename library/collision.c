@@ -2,6 +2,7 @@
 #include <math.h>
 #include "collision.h"
 #include "vector.h"
+#include "polygon.h"
 #include <assert.h>
 
 list_t *get_axis(list_t *shape){
@@ -65,9 +66,31 @@ overlap_return_t overlap(list_t *axis, list_t *shape1, list_t *shape2){
 
 
 collision_info_t find_collision(list_t *shape1, list_t *shape2){
+    vector_t shape1_centroid = polygon_centroid(shape1);
+    vector_t shape2_centroid = polygon_centroid(shape2);
+
+    double shape1_r = 0;
+    double shape2_r = 0;
+    for (int i = 0; i < list_size(shape1); i++) {
+        shape1_r = fmax(shape1_r, 
+                vec_mag(vec_subtract(*(vector_t *) list_get(shape1,i), 
+                                        shape1_centroid)));
+    }
+    for (int i = 0; i < list_size(shape2); i++) {
+        shape2_r = fmax(shape2_r, 
+                vec_mag(vec_subtract(*(vector_t *) list_get(shape2,i), 
+                                        shape2_centroid)));
+    }
+    if (vec_mag(vec_subtract(shape1_centroid, shape2_centroid)) > 
+            shape1_r + shape2_r) {
+                return (collision_info_t) {false, VEC_ZERO};
+    }
     list_t *axis1 = get_axis(shape1);
     list_t *axis2 = get_axis(shape2);
     overlap_return_t shape1_overlap = overlap(axis1, shape1, shape2);
+    if (!shape1_overlap.collided) {
+        return (collision_info_t) {false, VEC_ZERO};
+    }
     overlap_return_t shape2_overlap = overlap(axis2, shape1, shape2);
     list_free(axis1);
     list_free(axis2);
