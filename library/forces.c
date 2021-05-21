@@ -35,15 +35,15 @@ void gravity_creator(param_t *aux){
     double mass_product = body_get_mass(aux->body1)* body_get_mass(aux->body2);
     vector_t force = VEC_ZERO;
     if (sqrt(vec_dot(r, r)) > SMALL_DISTANCE){
-        force = vec_multiply(-(double) aux->constant * mass_product / pow(sqrt(vec_dot(r,r)), 3.0) , r);
+        force = vec_multiply(- *(double *) aux->constant * mass_product / pow(sqrt(vec_dot(r,r)), 3.0) , r);
     }
     body_add_force(aux->body1, force);
     body_add_force(aux->body2, vec_negate(force));
 }
 
-void create_newtonian_gravity(scene_t *scene, double G, body_t *body1, body_t *body2){
+void create_newtonian_gravity(scene_t *scene, void *G, body_t *body1, body_t *body2){
     param_t *force_param = malloc(sizeof(param_t));
-    *force_param = (param_t){(void *) G, body1, body2};
+    *force_param = (param_t){G, body1, body2};
     list_t *bodies = list_init(2, body_free);
     list_add(bodies, body1);
     list_add(bodies, body2);
@@ -55,24 +55,25 @@ void const_force_creator(param_t *aux){
     body_add_force(aux->body1, force);
 }
 
-void create_constant_force(scene_t *scene, vector_t *a, body_t *body){
+void create_constant_force(scene_t *scene, void *A, body_t *body){
     param_t *force_param = malloc(sizeof(param_t));
-    *force_param = (param_t){a, body, NULL};
+    *force_param = (param_t){A, body, NULL};
     list_t *bodies = list_init(1, body_free);
     list_add(bodies, body);
     scene_add_bodies_force_creator(scene, const_force_creator, force_param, bodies, free);
+
 }
 
 void spring_creator(param_t *aux){
     vector_t r = vec_subtract(body_get_centroid(aux->body1), body_get_centroid(aux->body2));
-    vector_t force = vec_multiply(-1 * (double) aux->constant, r);
+    vector_t force = vec_multiply(-1 * *(double *) aux->constant, r);
     body_add_force(aux->body1, force);
     body_add_force(aux->body2, vec_negate(force));
 } 
 
-void create_spring(scene_t *scene, double k, body_t *body1, body_t *body2){
+void create_spring(scene_t *scene, void *k, body_t *body1, body_t *body2){
     param_t *force_param = malloc(sizeof(param_t));
-    *force_param = (param_t){(void *)k, body1, body2};
+    *force_param = (param_t){k, body1, body2};
     list_t *bodies = list_init(2, body_free);
     list_add(bodies, body1);
     list_add(bodies, body2);
@@ -80,13 +81,13 @@ void create_spring(scene_t *scene, double k, body_t *body1, body_t *body2){
 }
 
 void drag_creator(param_t *aux){
-    vector_t force = vec_multiply(- (double) aux->constant, body_get_velocity(aux->body1));
+    vector_t force = vec_multiply(- *(double *) aux->constant, body_get_velocity(aux->body1));
     body_add_force(aux->body1, force);
 }
 
-void create_drag(scene_t *scene, double gamma, body_t *body){
+void create_drag(scene_t *scene, void *gamma, body_t *body){
     param_t *force_param = malloc(sizeof(param_t));
-    *force_param = (param_t){(void *) gamma, body, NULL};
+    *force_param = (param_t){ gamma, body, NULL};
     list_t *bodies = list_init(1, body_free);
     list_add(bodies, body);
     scene_add_bodies_force_creator(scene, drag_creator, force_param, bodies, free);
@@ -144,6 +145,27 @@ void physics_collision_handler(body_t *body1, body_t *body2,
     }
 }
 
+void normal_handler(collision_param_t *param){
+    list_t *shape1 = body_get_shape(param->body1);
+    list_t *shape2 = body_get_shape(param->body2);
+    collision_info_t collision = find_collision(shape1, shape2);
+    if (collision.collided) {
+        if (!(param->collided)){
+            printf("check");
+            body_set_velocity(param->body1, VEC_ZERO);
+            param->collided = true; 
+        }
+        vector_t force = vec_multiply(body_get_mass(param->body1), *(vector_t *) param->aux);
+        body_add_force(param->body1, force);
+    }
+    else if (!collision.collided) {
+        param->collided = false;
+    }
+    free(shape1);
+    free(shape2);
+}
+
+
 void one_way_destroy_handler(body_t *body1, body_t *body2,
                                 vector_t axis, void *aux) {
     physics_collision_handler(body1, body2, axis, aux);
@@ -175,4 +197,18 @@ void create_physics_collision(scene_t *scene, double elasticity,
     *elasticity_param = elasticity;
     create_collision(scene, body1, body2, physics_collision_handler,
                         elasticity_param, free);
+}
+
+void create_normal_collision(scene_t *scene, vector_t grav,
+                                    body_t *body1, body_t *body2) {
+    vector_t *grav_param = malloc(sizeof(vector_t));
+    *grav_param = grav;
+    list_t *bodies = list_init(2, body_free);
+    list_add(bodies, body1);
+    list_add(bodies, body2);
+    collision_param_t *force_param = malloc(sizeof(collision_param_t));
+    *force_param = (collision_param_t) {normal_handler, body1, body2, grav_param, false};
+    scene_add_bodies_force_creator(scene, normal_handler, force_param,
+                                        bodies, free);
+
 }

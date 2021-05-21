@@ -26,8 +26,8 @@ const double PLAYER_RADIUS = 16;
 const double PLAYER_MASS = 10;
 const rgb_color_t PLAYER_COLOR = {0, 1, 0};
 
-const vector_t DEFAULT_GRAVITY = {0, -50};
-const vector_t DEFAULT_SCROLL_SPEED = {-0.1, 0};
+const vector_t DEFAULT_GRAVITY = {0, -500};
+const vector_t DEFAULT_SCROLL_SPEED = {-1, 0};
 
 bool game_end() {
     sdl_on_key(NULL);
@@ -97,6 +97,8 @@ void initialize_terrain(scene_t *scene) {
     list_t *floor_coords = compute_rect_points(fc, MAX.x, 50);
     body_t *floor = body_init_with_info(floor_coords, INFINITY, BLACK, entity, entity_free);
     scene_add_body(scene, floor);
+    body_set_velocity(floor, (vector_t){-10,0});
+    create_normal_collision(scene, vec_negate(DEFAULT_GRAVITY), scene_get_body(scene, 0), floor);
 }
 
 void add_bullet (scene_t *scene, vector_t center, rgb_color_t color,
@@ -147,9 +149,9 @@ void player_move (char key, key_event_type_t type, double held_time, void *scene
                     new_velocity.x = PLAYER_SPEED;
                 }
                 break;
-            case (char)32: //spacebar
+            case UP_ARROW:
                 if (held_time < 0.2) {
-                    new_velocity.y = PLAYER_SPEED;
+                    new_velocity.y = 100;
                 }
                 break;
         }
@@ -191,7 +193,7 @@ int main(int argc, char *argv[]) {
         //double time_since_last_enemy = 0;
         while (!check_game_end(scene)) {
             double dt = time_since_last_tick();
-            sidescroll(scene, scroll_speed);
+            //sidescroll(scene, scroll_speed);
             scene_tick(scene, dt);
             if (sdl_is_done(scene)) {
                 scene_free(scene);

@@ -36,7 +36,7 @@ typedef void (*collision_handler_t)
  * @param body1 the first body
  * @param body2 the second body
  */
-void create_newtonian_gravity(scene_t *scene, double G, body_t *body1, body_t *body2);
+void create_newtonian_gravity(scene_t *scene, void *G, body_t *body1, body_t *body2);
 
 /**
  * Adds a force creator to a scene that acts like a spring between two bodies.
@@ -49,7 +49,7 @@ void create_newtonian_gravity(scene_t *scene, double G, body_t *body1, body_t *b
  * @param body1 the first body
  * @param body2 the second body
  */
-void create_spring(scene_t *scene, double k, body_t *body1, body_t *body2);
+void create_spring(scene_t *scene, void *k, body_t *body1, body_t *body2);
 
 /**
  * Adds a force creator to a scene that applies a drag force on a body.
@@ -62,7 +62,7 @@ void create_spring(scene_t *scene, double k, body_t *body1, body_t *body2);
  *   (higher gamma means more drag)
  * @param body the body to slow down
  */
-void create_drag(scene_t *scene, double gamma, body_t *body);
+void create_drag(scene_t *scene, void *gamma, body_t *body);
 
 /**
  * Adds a force creator to a scene that calls a given collision handler
@@ -88,7 +88,7 @@ void create_collision(
     free_func_t freer
 );
 
-void create_constant_force(scene_t *scene, vector_t *a, body_t *body){
+void create_constant_force(scene_t *scene, vector_t *a, body_t *body);
     
 /**
  * Adds a force creator to a scene that destroys two bodies when they collide.
@@ -132,6 +132,13 @@ void create_oneway_destructive_collision(scene_t *scene, double elasticity,
 void create_physics_collision(
     scene_t *scene,
     double elasticity,
+    body_t *body1,
+    body_t *body2
+);
+
+void create_normal_collision(
+    scene_t *scene,
+    vector_t grav,
     body_t *body1,
     body_t *body2
 );
