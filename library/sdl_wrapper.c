@@ -222,7 +222,7 @@ void sdl_draw_image(){
         texture = SDL_CreateTextureFromSurface(renderer, surface);
         SDL_FreeSurface(surface);
     }
-}*/
+}
 
 
 void sdl_show(void) {
