@@ -10,6 +10,8 @@
 #include "sdl_wrapper.h"
 #include "SDL2/SDL_mouse.h"
 
+double SCORE = 0;
+
 const vector_t MIN = {.x = 0, .y = 0};
 const vector_t MAX = {.x = 1000, .y = 500};
 
@@ -36,6 +38,11 @@ bool game_end() {
     sdl_on_key(NULL);
     sdl_on_click(NULL);
     exit(0);
+}
+
+double basic_score_calculation(double dt) {
+    assert(dt >= 0);
+    return dt * 100.0;
 }
 
 list_t *compute_circle_points(vector_t center, double radius) {
@@ -192,6 +199,7 @@ int main(int argc, char *argv[]) {
         //double time_since_last_enemy = 0;
         while (!check_game_end(scene)) {
             double dt = time_since_last_tick();
+            SCORE += basic_score_calculation(dt);
             sidescroll(scene, scroll_speed);
             scene_tick(scene, dt);
             if (sdl_is_done(scene)) {
