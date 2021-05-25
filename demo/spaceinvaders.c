@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "shapelib.h"
 #include "body.h"
 #include "scene.h"
 #include "forces.h"
@@ -38,35 +39,6 @@ bool game_end() {
     exit(0);
 }
 
-list_t *compute_sector_points(vector_t center, double radius, double angle) {
-    list_t *coords = list_init(ARC_RESOLUTION+2, free);
-
-    vector_t *c = malloc(sizeof(vector_t));
-    c->x = center.x;
-    c->y = center.y;
-    list_add(coords, c);
-    
-    vector_t *top_mouth = polar_to_cartesian(radius, angle / 2);
-    top_mouth->x = top_mouth->x + center.x;
-    top_mouth->y = top_mouth->y + center.y;
-    list_add(coords, top_mouth);
-
-    double d_theta = (M_PI - angle) / ARC_RESOLUTION;
-    for (int i = 1; i < ARC_RESOLUTION; i++) {
-        vector_t *next_point = polar_to_cartesian(radius, (angle/2) + i*d_theta);
-        next_point->x = next_point->x + center.x;
-        next_point->y = next_point->y + center.y;
-        list_add(coords, next_point);
-    }
-
-    vector_t *bottom_mouth = polar_to_cartesian(radius, M_PI - angle / 2);
-    bottom_mouth->x = bottom_mouth->x + center.x;
-    bottom_mouth->y = bottom_mouth->y + center.y;
-    list_add(coords, bottom_mouth);
-
-    return coords;
-}
-
 list_t *compute_player_points(vector_t center, double radius) {
     //triangular player
     list_t *coords = list_init(3, free);
@@ -89,32 +61,6 @@ list_t *compute_player_points(vector_t center, double radius) {
     return coords;
 }
 
-list_t *compute_bullet_points (vector_t *center, double height, double width) {
-    list_t *coords = list_init(4, free);
-
-    vector_t *top_left = malloc(sizeof(vector_t));
-    top_left->x = center->x - width/2;
-    top_left->y = center->y + height/2;
-    list_add(coords, top_left);
-
-    vector_t *bottom_left = malloc(sizeof(vector_t));
-    bottom_left->x = center->x - width/2;
-    bottom_left->y = center->y - height/2;
-    list_add(coords, bottom_left);
-
-    vector_t *bottom_right = malloc(sizeof(vector_t));
-    bottom_right->x = center->x + width/2;
-    bottom_right->y = center->y - height/2;
-    list_add(coords, bottom_right);
-
-    vector_t *top_right = malloc(sizeof(vector_t));
-    top_right->x = center->x + width/2;
-    top_right->y = center->y + height/2;
-    list_add(coords, top_right);
-
-    return coords;
-}
-
 int initialize_enemies(scene_t *scene) {
     int rows = 1;
 
@@ -125,7 +71,8 @@ int initialize_enemies(scene_t *scene) {
 
     for (int i = 0; i < NUM_ENEMIES; i++) {
         body_t *enemy = body_init_with_info(
-            compute_sector_points(enemy_pos, ENEMY_RADIUS, ENEMY_ARC_ANGLE),
+            compute_sector_points(enemy_pos, ENEMY_RADIUS, ENEMY_ARC_ANGLE,
+                                  ARC_RESOLUTION),
             ENEMY_MASS, random_color(), "ENEMY", free);
         body_set_velocity(enemy, ENEMY_VELOCITY);
         scene_add_body(scene, enemy);
@@ -191,7 +138,7 @@ void update_bullets (scene_t *scene) {
 void add_bullet (scene_t *scene, vector_t *center, rgb_color_t color,
                     vector_t velocity, char *bullet_type, char *target_type) {
     body_t *bullet = body_init_with_info(
-        compute_bullet_points(center, BULLET_HEIGHT, BULLET_WIDTH),
+        compute_rect_points(*center, BULLET_WIDTH, BULLET_HEIGHT),
         BULLET_MASS, color, bullet_type, free);
     body_set_velocity(bullet, velocity);
 

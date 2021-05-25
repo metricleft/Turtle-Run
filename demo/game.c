@@ -1,12 +1,14 @@
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 
 #include "body.h"
 #include "polygon.h"
 #include "scene.h"
 #include "forces.h"
 #include "entity.h"
+#include "shapelib.h"
 #include "sdl_wrapper.h"
 #include "SDL2/SDL_mouse.h"
 
@@ -19,8 +21,6 @@ const int ARC_RESOLUTION = 10;
 
 const double BULLET_RADIUS = 6;
 const double BULLET_MASS = 0.2;
-
-const rgb_color_t ENEMY_BULLET_COLOR = {1, 0, 0};
 
 const rgb_color_t PLAYER_BULLET_COLOR = {0, 1, 0};
 const double PLAYER_SPEED = 600;
@@ -43,40 +43,6 @@ bool game_end() {
 double basic_score_calculation(double dt) {
     assert(dt >= 0);
     return dt * 100.0;
-}
-
-list_t *compute_circle_points(vector_t center, double radius) {
-     list_t *coords = list_init(ARC_RESOLUTION, free);
-
-    double d_theta = (2*M_PI / ARC_RESOLUTION);
-    for (int i = 0; i < ARC_RESOLUTION; i++) {
-        vector_t *next_point = polar_to_cartesian(radius, i*d_theta);
-        next_point->x = next_point->x + center.x;
-        next_point->y = next_point->y + center.y;
-        list_add(coords, next_point);
-    }
-    return coords;
-}
-
-list_t *compute_rect_points(vector_t center, double width, double height) {
-    vector_t half_width  = {.x = width / 2, .y = 0.0},
-             half_height = {.x = 0.0, .y = height / 2};
-    list_t *rect = list_init(4, free);
-    vector_t *v = malloc(sizeof(*v));
-    *v = vec_add(half_width, half_height);
-    list_add(rect, v);
-    v = malloc(sizeof(*v));
-    *v = vec_subtract(half_height, half_width);
-    list_add(rect, v);
-    v = malloc(sizeof(*v));
-    *v = vec_negate(*(vector_t *) list_get(rect, 0));
-    list_add(rect, v);
-    v = malloc(sizeof(*v));
-    *v = vec_subtract(half_width, half_height);
-    list_add(rect, v);
-
-    polygon_translate(rect, center);
-    return rect;
 }
 
 bool check_game_end(scene_t *scene) {
@@ -114,7 +80,7 @@ void initialize_terrain(scene_t *scene) {
 void add_bullet (scene_t *scene, vector_t center, rgb_color_t color,
                     vector_t velocity, entity_t *bullet_entity, char *target_type) {
     body_t *bullet = body_init_with_info(
-        compute_circle_points(center, BULLET_RADIUS),
+        compute_circle_points(center, BULLET_RADIUS, ARC_RESOLUTION),
         BULLET_MASS, color, bullet_entity, entity_free);
     body_set_velocity(bullet, velocity);
 
