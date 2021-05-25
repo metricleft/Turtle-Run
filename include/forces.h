@@ -35,8 +35,9 @@ typedef void (*collision_handler_t)
  * @param G the gravitational proportionality constant
  * @param body1 the first body
  * @param body2 the second body
+ * @param freer the function that frees G
  */
-void create_newtonian_gravity(scene_t *scene, void *G, body_t *body1, body_t *body2);
+void create_newtonian_gravity(scene_t *scene, void *G, body_t *body1, body_t *body2, free_func_t freer);
 
 /**
  * Adds a force creator to a scene that acts like a spring between two bodies.
@@ -48,8 +49,9 @@ void create_newtonian_gravity(scene_t *scene, void *G, body_t *body1, body_t *bo
  * @param k the Hooke's constant for the spring
  * @param body1 the first body
  * @param body2 the second body
+ * @param freer the function that frees k
  */
-void create_spring(scene_t *scene, void *k, body_t *body1, body_t *body2);
+void create_spring(scene_t *scene, void *k, body_t *body1, body_t *body2, free_func_t freer);
 
 /**
  * Adds a force creator to a scene that applies a drag force on a body.
@@ -61,8 +63,20 @@ void create_spring(scene_t *scene, void *k, body_t *body1, body_t *body2);
  * @param gamma the proportionality constant between force and velocity
  *   (higher gamma means more drag)
  * @param body the body to slow down
+ * @param freer the function that frees gamma
  */
-void create_drag(scene_t *scene, void *gamma, body_t *body);
+void create_drag(scene_t *scene, void *gamma, body_t *body, free_func_t freer);
+
+/**
+ * Adds a force creator to a scene that applies a constant force on a body.
+ * The force creator will be called each tick.
+ *
+ * @param scene the scene containing the bodies
+ * @param a the acceleration
+ * @param body the body to apply the force to
+ * @param freer the function that frees a
+ */
+void create_constant_force(scene_t *scene, vector_t *a, body_t *body, free_func_t freer);
 
 /**
  * Adds a force creator to a scene that calls a given collision handler
@@ -88,8 +102,6 @@ void create_collision(
     free_func_t freer
 );
 
-void create_constant_force(scene_t *scene, vector_t *a, body_t *body);
-    
 /**
  * Adds a force creator to a scene that destroys two bodies when they collide.
  * The bodies should be destroyed by calling body_remove().

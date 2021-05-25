@@ -63,7 +63,7 @@ void initialize_player(scene_t *scene) {
     scene_add_body(scene, player);
     vector_t *grav = malloc(sizeof(vector_t));
     *grav = DEFAULT_GRAVITY;
-    create_constant_force(scene, grav, player);
+    create_constant_force(scene, grav, player, free);
 }
 
 //TODO: this function will be changed into derek's terrain implementation eventually
@@ -100,8 +100,11 @@ void sidescroll(scene_t *scene, vector_t *scroll_speed) {
         body_t *body = scene_get_body(scene, i);
         entity_t *entity = body_get_info(body);
         //Applies a leftwards velocity to all objects with the "SCROLLABLE" tag
-        if (entity_get_scrollable(entity)) {
-            body_set_velocity(body, *scroll_speed);
+        if (entity_get_scrollable(entity) && !entity_is_scrolling(entity)) {
+            vector_t scroll = {scroll_speed->x, body_get_velocity(body).y};
+            body_set_velocity(body, scroll);
+            //Ensures that every object only gets an initial velocity assigned once
+            entity_set_scrolling(body);
         }
     }
 }
