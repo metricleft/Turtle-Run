@@ -1,15 +1,23 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <math.h>
-#include <stdio.h>
 
 #include "enemy.h"
 
 const int GAME_ENEMY_MASS = 10;
 
+void create_bullet_collisions(scene_t *scene, body_t *enemy) {
+    for (int i = 0; i < scene_bodies(scene); i++) {
+        body_t *body = scene_get_body(scene, i);
+        entity_t *entity = body_get_info(body);
+        if (!strcmp(entity_get_type(entity), "BULLET")) {
+            create_destructive_collision(scene, body, enemy);
+        }
+    }
+}
+
 void spawn_goose(scene_t *scene, vector_t MIN, vector_t MAX, double radius) {
     //Spawns a goose that flies across the screen, speeding up
-    printf("SPAWN GOOSE\n");
     double *drag_const = malloc(sizeof(double));
     *drag_const = -10;
 
@@ -21,11 +29,11 @@ void spawn_goose(scene_t *scene, vector_t MIN, vector_t MAX, double radius) {
     create_drag(scene, drag_const, goose, free);
     scene_add_body(scene, goose);
     create_destructive_collision(scene, player, goose);
+    create_bullet_collisions(scene, goose);
 }
 
 void spawn_frog(scene_t *scene, vector_t MIN, vector_t MAX, double radius) {
     //Spawns a frog that bounces up and down the screen
-    printf("SPAWN FROG\n");
     double *spring_const = malloc(sizeof(double));
     *spring_const = 20;
 
@@ -46,6 +54,7 @@ void spawn_frog(scene_t *scene, vector_t MIN, vector_t MAX, double radius) {
     scene_add_body(scene, frog);
     scene_add_body(scene, anchor);
     create_destructive_collision(scene, player, frog);
+    create_bullet_collisions(scene, frog);
 }
 
 typedef struct param {
@@ -74,8 +83,7 @@ void create_one_way_gravity(scene_t *scene, double G, body_t *body1, body_t *bod
 
 void spawn_fly(scene_t *scene, vector_t MIN, vector_t MAX, double radius) {
     //Spawns a fly that lazily follows the player
-    printf("SPAWN FLY\n");
-    double gravity_const = 10;
+    double gravity_const = 1000000;
 
     body_t *player = scene_get_body(scene, 0);
     vector_t center = {MAX.x + radius, rand()%((int)(MAX.y - MIN.y))};
@@ -86,6 +94,7 @@ void spawn_fly(scene_t *scene, vector_t MIN, vector_t MAX, double radius) {
     create_one_way_gravity(scene, gravity_const, fly, player);
     scene_add_body(scene, fly);
     create_destructive_collision(scene, player, fly);
+    create_bullet_collisions(scene, fly);
 }
 
 void spawn_random_enemy(scene_t *scene, vector_t MIN, vector_t MAX, double enemy_radius) {
