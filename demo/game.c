@@ -13,7 +13,6 @@
 #include "SDL2/SDL_mouse.h"
 #include "enemy.h"
 
-double SCORE = 0;
 
 const vector_t MIN = {.x = 0, .y = 0};
 const vector_t MAX = {.x = 1000, .y = 500};
@@ -156,6 +155,8 @@ void player_shoot(char key, mouse_event_type_t type, double held_time, void *sce
 }
 
 int main(int argc, char *argv[]) {
+    double *score = malloc(sizeof(double));
+    *score = 0;
     scene_t *scene = scene_init();
 
     vector_t *scroll_speed = malloc(sizeof(vector_t));
@@ -177,7 +178,7 @@ int main(int argc, char *argv[]) {
                 spawn_random_enemy(scene, MIN, MAX, ENEMY_RADIUS);
                 time_since_last_enemy = 0;
             }
-            SCORE += basic_score_calculation(dt);
+            *score += basic_score_calculation(dt);
             sidescroll(scene, scroll_speed);
             scene_tick(scene, dt);
             if (sdl_is_done(scene)) {
