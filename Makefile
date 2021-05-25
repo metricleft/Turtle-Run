@@ -4,7 +4,7 @@ DEMOS = spaceinvaders breakout game imgtest
 STAFF_LIBS = test_util sdl_wrapper
 # List of C files in "libraries" that you will write.
 # This also defines the order in which the tests are run.
-STUDENT_LIBS = vector list polygon color body scene forces collision entity shapelib
+STUDENT_LIBS = vector list polygon color body scene forces collision entity shapelib enemy
 
 # If we're not on Windows...
 ifneq ($(OS), Windows_NT)

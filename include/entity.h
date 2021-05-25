@@ -45,4 +45,19 @@ bool entity_get_scrollable(entity_t *entity);
  */
 bool entity_get_fallable(entity_t *entity);
 
+/**
+ * Returns the state of is_scrolling of an entity.
+ * 
+ * @param entity a pointer to an entity
+ * @return a boolean representing whether is_scrolling is true or false.
+ */
+bool entity_is_scrolling(entity_t *entity);
+
+/**
+ * Sets is_scrolling of an entity to true.
+ * 
+ * @param entity a pointer to an entity
+ */
+void entity_set_scrolling(entity_t *entity);
+
 #endif // #ifndef __ENTITY_H__

@@ -11,6 +11,7 @@
 #include "shapelib.h"
 #include "sdl_wrapper.h"
 #include "SDL2/SDL_mouse.h"
+#include "enemy.h"
 
 double SCORE = 0;
 
@@ -21,6 +22,9 @@ const int ARC_RESOLUTION = 10;
 
 const double BULLET_RADIUS = 6;
 const double BULLET_MASS = 0.2;
+
+const int ENEMY_INTERVAL = 5;
+const double ENEMY_RADIUS = 20;
 
 const rgb_color_t PLAYER_BULLET_COLOR = {0, 1, 0};
 const double PLAYER_SPEED = 600;
@@ -104,7 +108,7 @@ void sidescroll(scene_t *scene, vector_t *scroll_speed) {
             vector_t scroll = {scroll_speed->x, body_get_velocity(body).y};
             body_set_velocity(body, scroll);
             //Ensures that every object only gets an initial velocity assigned once
-            entity_set_scrolling(body);
+            entity_set_scrolling(entity);
         }
     }
 }
@@ -165,9 +169,14 @@ int main(int argc, char *argv[]) {
         scene = scene_init();
         initialize_player(scene);
         initialize_terrain(scene);
-        //double time_since_last_enemy = 0;
+        double time_since_last_enemy = 0;
         while (!check_game_end(scene)) {
             double dt = time_since_last_tick();
+            time_since_last_enemy += dt;
+            if (time_since_last_enemy > ENEMY_INTERVAL) {
+                spawn_random_enemy(scene, MIN, MAX, ENEMY_RADIUS);
+                time_since_last_enemy = 0;
+            }
             SCORE += basic_score_calculation(dt);
             sidescroll(scene, scroll_speed);
             scene_tick(scene, dt);
