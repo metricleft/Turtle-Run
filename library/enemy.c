@@ -9,6 +9,8 @@
 const int GAME_ENEMY_MASS = 10;
 const char* FROG = "static/frog_spritesheet.png";
 const char* FLY = "static/dragonfly_spritesheet.png";
+const char* GOOSE = "static/goose_spritesheet.png";
+
 
 void create_bullet_collisions(scene_t *scene, body_t *enemy) {
     for (int i = 0; i < scene_bodies(scene); i++) {
@@ -30,9 +32,8 @@ void spawn_goose(scene_t *scene, vector_t MIN, vector_t MAX, double radius) {
     entity_t *entity = entity_init("ENEMY", true, false);
     list_t *goose_coords = compute_rect_points(center, 2*radius, 2*radius);
     body_t *goose = body_init_with_info(goose_coords, GAME_ENEMY_MASS, entity, entity_free);
-    rgb_color_t *black = malloc(sizeof(rgb_color_t));
-    *black = BLACK;
-    body_set_draw(goose, (draw_func_t) sdl_draw_polygon, black, free);
+    sprite_t *goose_info = sprite_animated(GOOSE, 1, 10, 12);
+    body_set_draw(goose, (draw_func_t) sdl_draw_animated, goose_info, sprite_free);
     create_drag(scene, drag_const, goose, free);
     scene_add_body(scene, goose);
     create_destructive_collision(scene, player, goose);
@@ -96,7 +97,7 @@ void spawn_fly(scene_t *scene, vector_t MIN, vector_t MAX, double radius) {
     body_t *player = scene_get_body(scene, 0);
     vector_t center = {MAX.x + radius, rand()%((int)(MAX.y - MIN.y))};
     entity_t *entity = entity_init("ENEMY", true, false);
-    list_t *fly_coords = compute_rect_points(center, 2*radius, 2*radius);
+    list_t *fly_coords = compute_rect_points(center, radius, radius);
     body_t *fly = body_init_with_info(fly_coords, GAME_ENEMY_MASS,  entity, entity_free);
     sprite_t *fly_info = sprite_animated(FLY, 1, 2, 20);
     body_set_draw(fly, (draw_func_t) sdl_draw_animated, fly_info, sprite_free);
