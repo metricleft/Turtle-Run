@@ -76,7 +76,7 @@ typedef void (*event_handler_t)(char event, void *type, double held_time,
  * @param fps how fast the animation is
  * @return a pointer to info for a sprite
  */
-sprite_t *sprite_animated(char *image, double scale, int frames, int fps);
+sprite_t *sprite_animated(const char *image, double scale, int frames, int fps);
 
 /**
  * Creates the info of unanimated sprite .
@@ -85,7 +85,7 @@ sprite_t *sprite_animated(char *image, double scale, int frames, int fps);
  * @param scale the scaling of the image
  * @return a pointer to info for a sprite
  */
-sprite_t *sprite_draw(char *image, double scale);
+sprite_t *sprite_draw(const char *image, double scale);
 
 /**
  * Releases the memory allocated for sprite.

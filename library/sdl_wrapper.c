@@ -49,7 +49,7 @@ uint32_t key_start_timestamp;
  */
 clock_t last_clock = 0;
 
-sprite_t *sprite_animated(char *image, double scale, int frames, int fps){
+sprite_t *sprite_animated(const char *image, double scale, int frames, int fps){
     sprite_t *sprite = malloc(sizeof(sprite_t));
     sprite->texture = IMG_LoadTexture(renderer, image);
     sprite->scale = scale;
@@ -58,7 +58,7 @@ sprite_t *sprite_animated(char *image, double scale, int frames, int fps){
     return sprite;
 }
 
-sprite_t *sprite_image(char *image, double scale){
+sprite_t *sprite_image(const char *image, double scale){
     return sprite_animated(image, scale, 0, 0);
 }
 void sprite_free(sprite_t *sprite){
