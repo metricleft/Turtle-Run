@@ -3,16 +3,14 @@
 #include <stdlib.h>
 #include <time.h>
 #include <SDL2/SDL_image.h>
-#include <SDL2/SDL.h>
 #include <SDL2/SDL2_gfxPrimitives.h>
-#include <SDL2/SDL_mouse.h>
-#include <SDL2/SDL_surface.h>
 #include "sdl_wrapper.h"
 
 const char WINDOW_TITLE[] = "CS 3";
 const int WINDOW_WIDTH = 1000;
 const int WINDOW_HEIGHT = 500;
 const double MS_PER_S = 1e3;
+const rgb_color_t BACKGROUND = {28, 163, 236};
 
 /**
  * The coordinate at the center of the screen.
@@ -31,7 +29,6 @@ SDL_Window *window;
  */
 SDL_Renderer *renderer;
 
-SDL_Texture *texture;
 /**
  * The keypress handler, or NULL if none has been configured.
  */
@@ -51,6 +48,23 @@ uint32_t key_start_timestamp;
  * Initially 0.
  */
 clock_t last_clock = 0;
+
+sprite_t *sprite_animated(char *image, double scale, int frames, int fps){
+    sprite_t *sprite = malloc(sizeof(sprite_t));
+    sprite->texture = IMG_LoadTexture(renderer, image);
+    sprite->scale = scale;
+    sprite->frames = frames;
+    sprite->fps = fps;
+    return sprite;
+}
+
+sprite_t *sprite_image(char *image, double scale){
+    return sprite_animated(image, scale, 0, 0);
+}
+void sprite_free(sprite_t *sprite){
+    SDL_DestroyTexture(sprite->texture);
+    free(sprite);
+}
 
 /** Computes the center of the window in pixel coordinates */
 vector_t get_window_center(void) {
@@ -103,6 +117,10 @@ char get_keycode(SDL_Keycode key) {
         case SDLK_UP:    return UP_ARROW;
         case SDLK_RIGHT: return RIGHT_ARROW;
         case SDLK_DOWN:  return DOWN_ARROW;
+        case SDLK_a:  return LEFT_ARROW;
+        case SDLK_w:    return UP_ARROW;
+        case SDLK_d: return RIGHT_ARROW;
+        case SDLK_s:  return DOWN_ARROW;
         default:
             // Only process 7-bit ASCII characters
             return key == (SDL_Keycode) (char) key ? key : '\0';
@@ -134,8 +152,6 @@ void sdl_init(vector_t min, vector_t max) {
         SDL_WINDOW_RESIZABLE
     );
     renderer = SDL_CreateRenderer(window, -1, 0);
-    texture  = IMG_LoadTexture(renderer,"static/turtle_spritesheet.png");
- 
 }
 
 bool sdl_is_done(void *scene) {
@@ -180,17 +196,18 @@ bool sdl_is_done(void *scene) {
 }
 
 void sdl_clear(void) {
-    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+    SDL_SetRenderDrawColor(renderer, BACKGROUND.r, BACKGROUND.g, BACKGROUND.b, 255);
     SDL_RenderClear(renderer);
 }
 
-void sdl_draw_polygon(list_t *points, rgb_color_t color) {
+void sdl_draw_polygon(body_t *body, rgb_color_t *color) {
     // Check parameters
+    list_t *points = body_get_shape(body);
     size_t n = list_size(points);
     assert(n >= 3);
-    assert(0 <= color.r && color.r <= 1);
-    assert(0 <= color.g && color.g <= 1);
-    assert(0 <= color.b && color.b <= 1);
+    assert(0 <= (*color).r && color->r <= 1);
+    assert(0 <= (*color).g && color->g <= 1);
+    assert(0 <= (*color).b && color->b <= 1);
 
     vector_t window_center = get_window_center();
 
@@ -210,35 +227,52 @@ void sdl_draw_polygon(list_t *points, rgb_color_t color) {
     filledPolygonRGBA(
         renderer,
         x_points, y_points, n,
-        color.r * 255, color.g * 255, color.b * 255, 255
+        (*color).r * 255, (*color).g * 255, (*color).b * 255, 255
     );
     free(x_points);
     free(y_points);
 }
 
-void sdl_draw_image(void) {
-    SDL_Surface *surface = IMG_Load("static/turtle_spritesheet.png");
-    SDL_Texture *texture = NULL;
-    if(surface){
-        texture = SDL_CreateTextureFromSurface(renderer, surface);
-        SDL_FreeSurface(surface);
-        SDL_RenderCopy(renderer, texture, NULL, NULL);        
-    }
-}
-
-void sdl_animate(SDL_Texture *texture, int frames, int FPS){
-    double time  = (double)clock() /CLOCKS_PER_SEC;
-    int tick = MS_PER_S / FPS;
+void sdl_draw_image(body_t *body, sprite_t *sprite) {
+    list_t *shape = body_get_shape(body);
     int *w = malloc(sizeof(int));
     int *h = malloc(sizeof(int));
-    SDL_QueryTexture(texture, NULL, NULL, w, h);
+    SDL_QueryTexture(sprite->texture, NULL, NULL, w, h);
+    vector_t window_center = get_window_center();
+    vector_t center = get_window_position(body_get_centroid(body), window_center);
     SDL_Rect *in = malloc(sizeof(SDL_Rect));
     SDL_Rect *out = malloc(sizeof(SDL_Rect));
-    int frame = ((int)(time * MS_PER_S) / tick) % frames;
-    printf("%d\n", frame);
-    *in = (SDL_Rect) { frame* (*w/frames), 0, *w/frames, *h };
-    *out = (SDL_Rect) {0,0, *w/frames *2, *h*2};
-    SDL_RenderCopy(renderer, texture, in, out );
+    *in = (SDL_Rect) { 0, 0, *w, *h };
+    *out = (SDL_Rect) {center.x - sprite->scale * *w/2,
+                       center.y - sprite->scale * *h/2, 
+                       sprite->scale * *w , 
+                       sprite->scale * *h};
+    SDL_RenderCopy(renderer, sprite->texture, in, out);
+    free(w);
+    free(h);
+    free(in);
+    free(out);
+}
+
+void sdl_draw_animated(body_t *body, sprite_t *sprite){
+    double time  = (double)clock() /CLOCKS_PER_SEC;
+    int *w = malloc(sizeof(int));
+    int *h = malloc(sizeof(int));
+    assert(sprite->texture!=NULL);
+    SDL_QueryTexture(sprite->texture, NULL, NULL, w, h);
+    vector_t window_center = get_window_center();
+    vector_t center = get_window_position(body_get_centroid(body), window_center);
+    SDL_Rect *in = malloc(sizeof(SDL_Rect));
+    SDL_Rect *out = malloc(sizeof(SDL_Rect));
+    int frame = (int)(time * sprite->fps) % sprite->frames;
+    assert((frame < sprite->frames) && (frame >= 0));
+    int width = *w / sprite->frames;
+    *in = (SDL_Rect) { frame* (width), 0, width, *h };
+    *out = (SDL_Rect) {center.x - (sprite->scale * width/2),
+                       center.y - (sprite->scale* *h/2), 
+                       sprite->scale * width, 
+                       sprite->scale * *h};
+    SDL_RenderCopy(renderer, sprite->texture, in, out );
     free(w);
     free(h);
     free(in);
@@ -260,7 +294,6 @@ void sdl_show(void) {
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderDrawRect(renderer, boundary);
     free(boundary);
-
     SDL_RenderPresent(renderer);
 }
 
@@ -269,11 +302,8 @@ void sdl_render_scene(scene_t *scene) {
     size_t body_count = scene_bodies(scene);
     for (size_t i = 0; i < body_count; i++) {
         body_t *body = scene_get_body(scene, i);
-        list_t *shape = body_get_shape(body);
-        sdl_draw_polygon(shape, body_get_color(body));
-        list_free(shape);
+        body_draw(body);
     }
-    sdl_animate(texture, 8, 12);
     sdl_show();
 }
 
