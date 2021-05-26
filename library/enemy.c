@@ -1,5 +1,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
+#include "sdl_wrapper.h"
+#include <string.h>
 #include <math.h>
 
 #include "enemy.h"
@@ -25,7 +27,10 @@ void spawn_goose(scene_t *scene, vector_t MIN, vector_t MAX, double radius) {
     vector_t center = {MAX.x + radius, rand()%((int)(MAX.y - MIN.y))};
     entity_t *entity = entity_init("ENEMY", true, false);
     list_t *goose_coords = compute_rect_points(center, 2*radius, 2*radius);
-    body_t *goose = body_init_with_info(goose_coords, GAME_ENEMY_MASS, BLACK, entity, entity_free);
+    body_t *goose = body_init_with_info(goose_coords, GAME_ENEMY_MASS, entity, entity_free);
+    rgb_color_t *black = malloc(sizeof(rgb_color_t));
+    *black = BLACK;
+    body_set_draw(goose, (draw_func_t) sdl_draw_polygon, black, free);
     create_drag(scene, drag_const, goose, free);
     scene_add_body(scene, goose);
     create_destructive_collision(scene, player, goose);
@@ -42,12 +47,14 @@ void spawn_frog(scene_t *scene, vector_t MIN, vector_t MAX, double radius) {
     vector_t center = {MAX.x + radius, rand()%((int)(MAX.y - MIN.y))};
     entity_t *entity = entity_init("ENEMY", false, false);
     list_t *frog_coords = compute_rect_points(center, 2*radius, 2*radius);
-    body_t *frog = body_init_with_info(frog_coords, GAME_ENEMY_MASS, BLACK, entity, entity_free);
-
+    body_t *frog = body_init_with_info(frog_coords, GAME_ENEMY_MASS, entity, entity_free);
+    rgb_color_t *black = malloc(sizeof(rgb_color_t));
+    *black = BLACK;
+    body_set_draw(frog, (draw_func_t) sdl_draw_polygon, black, free);
     center.y = MAX.y / 2;
     entity = entity_init("ANCHOR", true, false);
     list_t *anchor_coords = compute_circle_points(center, radius, radius);
-    body_t *anchor = body_init_with_info(anchor_coords, INFINITY, RED, entity, entity_free);
+    body_t *anchor = body_init_with_info(anchor_coords, INFINITY, entity, entity_free);
 
     create_spring(scene, spring_const, anchor, frog, free);
 
@@ -89,8 +96,10 @@ void spawn_fly(scene_t *scene, vector_t MIN, vector_t MAX, double radius) {
     vector_t center = {MAX.x + radius, rand()%((int)(MAX.y - MIN.y))};
     entity_t *entity = entity_init("ENEMY", true, false);
     list_t *fly_coords = compute_rect_points(center, 2*radius, 2*radius);
-    body_t *fly = body_init_with_info(fly_coords, GAME_ENEMY_MASS, BLACK, entity, entity_free);
-    
+    body_t *fly = body_init_with_info(fly_coords, GAME_ENEMY_MASS,  entity, entity_free);
+    rgb_color_t *black = malloc(sizeof(rgb_color_t));
+    *black = BLACK;
+    body_set_draw(fly, (draw_func_t) sdl_draw_polygon, black, free);
     create_one_way_gravity(scene, gravity_const, fly, player);
     scene_add_body(scene, fly);
     create_destructive_collision(scene, player, fly);
