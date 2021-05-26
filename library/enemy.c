@@ -1,16 +1,15 @@
 #include <stdlib.h>
 #include <stdbool.h>
-#include "sdl_wrapper.h"
 #include <string.h>
 #include <math.h>
 
+#include "sdl_wrapper.h"
 #include "enemy.h"
 
 const int GAME_ENEMY_MASS = 10;
 const char* FROG = "static/frog_spritesheet.png";
 const char* FLY = "static/dragonfly_spritesheet.png";
 const char* GOOSE = "static/goose_spritesheet.png";
-
 
 void create_bullet_collisions(scene_t *scene, body_t *enemy) {
     for (int i = 0; i < scene_bodies(scene); i++) {
@@ -25,7 +24,7 @@ void create_bullet_collisions(scene_t *scene, body_t *enemy) {
 void spawn_goose(scene_t *scene, vector_t MIN, vector_t MAX, double radius) {
     //Spawns a goose that flies across the screen, speeding up
     double *drag_const = malloc(sizeof(double));
-    *drag_const = -rand()%20;
+    *drag_const = -(rand()%15+5);
 
     body_t *player = scene_get_body(scene, 0);
     vector_t center = {MAX.x + radius, rand()%((int)(MAX.y - MIN.y))};
@@ -43,7 +42,7 @@ void spawn_goose(scene_t *scene, vector_t MIN, vector_t MAX, double radius) {
 void spawn_frog(scene_t *scene, vector_t MIN, vector_t MAX, double radius) {
     //Spawns a frog that bounces up and down the screen
     double *spring_const = malloc(sizeof(double));
-    *spring_const = rand()%20;
+    *spring_const = rand()%15+5;
 
     body_t *player = scene_get_body(scene, 0);
 
@@ -108,7 +107,6 @@ void spawn_fly(scene_t *scene, vector_t MIN, vector_t MAX, double radius) {
 }
 
 void spawn_random_enemy(scene_t *scene, vector_t MIN, vector_t MAX, double enemy_radius) {
-    srand(time(0));
     int percent_max = 100;
     int percent_goose = 10;
     int percent_frog = 60;

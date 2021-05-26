@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#include <time.h>
 
 #include "body.h"
 #include "polygon.h"
@@ -13,7 +14,6 @@
 #include "SDL2/SDL_mouse.h"
 #include "enemy.h"
 #include "frame.h"
-
 
 const vector_t MIN = {.x = 0, .y = 0};
 const vector_t MAX = {.x = 1000, .y = 500};
@@ -58,7 +58,7 @@ bool check_game_end(scene_t *scene) {
     //Check if player is gone: lose condition.
     entity_t *entity = body_get_info(scene_get_body(scene, 0));
     if (strcmp(entity_get_type(entity), "PLAYER")) {
-        game_end();
+        //game_end();
         return true;
     }
     return false;
@@ -170,8 +170,11 @@ void player_shoot(char key, mouse_event_type_t type, double held_time, void *sce
 }
 
 int main(int argc, char *argv[]) {
+    srand(time(0));
+
     double *score = malloc(sizeof(double));
     *score = 0;
+
     scene_t *scene = scene_init();
 
     vector_t *scroll_speed = malloc(sizeof(vector_t));
@@ -204,18 +207,18 @@ int main(int argc, char *argv[]) {
             sidescroll(scene, scroll_speed);
             scene_tick(scene, dt);
             sdl_render_scene(scene);
-            if (body_get_centroid(scene_get_body(scene,0)).y 
-                        < MIN.y - PLAYER_RADIUS) {
-                            //scene_free(scene);
-                            game_end();
+            /*if (body_get_centroid(scene_get_body(scene,0)).y < MIN.y - PLAYER_RADIUS) {
+                //scene_free(scene);
+                game_end();
             } else if (sdl_is_done(scene)) {
                 //scene_free(scene);
                 game_end();
-            }
+            }*/
         }
         scene_free(scene);
     }
 
     free(scroll_speed);
+    free(score);
     return 0;
 }
