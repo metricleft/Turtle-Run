@@ -149,7 +149,7 @@ void player_move (char key, key_event_type_t type, double held_time, void *scene
             case UP_ARROW:
                 if (entity_get_colliding(entity) && held_time < 0.2) {
                     new_velocity.y = 0.8 * PLAYER_SPEED;
-                    entity_set_colliding(entity, false);
+                    //entity_set_colliding(entity, false);
                 }
                 break;
         }
@@ -176,6 +176,8 @@ void player_shoot(char key, mouse_event_type_t type, double held_time, void *sce
 
 int main(int argc, char *argv[]) {
     srand((int)time(0));
+    
+    sdl_init(MIN,MAX);
 
     double *score = malloc(sizeof(double));
     *score = 0;
@@ -185,18 +187,22 @@ int main(int argc, char *argv[]) {
     vector_t *scroll_speed = malloc(sizeof(vector_t));
     *scroll_speed = DEFAULT_SCROLL_SPEED;
 
-    sdl_init(MIN,MAX);
-    sdl_on_key((event_handler_t) player_move);
-    sdl_on_click((event_handler_t) player_shoot);
-
     while (true) {
+        sdl_on_key((event_handler_t) player_move);
+        sdl_on_click((event_handler_t) player_shoot);
         scene = scene_init();
         initialize_player(scene);
         initialize_terrain(scene);
+
+        body_t *player = scene_get_body(scene, 0);
+        entity_t *player_entity = body_get_info(player);
+
         frame_spawn_random(scene, MAX, MAX.x);
         double time_since_last_enemy = 0;
         double time_since_last_frame = 0;
         while (!check_game_end(scene)) {
+            entity_set_colliding(player_entity, false);
+
             double dt = time_since_last_tick();
             time_since_last_enemy += dt;
             time_since_last_frame += dt;
@@ -209,11 +215,12 @@ int main(int argc, char *argv[]) {
                 time_since_last_frame = 0;
             }
             *score += basic_score_calculation(dt);
+
             sidescroll(scene, scroll_speed);
             scene_tick(scene, dt);
             sdl_render_scene(scene);
             if (body_get_centroid(scene_get_body(scene,0)).y < MIN.y - PLAYER_RADIUS) {
-                break;
+                body_remove(scene_get_body(scene, 0));
             } else if (sdl_is_done(scene)) {
                 game_end();
             }
