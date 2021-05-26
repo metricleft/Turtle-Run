@@ -8,7 +8,8 @@
 
 typedef struct body { 
     list_t *shape;
-    rgb_color_t color;
+    draw_func_t drawer;
+    void* draw_info;
     double mass;
     vector_t centroid;
     vector_t velocity;
@@ -18,21 +19,22 @@ typedef struct body {
     bool remove;
     void *info;
     free_func_t info_freer;
+    free_func_t draw_freer;
 } body_t;
 
-body_t *body_init(list_t *shape, double mass, rgb_color_t color){
-    return(body_init_with_info(shape, mass, color, NULL, NULL));
+body_t *body_init(list_t *shape, double mass){
+    return(body_init_with_info(shape, mass, NULL, NULL));
     
 }
 body_t *body_init_with_info(list_t *shape,
                             double mass,
-                            rgb_color_t color,
                             void *info,
                             free_func_t info_freer){
     body_t *body = malloc(sizeof(body_t));
     assert(body != NULL);
     body->shape = shape;
-    body->color = color;
+    body->drawer = NULL;
+    body->draw_info = NULL;
     body->mass = mass;
     body->centroid = polygon_centroid(shape);
     body->velocity = VEC_ZERO;
@@ -42,12 +44,15 @@ body_t *body_init_with_info(list_t *shape,
     body->remove = false;
     body->info = info;
     body->info_freer = info_freer;
+    body->draw_freer = NULL;
     return body;
 }
 
 
 void body_free(body_t *body){
     list_free(body->shape);
+    //body->info_freer(body->info);
+    body->draw_freer(body->draw_info);
     free(body);
 }
 
@@ -73,10 +78,6 @@ double body_get_mass(body_t *body){
     return body->mass;
 }
 
-rgb_color_t body_get_color(body_t *body){
-    return body->color;
-}
-
 void *body_get_info(body_t *body) {
     return body->info;
 }
@@ -85,8 +86,10 @@ double body_get_orientation(body_t *body){
     return body->orientation;
 }
 
-void body_set_color(body_t *body, rgb_color_t color) {
-    body->color = color;
+void body_set_draw(body_t *body, draw_func_t drawer, void* draw_info, free_func_t draw_freer){
+    body->drawer = drawer;
+    body->draw_info = draw_info;
+    body->draw_freer = draw_freer;
 }
 
 void body_set_centroid(body_t *body, vector_t x){
@@ -128,4 +131,9 @@ void body_remove(body_t *body){
 
 bool body_is_removed(body_t *body){
     return body->remove;
+}
+void body_draw(body_t *body){
+    if (body->drawer!= NULL){
+       body->drawer(body, body->draw_info); 
+    }
 }

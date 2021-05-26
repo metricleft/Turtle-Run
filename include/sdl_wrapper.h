@@ -2,6 +2,7 @@
 #define __SDL_WRAPPER_H__
 
 #include <stdbool.h>
+#include <SDL2/SDL.h>
 #include "color.h"
 #include "list.h"
 #include "scene.h"
@@ -44,6 +45,18 @@ typedef enum {
 } mouse_event_type_t;
 
 /**
+ * Contains all the info needed to draw a sprite, including the texture used
+ * scaling of the image, and number of frames and fps animating
+ */
+
+typedef struct sprite{
+    SDL_Texture *texture;
+    double scale;
+    int frames;
+    int fps;
+}sprite_t;
+
+/**
  * A event handler.
  * When a key or button is pressed or released, the handler is passed its char value.
  * 
@@ -54,7 +67,32 @@ typedef enum {
 typedef void (*event_handler_t)(char event, void *type, double held_time,
                               void *scene);
 
+/**
+ * Creates the info of animated sprite .
+ * 
+ * @param image file link of image used to create texture 
+ * @param scale the scaling of the image
+ * @param frames number of frames of animation 
+ * @param fps how fast the animation is
+ * @return a pointer to info for a sprite
+ */
+sprite_t *sprite_animated(char *image, double scale, int frames, int fps);
 
+/**
+ * Creates the info of unanimated sprite .
+ * 
+ * @param image file link of image used to create texture 
+ * @param scale the scaling of the image
+ * @return a pointer to info for a sprite
+ */
+sprite_t *sprite_draw(char *image, double scale);
+
+/**
+ * Releases the memory allocated for sprite.
+ *
+ * @param body a pointer to a sprite
+ */
+void sprite_free(sprite_t *sprite);
 /**
  * Initializes the SDL window and renderer.
  * Must be called once before any of the other SDL functions.
@@ -80,12 +118,27 @@ void sdl_clear(void);
 /**
  * Draws a polygon from the given list of vertices and a color.
  *
- * @param points the list of vertices of the polygon
+ * @param body body associated with the sprite
  * @param color the color used to fill in the polygon
  */
-void sdl_draw_polygon(list_t *points, rgb_color_t color);
+void sdl_draw_polygon( body_t *body, rgb_color_t *color);
 
-void sdl_draw_image(void);
+/**
+ * Draws an image from the given info about a sprite.
+ *
+ * @param body body associated with the sprite
+ * @param sprite info needed to draw the image
+ */
+void sdl_draw_image(body_t *body, sprite_t *sprite);
+
+/**
+ * Draws an animation from the given info about a sprite.
+ *
+ * @param body body associated with the sprite
+ * @param sprite info needed to draw the animation
+ */
+void sdl_draw_animated( body_t *body, sprite_t *sprite);
+
 /**
  * Displays the rendered frame on the SDL window.
  * Must be called after drawing the polygons in order to show them.
