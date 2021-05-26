@@ -60,4 +60,20 @@ bool entity_is_scrolling(entity_t *entity);
  */
 void entity_set_scrolling(entity_t *entity);
 
+/**
+ * Gets is_colliding of an entity.
+ * 
+ * @param entity a pointer to an entity
+ * @return the boolean value of is_colliding of the entity
+ */
+bool entity_get_colliding(entity_t *entity);
+
+/**
+ * Sets is_colliding of an entity.
+ * 
+ * @param entity a pointer to an entity
+ * @param value the new value of is_colliding
+ */
+void entity_set_colliding(entity_t *entity, bool value);
+
 #endif // #ifndef __ENTITY_H__

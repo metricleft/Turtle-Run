@@ -6,6 +6,7 @@
 #include "test_util.h"
 #include "test_util.h"
 #include "collision.h"
+#include "entity.h"
 
 #include <stdio.h>
 
@@ -113,6 +114,10 @@ void collision_force_creator(collision_param_t *param) {
     collision_info_t collision = find_collision(shape1, shape2);
     if (collision.collided && !(param->collided)) {
         param->handler(param->body1, param->body2, collision.axis, param->aux);
+        entity_t *entity1 = body_get_info(param->body1);
+        entity_set_colliding(entity1, true);
+        entity_t *entity2 = body_get_info(param->body2);
+        entity_set_colliding(entity2, true);
         param->collided = true;
     } else if (!collision.collided) {
         param->collided = false;
@@ -157,6 +162,10 @@ void normal_handler(collision_param_t *param){
     collision_info_t collision = find_collision(shape1, shape2);
     if (collision.collided) {
         if (!(param->collided)){
+            entity_t *entity1 = body_get_info(param->body1);
+            entity_set_colliding(entity1, true);
+            entity_t *entity2 = body_get_info(param->body2);
+            entity_set_colliding(entity2, true);
             body_set_velocity(param->body1, VEC_ZERO);
             param->collided = true; 
         }

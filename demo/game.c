@@ -129,6 +129,7 @@ void sidescroll(scene_t *scene, vector_t *scroll_speed) {
 
 void player_move (char key, key_event_type_t type, double held_time, void *scene) {
     body_t *player = scene_get_body(scene, 0);
+    entity_t *entity = body_get_info(player);
     vector_t new_velocity = {0, body_get_velocity(player).y};
     if (type == KEY_PRESSED) {
         switch (key) {
@@ -146,8 +147,9 @@ void player_move (char key, key_event_type_t type, double held_time, void *scene
                 break;
             case 'w':
             case UP_ARROW:
-                if (held_time < 0.2) {
+                if (entity_get_colliding(entity) && held_time < 0.2) {
                     new_velocity.y = 0.8 * PLAYER_SPEED;
+                    entity_set_colliding(entity, false);
                 }
                 break;
         }
@@ -211,7 +213,7 @@ int main(int argc, char *argv[]) {
             scene_tick(scene, dt);
             sdl_render_scene(scene);
             if (body_get_centroid(scene_get_body(scene,0)).y < MIN.y - PLAYER_RADIUS) {
-                body_remove(scene_get_body(scene, 0));
+                break;
             } else if (sdl_is_done(scene)) {
                 game_end();
             }
