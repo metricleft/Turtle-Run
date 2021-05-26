@@ -7,6 +7,8 @@
 #include "enemy.h"
 
 const int GAME_ENEMY_MASS = 10;
+const char* FROG = "static/frog_spritesheet.png";
+const char* FLY = "static/dragonfly_spritesheet.png";
 
 void create_bullet_collisions(scene_t *scene, body_t *enemy) {
     for (int i = 0; i < scene_bodies(scene); i++) {
@@ -48,9 +50,8 @@ void spawn_frog(scene_t *scene, vector_t MIN, vector_t MAX, double radius) {
     entity_t *entity = entity_init("ENEMY", false, false);
     list_t *frog_coords = compute_rect_points(center, 2*radius, 2*radius);
     body_t *frog = body_init_with_info(frog_coords, GAME_ENEMY_MASS, entity, entity_free);
-    rgb_color_t *black = malloc(sizeof(rgb_color_t));
-    *black = BLACK;
-    body_set_draw(frog, (draw_func_t) sdl_draw_polygon, black, free);
+    sprite_t *frog_info = sprite_animated(FROG, 1, 8, 6);
+    body_set_draw(frog, (draw_func_t) sdl_draw_animated, frog_info, sprite_free);
     center.y = MAX.y / 2;
     entity = entity_init("ANCHOR", true, false);
     list_t *anchor_coords = compute_circle_points(center, radius, radius);
@@ -97,9 +98,8 @@ void spawn_fly(scene_t *scene, vector_t MIN, vector_t MAX, double radius) {
     entity_t *entity = entity_init("ENEMY", true, false);
     list_t *fly_coords = compute_rect_points(center, 2*radius, 2*radius);
     body_t *fly = body_init_with_info(fly_coords, GAME_ENEMY_MASS,  entity, entity_free);
-    rgb_color_t *black = malloc(sizeof(rgb_color_t));
-    *black = BLACK;
-    body_set_draw(fly, (draw_func_t) sdl_draw_polygon, black, free);
+    sprite_t *fly_info = sprite_animated(FLY, 1, 2, 20);
+    body_set_draw(fly, (draw_func_t) sdl_draw_animated, fly_info, sprite_free);
     create_one_way_gravity(scene, gravity_const, fly, player);
     scene_add_body(scene, fly);
     create_destructive_collision(scene, player, fly);
