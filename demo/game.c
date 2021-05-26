@@ -96,7 +96,7 @@ void add_bullet (scene_t *scene, vector_t center, rgb_color_t color,
                     vector_t velocity, entity_t *bullet_entity, char *target_type) {
     body_t *bullet = body_init_with_info(
         compute_circle_points(center, BULLET_RADIUS, ARC_RESOLUTION),
-        BULLET_MASS, color, bullet_entity, entity_free);
+        BULLET_MASS, bullet_entity, entity_free);
     body_set_velocity(bullet, velocity);
     rgb_color_t *bullet_color = malloc(sizeof(rgb_color_t));
     *bullet_color = color;

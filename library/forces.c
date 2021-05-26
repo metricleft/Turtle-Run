@@ -15,7 +15,13 @@ typedef struct param {
     void *constant;
     body_t *body1;
     body_t *body2;
+    free_func_t const_freer;
 } param_t;
+
+void param_free(param_t *param) {
+    param->const_freer(param->constant);
+    free(param);
+}
 
 double calculate_reduced_mass(body_t *body1, body_t *body2) {
     double reduced_mass;
@@ -41,13 +47,13 @@ void gravity_creator(param_t *aux){
     body_add_force(aux->body2, vec_negate(force));
 }
 
-void create_newtonian_gravity(scene_t *scene, void *G, body_t *body1, body_t *body2){
+void create_newtonian_gravity(scene_t *scene, void *G, body_t *body1, body_t *body2, free_func_t freer){
     param_t *force_param = malloc(sizeof(param_t));
-    *force_param = (param_t){G, body1, body2};
+    *force_param = (param_t){G, body1, body2, freer};
     list_t *bodies = list_init(2, body_free);
     list_add(bodies, body1);
     list_add(bodies, body2);
-    scene_add_bodies_force_creator(scene, gravity_creator, force_param, bodies, free);
+    scene_add_bodies_force_creator(scene, gravity_creator, force_param, bodies, param_free);
 }
 
 void const_force_creator(param_t *aux){
@@ -55,12 +61,12 @@ void const_force_creator(param_t *aux){
     body_add_force(aux->body1, force);
 }
 
-void create_constant_force(scene_t *scene, void *A, body_t *body){
+void create_constant_force(scene_t *scene, void *A, body_t *body, free_func_t freer){
     param_t *force_param = malloc(sizeof(param_t));
-    *force_param = (param_t){A, body, NULL};
+    *force_param = (param_t){A, body, NULL, freer};
     list_t *bodies = list_init(1, body_free);
     list_add(bodies, body);
-    scene_add_bodies_force_creator(scene, const_force_creator, force_param, bodies, free);
+    scene_add_bodies_force_creator(scene, const_force_creator, force_param, bodies, param_free);
 
 }
 
@@ -71,13 +77,13 @@ void spring_creator(param_t *aux){
     body_add_force(aux->body2, vec_negate(force));
 } 
 
-void create_spring(scene_t *scene, void *k, body_t *body1, body_t *body2){
+void create_spring(scene_t *scene, void *k, body_t *body1, body_t *body2, free_func_t freer){
     param_t *force_param = malloc(sizeof(param_t));
-    *force_param = (param_t){k, body1, body2};
+    *force_param = (param_t){k, body1, body2, freer};
     list_t *bodies = list_init(2, body_free);
     list_add(bodies, body1);
     list_add(bodies, body2);
-    scene_add_bodies_force_creator(scene, spring_creator, force_param, bodies, free);
+    scene_add_bodies_force_creator(scene, spring_creator, force_param, bodies, param_free);
 }
 
 void drag_creator(param_t *aux){
@@ -85,12 +91,12 @@ void drag_creator(param_t *aux){
     body_add_force(aux->body1, force);
 }
 
-void create_drag(scene_t *scene, void *gamma, body_t *body){
+void create_drag(scene_t *scene, void *gamma, body_t *body, free_func_t freer){
     param_t *force_param = malloc(sizeof(param_t));
-    *force_param = (param_t){ gamma, body, NULL};
+    *force_param = (param_t){ gamma, body, NULL, freer};
     list_t *bodies = list_init(1, body_free);
     list_add(bodies, body);
-    scene_add_bodies_force_creator(scene, drag_creator, force_param, bodies, free);
+    scene_add_bodies_force_creator(scene, drag_creator, force_param, bodies, param_free);
 }
 
 typedef struct {

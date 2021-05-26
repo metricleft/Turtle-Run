@@ -6,6 +6,7 @@
 #include "forces.h"
 #include "sdl_wrapper.h"
 #include "polygon.h"
+#include "shapelib.h"
 
 const vector_t MIN = {.x = 0, .y = 0};
 const vector_t MAX = {.x = 1000, .y = 500};
@@ -36,43 +37,10 @@ bool game_end() {
     exit(0);
 }
 
-list_t *compute_ball_points(vector_t center, double radius) {
-    list_t *coords = list_init(ARC_RESOLUTION, free);
-
-    double d_theta = (2*M_PI / ARC_RESOLUTION);
-    for (int i = 0; i < ARC_RESOLUTION; i++) {
-        vector_t *next_point = polar_to_cartesian(BALL_RADIUS, i*d_theta);
-        next_point->x = next_point->x + center.x;
-        next_point->y = next_point->y + center.y;
-        list_add(coords, next_point);
-    }
-    return coords;
-}
-
-list_t *compute_rect_points(vector_t center, double width, double height) {
-    vector_t half_width  = {.x = width / 2, .y = 0.0},
-             half_height = {.x = 0.0, .y = height / 2};
-    list_t *rect = list_init(4, free);
-    vector_t *v = malloc(sizeof(*v));
-    *v = vec_add(half_width, half_height);
-    list_add(rect, v);
-    v = malloc(sizeof(*v));
-    *v = vec_subtract(half_height, half_width);
-    list_add(rect, v);
-    v = malloc(sizeof(*v));
-    *v = vec_negate(*(vector_t *) list_get(rect, 0));
-    list_add(rect, v);
-    v = malloc(sizeof(*v));
-    *v = vec_subtract(half_width, half_height);
-    list_add(rect, v);
-
-    polygon_translate(rect, center);
-    return rect;
-}
-
 void initialize_ball(scene_t *scene) {
     body_t *ball = body_init_with_info(
-                    compute_ball_points((vector_t){MAX.x / 2, MAX.y / 2}, BALL_RADIUS),
+                    compute_circle_points((vector_t){MAX.x / 2, MAX.y / 2},
+                                          BALL_RADIUS, ARC_RESOLUTION),
                     BALL_MASS, BLACK, "BALL", body_free);
     body_set_velocity(ball, (vector_t){BALL_SPEED, BALL_SPEED});
     scene_add_body(scene, ball);
