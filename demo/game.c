@@ -206,10 +206,10 @@ int main(int argc, char *argv[]) {
             sdl_render_scene(scene);
             if (body_get_centroid(scene_get_body(scene,0)).y 
                         < MIN.y - PLAYER_RADIUS) {
-                            scene_free(scene);
+                            //scene_free(scene);
                             game_end();
             } else if (sdl_is_done(scene)) {
-                scene_free(scene);
+                //scene_free(scene);
                 game_end();
             }
         }
