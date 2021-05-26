@@ -11,6 +11,7 @@
 #include <stdio.h>
 
 const double SMALL_DISTANCE = 5;
+const double SMALL_NUM = 1e-6;
 
 typedef struct param {
     void *constant;
@@ -162,17 +163,25 @@ void normal_handler(collision_param_t *param){
     collision_info_t collision = find_collision(shape1, shape2);
     if (collision.collided) {
         if (!(param->collided)){
+<<<<<<< HEAD
             entity_t *entity1 = body_get_info(param->body1);
             entity_set_colliding(entity1, true);
             entity_t *entity2 = body_get_info(param->body2);
             entity_set_colliding(entity2, true);
             body_set_velocity(param->body1, VEC_ZERO);
+=======
+>>>>>>> 0c352abc9ab311cbe14e9efc7117158fcf103893
             param->collided = true; 
         }
-        if (fabs(collision.axis.x) < SMALL_DISTANCE && collision.axis.y < 0) {
-            vector_t force = vec_multiply(body_get_mass(param->body1), *(vector_t *) param->aux);
+        if (body_get_centroid(param->body1).y > body_get_centroid(param->body2).y
+                && fabs(collision.axis.x) < SMALL_NUM) {
+            vector_t force = vec_multiply(body_get_mass(param->body1),
+                                            *(vector_t *) param->aux);
             body_add_force(param->body1, force);
-        } else {
+            if (param->collided) {
+                body_set_velocity(param->body1, VEC_ZERO);
+            }
+        } else if (fabs(collision.axis.y) < SMALL_NUM) {
             double reduced_mass = calculate_reduced_mass(param->body1, param->body2);
             vector_t impulse = 
                 vec_multiply(
@@ -181,6 +190,8 @@ void normal_handler(collision_param_t *param){
                     vec_dot(body_get_velocity(param->body1),collision.axis)),
                     collision.axis);
             body_add_impulse(param->body1, impulse);
+        } else {
+            
         }
     }
     else if (!collision.collided) {

@@ -29,7 +29,7 @@ const double ENEMY_RADIUS = 20;
 
 const rgb_color_t PLAYER_BULLET_COLOR = {0, 1, 0};
 const double PLAYER_SPEED = 600;
-const double PLAYER_RADIUS = 32;
+const double PLAYER_RADIUS = 30;
 const double PLAYER_MASS = 10;
 const rgb_color_t PLAYER_COLOR = {0, 1, 0};
 const char *PLAYER_SPRITE = "static/turtle_spritesheet.png";
