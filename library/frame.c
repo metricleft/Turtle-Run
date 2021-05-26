@@ -1,0 +1,39 @@
+#include "frame.h"
+
+void frame_0(scene_t *scene, vector_t frame, double frame_start) {
+    vector_t new_floor_center = (vector_t){0.5*frame.x+frame_start, 10};
+    entity_t *entity = entity_init("TERRAIN", true, false);
+    list_t *floor_coords = compute_rect_points(new_floor_center,frame.x,50);
+    body_t *new_floor = body_init_with_info(floor_coords, INFINITY,
+                                                entity, entity_free);
+    rgb_color_t *black = malloc(sizeof(rgb_color_t));
+    *black = BLACK;
+    body_set_draw(new_floor, (draw_func_t) sdl_draw_polygon, black, free);
+    scene_add_body(scene, new_floor);
+    create_normal_collision(scene, (vector_t) {0, 500},
+                            scene_get_body(scene,0), new_floor);
+}
+
+void frame_spawn_random(scene_t *scene, vector_t frame, double frame_start) {
+    int frame_num;
+    time_t t;
+
+    srand((unsigned) time(&t));
+
+    frame_num = rand() % 2;
+    if (frame_num == 0) {
+        frame_0(scene, frame, frame_start);
+    }
+    
+}
+
+
+void frame_remove_bodies(scene_t *scene, list_t *frame) {
+    for (int i = 0; i < list_size(frame); i++) {
+        for (int j = 0; j < scene_bodies(scene); j++) {
+            if (scene_get_body(scene, j) == list_get(frame,j)) {
+                scene_remove_body(scene, j);
+            }
+        }
+    }
+}

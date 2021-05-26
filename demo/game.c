@@ -12,6 +12,7 @@
 #include "sdl_wrapper.h"
 #include "SDL2/SDL_mouse.h"
 #include "enemy.h"
+#include "frame.h"
 
 
 const vector_t MIN = {.x = 0, .y = 0};
@@ -184,22 +185,33 @@ int main(int argc, char *argv[]) {
         scene = scene_init();
         initialize_player(scene);
         initialize_terrain(scene);
+        frame_spawn_random(scene, MAX, MAX.x);
         double time_since_last_enemy = 0;
+        double time_since_last_frame = 0;
         while (!check_game_end(scene)) {
             double dt = time_since_last_tick();
             time_since_last_enemy += dt;
+            time_since_last_frame += dt;
             if (time_since_last_enemy > ENEMY_INTERVAL) {
                 spawn_random_enemy(scene, MIN, MAX, ENEMY_RADIUS);
                 time_since_last_enemy = 0;
             }
+            if (time_since_last_frame > MAX.x / -(scroll_speed->x)) {
+                frame_spawn_random(scene, MAX, MAX.x);
+                time_since_last_frame = 0;
+            }
             *score += basic_score_calculation(dt);
             sidescroll(scene, scroll_speed);
             scene_tick(scene, dt);
-            if (sdl_is_done(scene)) {
+            sdl_render_scene(scene);
+            if (body_get_centroid(scene_get_body(scene,0)).y 
+                        < MIN.y - PLAYER_RADIUS) {
+                            scene_free(scene);
+                            game_end();
+            } else if (sdl_is_done(scene)) {
                 scene_free(scene);
                 game_end();
             }
-            sdl_render_scene(scene);
         }
         scene_free(scene);
     }
