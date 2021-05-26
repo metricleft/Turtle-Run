@@ -19,7 +19,7 @@ void create_bullet_collisions(scene_t *scene, body_t *enemy) {
 void spawn_goose(scene_t *scene, vector_t MIN, vector_t MAX, double radius) {
     //Spawns a goose that flies across the screen, speeding up
     double *drag_const = malloc(sizeof(double));
-    *drag_const = -10;
+    *drag_const = -rand()%20;
 
     body_t *player = scene_get_body(scene, 0);
     vector_t center = {MAX.x + radius, rand()%((int)(MAX.y - MIN.y))};
@@ -35,7 +35,7 @@ void spawn_goose(scene_t *scene, vector_t MIN, vector_t MAX, double radius) {
 void spawn_frog(scene_t *scene, vector_t MIN, vector_t MAX, double radius) {
     //Spawns a frog that bounces up and down the screen
     double *spring_const = malloc(sizeof(double));
-    *spring_const = 20;
+    *spring_const = rand()%20;
 
     body_t *player = scene_get_body(scene, 0);
 
@@ -83,7 +83,7 @@ void create_one_way_gravity(scene_t *scene, double G, body_t *body1, body_t *bod
 
 void spawn_fly(scene_t *scene, vector_t MIN, vector_t MAX, double radius) {
     //Spawns a fly that lazily follows the player
-    double gravity_const = 1000000;
+    double gravity_const = rand()%500000+500000;
 
     body_t *player = scene_get_body(scene, 0);
     vector_t center = {MAX.x + radius, rand()%((int)(MAX.y - MIN.y))};
@@ -98,6 +98,7 @@ void spawn_fly(scene_t *scene, vector_t MIN, vector_t MAX, double radius) {
 }
 
 void spawn_random_enemy(scene_t *scene, vector_t MIN, vector_t MAX, double enemy_radius) {
+    srand(time(0));
     int percent_max = 100;
     int percent_goose = 10;
     int percent_frog = 60;
