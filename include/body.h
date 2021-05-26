@@ -5,7 +5,6 @@
 #include "color.h"
 #include "list.h"
 #include "vector.h"
-
 /**
  * A rigid body constrained to the plane.
  * Implemented as a polygon with uniform density.
@@ -15,10 +14,16 @@
 typedef struct body body_t;
 
 /**
+ * A function that can be called on body to draw it.
+ * Examples: sdl_animate, sdl_draw_polygon
+ */
+typedef void (* draw_func_t)(body_t *body, void *aux);
+
+/**
  * Initializes a body without any info.
  * Acts like body_init_with_info() where info and info_freer are NULL.
  */
-body_t *body_init(list_t *shape, double mass, rgb_color_t color);
+body_t *body_init(list_t *shape, double mass);
 
 /**
  * Allocates memory for a body with the given parameters.
@@ -27,7 +32,6 @@ body_t *body_init(list_t *shape, double mass, rgb_color_t color);
  *
  * @param shape a list of vectors describing the initial shape of the body
  * @param mass the mass of the body (if INFINITY, stops the body from moving)
- * @param color the color of the body, used to draw it on the screen
  * @param info additional information to associate with the body,
  *   e.g. its type if the scene has multiple types of bodies
  * @param info_freer if non-NULL, a function call on the info to free it
@@ -36,7 +40,6 @@ body_t *body_init(list_t *shape, double mass, rgb_color_t color);
 body_t *body_init_with_info(
     list_t *shape,
     double mass,
-    rgb_color_t color,
     void *info,
     free_func_t info_freer
 );
@@ -85,14 +88,6 @@ vector_t body_get_velocity(body_t *body);
 double body_get_mass(body_t *body);
 
 /**
- * Gets the display color of a body.
- *
- * @param body a pointer to a body returned from body_init()
- * @return the color passed to body_init(), as an (R, G, B) tuple
- */
-rgb_color_t body_get_color(body_t *body);
-
-/**
  * Gets the information associated with a body.
  *
  * @param body a pointer to a body returned from body_init()
@@ -109,12 +104,13 @@ void *body_get_info(body_t *body);
 double body_get_orientation(body_t *body);
 
 /**
- * Sets a body's color.
+ * Sets a body's draw info.
  *
  * @param body a pointer to a body returned from body_init()
- * @param color the body's new color
+ * @param drawer the function to draw a body
+ * @param draw_info auxiliary info used to draw the body;
  */
-void body_set_color(body_t *body, rgb_color_t color);
+void body_set_draw(body_t *body, draw_func_t drawer, void* draw_info);
 
 /**
  * Translates a body to a new position.
@@ -196,5 +192,13 @@ void body_remove(body_t *body);
  * @return whether body_remove() has been called on the body
  */
 bool body_is_removed(body_t *body);
+
+/**
+ * Draws the body.
+ * If there is no draw funtion, nothing is drawn;
+ *
+ * @param body the body to mark for removal
+ */
+void body_draw(body_t *body);
 
 #endif // #ifndef __BODY_H__
