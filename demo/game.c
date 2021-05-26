@@ -65,7 +65,7 @@ bool check_game_end(scene_t *scene) {
 }
 
 void initialize_player(scene_t *scene) {
-    vector_t center = {MAX.x / 2, MAX.y / 2};
+    vector_t center = {MAX.x / 2, MAX.y - PLAYER_RADIUS};
     entity_t *entity = entity_init("PLAYER", false, true);
     list_t *coords = compute_rect_points(center, 2 * PLAYER_RADIUS, 2 * PLAYER_RADIUS);
     body_t *player = body_init_with_info(coords, PLAYER_MASS, entity, entity_free);
@@ -80,18 +80,18 @@ void initialize_player(scene_t *scene) {
     create_constant_force(scene, grav, player, free);
 }
 
-//TODO: this function will be changed into derek's terrain implementation eventually
 void initialize_terrain(scene_t *scene) {
     body_t *player = scene_get_body(scene, 0);
-    vector_t fc = (vector_t){MAX.x/2, 10};
+    vector_t center = (vector_t){MAX.x/2, 10};
     entity_t *entity = entity_init("TERRAIN", true, false);
-    list_t *floor_coords = compute_rect_points(fc, MAX.x, 50);
+    list_t *floor_coords = compute_rect_points(center, MAX.x, 50);
     body_t *floor = body_init_with_info(floor_coords, INFINITY, entity, entity_free);
+    scene_add_body(scene, floor);
+    create_normal_collision(scene, vec_negate(DEFAULT_GRAVITY), scene_get_body(scene, 0), floor);
+
     rgb_color_t *black = malloc(sizeof(rgb_color_t));
     *black = BLACK;
     body_set_draw(floor, (draw_func_t) sdl_draw_polygon, black, free);
-    scene_add_body(scene, floor);
-    create_normal_collision(scene, vec_negate(DEFAULT_GRAVITY), scene_get_body(scene, 0), floor);
 }
 
 void add_bullet (scene_t *scene, vector_t center, rgb_color_t color,
@@ -132,19 +132,22 @@ void player_move (char key, key_event_type_t type, double held_time, void *scene
     vector_t new_velocity = {0, body_get_velocity(player).y};
     if (type == KEY_PRESSED) {
         switch (key) {
+            case 'a':
             case LEFT_ARROW:
                 if (body_get_centroid(player).x - PLAYER_RADIUS > MIN.x) {
                     new_velocity.x = -PLAYER_SPEED;
                 }
                 break;
+            case 'd':
             case RIGHT_ARROW:
                 if (body_get_centroid(player).x + PLAYER_RADIUS < MAX.x) {
                     new_velocity.x = PLAYER_SPEED;
                 }
                 break;
+            case 'w':
             case UP_ARROW:
                 if (held_time < 0.2) {
-                    new_velocity.y = PLAYER_SPEED/2;
+                    new_velocity.y = 0.8 * PLAYER_SPEED;
                 }
                 break;
         }
@@ -170,7 +173,7 @@ void player_shoot(char key, mouse_event_type_t type, double held_time, void *sce
 }
 
 int main(int argc, char *argv[]) {
-    srand(time(0));
+    srand((int)time(0));
 
     double *score = malloc(sizeof(double));
     *score = 0;
@@ -208,10 +211,8 @@ int main(int argc, char *argv[]) {
             scene_tick(scene, dt);
             sdl_render_scene(scene);
             if (body_get_centroid(scene_get_body(scene,0)).y < MIN.y - PLAYER_RADIUS) {
-                //scene_free(scene);
-                game_end();
+                body_remove(scene_get_body(scene, 0));
             } else if (sdl_is_done(scene)) {
-                //scene_free(scene);
                 game_end();
             }
         }
