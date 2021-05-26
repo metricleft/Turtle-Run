@@ -76,7 +76,7 @@ void create_drag(scene_t *scene, void *gamma, body_t *body, free_func_t freer);
  * @param body the body to apply the force to
  * @param freer the function that frees a
  */
-void create_constant_force(scene_t *scene, vector_t *a, body_t *body, free_func_t freer);
+void create_constant_force(scene_t *scene, void *A, body_t *body, free_func_t freer);
 
 /**
  * Adds a force creator to a scene that calls a given collision handler

@@ -160,8 +160,19 @@ void normal_handler(collision_param_t *param){
             body_set_velocity(param->body1, VEC_ZERO);
             param->collided = true; 
         }
-        vector_t force = vec_multiply(body_get_mass(param->body1), *(vector_t *) param->aux);
-        body_add_force(param->body1, force);
+        if (fabs(collision.axis.x) < SMALL_DISTANCE && collision.axis.y < 0) {
+            vector_t force = vec_multiply(body_get_mass(param->body1), *(vector_t *) param->aux);
+            body_add_force(param->body1, force);
+        } else {
+            double reduced_mass = calculate_reduced_mass(param->body1, param->body2);
+            vector_t impulse = 
+                vec_multiply(
+                    reduced_mass * 
+                    (vec_dot(body_get_velocity(param->body2),collision.axis)-
+                    vec_dot(body_get_velocity(param->body1),collision.axis)),
+                    collision.axis);
+            body_add_impulse(param->body1, impulse);
+        }
     }
     else if (!collision.collided) {
         param->collided = false;
