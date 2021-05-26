@@ -29,7 +29,7 @@ const double ENEMY_RADIUS = 20;
 
 const rgb_color_t PLAYER_BULLET_COLOR = {0, 1, 0};
 const double PLAYER_SPEED = 600;
-const double PLAYER_RADIUS = 32;
+const double PLAYER_RADIUS = 30;
 const double PLAYER_MASS = 10;
 const rgb_color_t PLAYER_COLOR = {0, 1, 0};
 const char *PLAYER_SPRITE = "static/turtle_spritesheet.png";
@@ -207,13 +207,13 @@ int main(int argc, char *argv[]) {
             sidescroll(scene, scroll_speed);
             scene_tick(scene, dt);
             sdl_render_scene(scene);
-            /*if (body_get_centroid(scene_get_body(scene,0)).y < MIN.y - PLAYER_RADIUS) {
+            if (body_get_centroid(scene_get_body(scene,0)).y < MIN.y - PLAYER_RADIUS) {
                 //scene_free(scene);
                 game_end();
             } else if (sdl_is_done(scene)) {
                 //scene_free(scene);
                 game_end();
-            }*/
+            }
         }
         scene_free(scene);
     }
