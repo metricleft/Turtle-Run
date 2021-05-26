@@ -85,7 +85,7 @@ sprite_t *sprite_animated(const char *image, double scale, int frames, int fps);
  * @param scale the scaling of the image
  * @return a pointer to info for a sprite
  */
-sprite_t *sprite_draw(const char *image, double scale);
+sprite_t *sprite_image(const char *image, double scale);
 
 /**
  * Releases the memory allocated for sprite.

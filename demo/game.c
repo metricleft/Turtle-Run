@@ -22,6 +22,7 @@ const int ARC_RESOLUTION = 10;
 
 const double BULLET_RADIUS = 6;
 const double BULLET_MASS = 0.2;
+const char *BULLET_SPRITE = "static/bullet.png";
 
 const int ENEMY_INTERVAL = 5;
 const double ENEMY_RADIUS = 20;
@@ -99,9 +100,8 @@ void add_bullet (scene_t *scene, vector_t center, rgb_color_t color,
         compute_circle_points(center, BULLET_RADIUS, ARC_RESOLUTION),
         BULLET_MASS, bullet_entity, entity_free);
     body_set_velocity(bullet, velocity);
-    rgb_color_t *bullet_color = malloc(sizeof(rgb_color_t));
-    *bullet_color = color;
-    body_set_draw(bullet, (draw_func_t) sdl_draw_polygon, bullet_color, free);
+    sprite_t *bullet_info = sprite_image(BULLET_SPRITE, 1);
+    body_set_draw(bullet, (draw_func_t) sdl_draw_image, bullet_info, sprite_free);
     scene_add_body(scene, bullet);
 
     for (size_t i = 0; i < scene_bodies(scene); i++) {
