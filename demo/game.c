@@ -1,14 +1,18 @@
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 
 #include "body.h"
 #include "polygon.h"
 #include "scene.h"
 #include "forces.h"
 #include "entity.h"
+#include "shapelib.h"
 #include "sdl_wrapper.h"
 #include "SDL2/SDL_mouse.h"
+#include "enemy.h"
+
 
 const vector_t MIN = {.x = 0, .y = 0};
 const vector_t MAX = {.x = 1000, .y = 500};
@@ -18,7 +22,8 @@ const int ARC_RESOLUTION = 10;
 const double BULLET_RADIUS = 6;
 const double BULLET_MASS = 0.2;
 
-const rgb_color_t ENEMY_BULLET_COLOR = {1, 0, 0};
+const int ENEMY_INTERVAL = 5;
+const double ENEMY_RADIUS = 20;
 
 const rgb_color_t PLAYER_BULLET_COLOR = {0, 1, 0};
 const double PLAYER_SPEED = 600;
@@ -42,38 +47,9 @@ bool game_end() {
     exit(0);
 }
 
-list_t *compute_circle_points(vector_t center, double radius) {
-     list_t *coords = list_init(ARC_RESOLUTION, free);
-
-    double d_theta = (2*M_PI / ARC_RESOLUTION);
-    for (int i = 0; i < ARC_RESOLUTION; i++) {
-        vector_t *next_point = polar_to_cartesian(radius, i*d_theta);
-        next_point->x = next_point->x + center.x;
-        next_point->y = next_point->y + center.y;
-        list_add(coords, next_point);
-    }
-    return coords;
-}
-
-list_t *compute_rect_points(vector_t center, double width, double height) {
-    vector_t half_width  = {.x = width / 2, .y = 0.0},
-             half_height = {.x = 0.0, .y = height / 2};
-    list_t *rect = list_init(4, free);
-    vector_t *v = malloc(sizeof(*v));
-    *v = vec_add(half_width, half_height);
-    list_add(rect, v);
-    v = malloc(sizeof(*v));
-    *v = vec_subtract(half_height, half_width);
-    list_add(rect, v);
-    v = malloc(sizeof(*v));
-    *v = vec_negate(*(vector_t *) list_get(rect, 0));
-    list_add(rect, v);
-    v = malloc(sizeof(*v));
-    *v = vec_subtract(half_width, half_height);
-    list_add(rect, v);
-
-    polygon_translate(rect, center);
-    return rect;
+double basic_score_calculation(double dt) {
+    assert(dt >= 0);
+    return dt * 100.0;
 }
 
 bool check_game_end(scene_t *scene) {
@@ -99,7 +75,7 @@ void initialize_player(scene_t *scene) {
     scene_add_body(scene, player);
     vector_t *grav = malloc(sizeof(vector_t));
     *grav = DEFAULT_GRAVITY;
-    create_constant_force(scene, grav, player);
+    create_constant_force(scene, grav, player, free);
 }
 
 //TODO: this function will be changed into derek's terrain implementation eventually
@@ -119,8 +95,8 @@ void initialize_terrain(scene_t *scene) {
 void add_bullet (scene_t *scene, vector_t center, rgb_color_t color,
                     vector_t velocity, entity_t *bullet_entity, char *target_type) {
     body_t *bullet = body_init_with_info(
-        compute_circle_points(center, BULLET_RADIUS),
-        BULLET_MASS, bullet_entity, entity_free);
+        compute_circle_points(center, BULLET_RADIUS, ARC_RESOLUTION),
+        BULLET_MASS, color, bullet_entity, entity_free);
     body_set_velocity(bullet, velocity);
     rgb_color_t *bullet_color = malloc(sizeof(rgb_color_t));
     *bullet_color = color;
@@ -141,8 +117,11 @@ void sidescroll(scene_t *scene, vector_t *scroll_speed) {
         body_t *body = scene_get_body(scene, i);
         entity_t *entity = body_get_info(body);
         //Applies a leftwards velocity to all objects with the "SCROLLABLE" tag
-        if (entity_get_scrollable(entity)) {
-            body_set_velocity(body, *scroll_speed);
+        if (entity_get_scrollable(entity) && !entity_is_scrolling(entity)) {
+            vector_t scroll = {scroll_speed->x, body_get_velocity(body).y};
+            body_set_velocity(body, scroll);
+            //Ensures that every object only gets an initial velocity assigned once
+            entity_set_scrolling(entity);
         }
     }
 }
@@ -190,6 +169,8 @@ void player_shoot(char key, mouse_event_type_t type, double held_time, void *sce
 }
 
 int main(int argc, char *argv[]) {
+    double *score = malloc(sizeof(double));
+    *score = 0;
     scene_t *scene = scene_init();
 
     vector_t *scroll_speed = malloc(sizeof(vector_t));
@@ -203,9 +184,15 @@ int main(int argc, char *argv[]) {
         scene = scene_init();
         initialize_player(scene);
         initialize_terrain(scene);
-        //double time_since_last_enemy = 0;
+        double time_since_last_enemy = 0;
         while (!check_game_end(scene)) {
             double dt = time_since_last_tick();
+            time_since_last_enemy += dt;
+            if (time_since_last_enemy > ENEMY_INTERVAL) {
+                spawn_random_enemy(scene, MIN, MAX, ENEMY_RADIUS);
+                time_since_last_enemy = 0;
+            }
+            *score += basic_score_calculation(dt);
             sidescroll(scene, scroll_speed);
             scene_tick(scene, dt);
             if (sdl_is_done(scene)) {
