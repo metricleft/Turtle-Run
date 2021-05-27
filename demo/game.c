@@ -73,7 +73,7 @@ void initialize_background(scene_t *scene){
     list_t *window = compute_rect_points(center, MAX.x, MAX.y);
     entity_t *info = entity_init("OTHER", false, false);
     body_t *background = body_init_with_info(window, INFINITY, info , entity_free);
-    sprite_t *back_info = sprite_scroll(BACKGROUND_IMG, BACKGROUND_SCALE, MAX.x,  SCROLL_SPEED);
+    sprite_t *back_info = sprite_scroll(BACKGROUND_IMG, BACKGROUND_SCALE, 3,  SCROLL_SPEED);
     body_set_draw(background, sdl_draw_scroll, back_info, sprite_free); 
     scene_add_body(scene, background);
 }

@@ -294,9 +294,10 @@ void sdl_draw_scroll(body_t *body, sprite_t *sprite){
     vector_t center = get_window_position(body_get_centroid(body), window_center);
     SDL_Rect *in = malloc(sizeof(SDL_Rect));
     SDL_Rect *out = malloc(sizeof(SDL_Rect));
-    int frame = (int)(time * sprite->speed) % *w/2;
-    assert((frame < *w/2) && (frame >= 0));
-    *in = (SDL_Rect) { frame, 0, *w/2, *h };
+    int width = *w / sprite->frames;
+    int frame = (int)(time * sprite->speed) % (*w - width);
+    assert((frame < *w - width) && (frame >= 0));
+    *in = (SDL_Rect) { frame, 0, width, *h };
     SDL_RenderCopy(renderer, sprite->texture, in, NULL);
     free(w);
     free(h);
