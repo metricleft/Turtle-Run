@@ -10,15 +10,37 @@
 typedef struct entity entity_t;
 
 /**
- * Initializes an entity without any info.
- * Acts like body_init_with_info() where info and info_freer are NULL.
+ * Child of entity: additional tags that a player may have.
+ */
+typedef struct player_entity player_entity_t;
+
+/**
+ * Initializes an entity.
+ * 
+ * @param entity_type type of entity: PLAYER, BULLET, ENEMY, TERRAIN, POWERUP
+ * @param scrollable whether or not the entity should scroll with the screen
+ * @param fallable whether or not the entity experiences gravity
  */
 entity_t *entity_init(char *entity_type, bool scrollable, bool fallable);
+
+/**
+ * Initializes an entity.
+ * 
+ * @param entity_type type of entity: PLAYER, BULLET, ENEMY, TERRAIN, POWERUP
+ * @param scrollable whether or not the entity should scroll with the screen
+ * @param fallable whether or not the entity experiences gravity
+ */
+player_entity_t *player_entity_init(char *entity_type, bool scrollable, bool fallable);
 
 /**
  * Frees an entity.
  */
 void entity_free(entity_t *entity);
+
+/**
+ * Frees a player_entity.
+ */
+void player_entity_free(player_entity_t *player_entity);
 
 //TODO: consider changing to "returns a copy of the entity type of an entity" to encapsulate
 /**
@@ -61,19 +83,35 @@ bool entity_is_scrolling(entity_t *entity);
 void entity_set_scrolling(entity_t *entity);
 
 /**
- * Gets is_colliding of an entity.
+ * Gets is_colliding of a player entity.
  * 
- * @param entity a pointer to an entity
+ * @param entity a pointer to a player entity
  * @return the boolean value of is_colliding of the entity
  */
-bool entity_get_colliding(entity_t *entity);
+bool entity_get_colliding(player_entity_t *entity);
 
 /**
- * Sets is_colliding of an entity.
+ * Sets is_colliding of a player entity.
  * 
  * @param entity a pointer to an entity
  * @param value the new value of is_colliding
  */
-void entity_set_colliding(entity_t *entity, bool value);
+void entity_set_colliding(player_entity_t *entity, bool value);
+
+/**
+ * Gets the active powerup of a player entity.
+ * 
+ * @param entity a pointer to a player entity
+ * @return the char * value of the player entity
+ */
+char *entity_get_powerup(player_entity_t *entity);
+
+/**
+ * Sets the active powerup of a player entity.
+ * 
+ * @param entity a pointer to a player entity
+ * @param new_powerup the new value of active_powerup
+ */
+void entity_set_powerup(player_entity_t *entity, char *new_powerup);
 
 #endif // #ifndef __ENTITY_H__
