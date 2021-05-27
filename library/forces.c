@@ -157,10 +157,8 @@ void normal_handler(collision_param_t *param){
     list_t *shape2 = body_get_shape(param->body2);
     collision_info_t collision = find_collision(shape1, shape2);
     if (collision.collided) {
-        entity_t *entity1 = body_get_info(param->body1);
+        player_entity_t *entity1 = body_get_info(param->body1); //This must be the player.
         entity_set_colliding(entity1, true);
-        entity_t *entity2 = body_get_info(param->body2);
-        entity_set_colliding(entity2, true);
         if (!(param->collided)){
             body_set_velocity(param->body1, VEC_ZERO);
             param->collided = true; 

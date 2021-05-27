@@ -7,6 +7,7 @@
 #include "enemy.h"
 
 const int GAME_ENEMY_MASS = 10;
+const int ENEMY_RADIUS = 20;
 const char* FROG = "static/frog_spritesheet.png";
 const char* FLY = "static/dragonfly_spritesheet.png";
 const char* GOOSE = "static/goose_spritesheet.png";
@@ -21,15 +22,15 @@ void create_bullet_collisions(scene_t *scene, body_t *enemy) {
     }
 }
 
-void spawn_goose(scene_t *scene, vector_t MIN, vector_t MAX, double radius) {
+void spawn_goose(scene_t *scene, vector_t MIN, vector_t MAX) {
     //Spawns a goose that flies across the screen, speeding up
     double *drag_const = malloc(sizeof(double));
     *drag_const = -(rand()%15+5);
 
-    body_t *player = scene_get_body(scene, 0);
-    vector_t center = {MAX.x + radius, rand()%((int)(MAX.y - MIN.y))};
+    body_t *player = scene_get_body(scene, 1);
+    vector_t center = {MAX.x + ENEMY_RADIUS, rand()%((int)(MAX.y - MIN.y))};
     entity_t *entity = entity_init("ENEMY", true, false);
-    list_t *goose_coords = compute_rect_points(center, 2*radius, 2*radius);
+    list_t *goose_coords = compute_rect_points(center, 2*ENEMY_RADIUS, 2*ENEMY_RADIUS);
     body_t *goose = body_init_with_info(goose_coords, GAME_ENEMY_MASS, entity, entity_free);
     sprite_t *goose_info = sprite_animated(GOOSE, 1, 10, 12);
     body_set_draw(goose, (draw_func_t) sdl_draw_animated, goose_info, sprite_free);
@@ -39,22 +40,22 @@ void spawn_goose(scene_t *scene, vector_t MIN, vector_t MAX, double radius) {
     create_bullet_collisions(scene, goose);
 }
 
-void spawn_frog(scene_t *scene, vector_t MIN, vector_t MAX, double radius) {
+void spawn_frog(scene_t *scene, vector_t MIN, vector_t MAX) {
     //Spawns a frog that bounces up and down the screen
     double *spring_const = malloc(sizeof(double));
     *spring_const = rand()%15+5;
 
-    body_t *player = scene_get_body(scene, 0);
+    body_t *player = scene_get_body(scene, 1);
 
-    vector_t center = {MAX.x + radius, rand()%((int)(MAX.y - MIN.y))};
+    vector_t center = {MAX.x + ENEMY_RADIUS, rand()%((int)(MAX.y - MIN.y))};
     entity_t *entity = entity_init("ENEMY", false, false);
-    list_t *frog_coords = compute_rect_points(center, 2*radius, 2*radius);
+    list_t *frog_coords = compute_rect_points(center, 2*ENEMY_RADIUS, 2*ENEMY_RADIUS);
     body_t *frog = body_init_with_info(frog_coords, GAME_ENEMY_MASS, entity, entity_free);
     sprite_t *frog_info = sprite_animated(FROG, 1, 8, 6);
     body_set_draw(frog, (draw_func_t) sdl_draw_animated, frog_info, sprite_free);
     center.y = MAX.y / 2;
     entity = entity_init("ANCHOR", true, false);
-    list_t *anchor_coords = compute_circle_points(center, radius, radius);
+    list_t *anchor_coords = compute_circle_points(center, ENEMY_RADIUS, ENEMY_RADIUS);
     body_t *anchor = body_init_with_info(anchor_coords, INFINITY, entity, entity_free);
 
     create_spring(scene, spring_const, anchor, frog, free);
@@ -89,14 +90,14 @@ void create_one_way_gravity(scene_t *scene, double G, body_t *body1, body_t *bod
     scene_add_bodies_force_creator(scene, one_way_gravity_creator, force_param, bodies, free);
 }
 
-void spawn_fly(scene_t *scene, vector_t MIN, vector_t MAX, double radius) {
+void spawn_fly(scene_t *scene, vector_t MIN, vector_t MAX) {
     //Spawns a fly that lazily follows the player
     double gravity_const = rand()%500000+500000;
 
-    body_t *player = scene_get_body(scene, 0);
-    vector_t center = {MAX.x + radius, rand()%((int)(MAX.y - MIN.y))};
+    body_t *player = scene_get_body(scene, 1);
+    vector_t center = {MAX.x + ENEMY_RADIUS, rand()%((int)(MAX.y - MIN.y))};
     entity_t *entity = entity_init("ENEMY", true, false);
-    list_t *fly_coords = compute_rect_points(center, radius, radius);
+    list_t *fly_coords = compute_rect_points(center, ENEMY_RADIUS, ENEMY_RADIUS);
     body_t *fly = body_init_with_info(fly_coords, GAME_ENEMY_MASS,  entity, entity_free);
     sprite_t *fly_info = sprite_animated(FLY, 1, 2, 20);
     body_set_draw(fly, (draw_func_t) sdl_draw_animated, fly_info, sprite_free);
@@ -106,19 +107,19 @@ void spawn_fly(scene_t *scene, vector_t MIN, vector_t MAX, double radius) {
     create_bullet_collisions(scene, fly);
 }
 
-void spawn_random_enemy(scene_t *scene, vector_t MIN, vector_t MAX, double enemy_radius) {
+void enemy_spawn_random(scene_t *scene, vector_t MIN, vector_t MAX) {
     int percent_max = 100;
     int percent_goose = 10;
     int percent_frog = 60;
     int percent_fly = 100;
     int random_enemy = rand()%percent_max;
     if (random_enemy <= percent_goose) {
-        spawn_goose(scene, MIN, MAX, enemy_radius);
+        spawn_goose(scene, MIN, MAX);
     }
     else if (random_enemy <= percent_frog) {
-        spawn_frog(scene, MIN, MAX, enemy_radius);
+        spawn_frog(scene, MIN, MAX);
     }
     else if (random_enemy <= percent_fly) {
-        spawn_fly(scene, MIN, MAX, enemy_radius);
+        spawn_fly(scene, MIN, MAX);
     }
 }
