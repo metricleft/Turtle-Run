@@ -91,18 +91,16 @@ void frame_spawn_random(scene_t *scene, vector_t frame, double frame_start) {
     srand((unsigned) time(&t));
 
     frame_num = rand() % 3;
-    // if (frame_num == 0) {
-    //     frame_0(scene, frame, frame_start);
-    // }
-    // if (frame_num == 1) {
-    //     frame_1(scene,frame,frame_start);
-    // }
-    // if (frame_num == 2) {
-    //     frame_2(scene, frame, frame_start);
-    // }
-    frame_2(scene,frame,frame_start);
+    if (frame_num == 0) {
+        frame_0(scene, frame, frame_start);
+    }
+    if (frame_num == 1) {
+        frame_1(scene,frame,frame_start);
+    }
+    if (frame_num == 2) {
+        frame_2(scene, frame, frame_start);
+    }
 }
-
 
 void frame_remove_bodies(scene_t *scene, list_t *frame) {
     for (int i = 0; i < list_size(frame); i++) {

@@ -14,8 +14,7 @@
  * @param scene a pointer to a scene
  * @param MIN the coordinates of the bottom-left corner of the screen
  * @param MAX the coordinate of the top-right corner of the screen
- * @param enemy_radius the radius of the enemy
  */
-void spawn_random_enemy(scene_t *scene, vector_t MIN, vector_t MAX, double enemy_radius);
+void enemy_spawn_random(scene_t *scene, vector_t MIN, vector_t MAX);
 
 #endif // #ifndef __ENEMY_H__

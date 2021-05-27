@@ -14,6 +14,7 @@
 #include "SDL2/SDL_mouse.h"
 #include "enemy.h"
 #include "frame.h"
+#include "powerup.h"
 
 const vector_t MIN = {.x = 0, .y = 0};
 const vector_t MAX = {.x = 1000, .y = 500};
@@ -24,14 +25,17 @@ const double BULLET_RADIUS = 6;
 const double BULLET_MASS = 0.2;
 const char *BULLET_SPRITE = "static/bullet.png";
 
+const int POWERUP_INTERVAL = 15;
 const int ENEMY_INTERVAL = 5;
-const double ENEMY_RADIUS = 20;
+const int SPEEDUP_INTERVAL = 30;
 
-const rgb_color_t PLAYER_BULLET_COLOR = {0, 1, 0};
+const vector_t DEFAULT_SPEEDUP = {-10, 0};
+
+//const rgb_color_t PLAYER_BULLET_COLOR = {0, 1, 0};
 const double PLAYER_SPEED = 600;
 const double PLAYER_RADIUS = 30;
 const double PLAYER_MASS = 10;
-const rgb_color_t PLAYER_COLOR = {0, 1, 0};
+//const rgb_color_t PLAYER_COLOR = {0, 1, 0};
 const char *PLAYER_SPRITE = "static/turtle_spritesheet.png";
 const double PLAYER_SCALE = 2;
 const int PLAYER_FRAMES = 8;
@@ -81,7 +85,7 @@ void initialize_background(scene_t *scene){
 
 void initialize_player(scene_t *scene) {
     vector_t center = {MAX.x / 2, MAX.y - PLAYER_RADIUS};
-    entity_t *entity = entity_init("PLAYER", false, true);
+    player_entity_t *entity = player_entity_init("PLAYER", false, true);
     list_t *coords = compute_rect_points(center, 2 * PLAYER_RADIUS, 2 * PLAYER_RADIUS);
     body_t *player = body_init_with_info(coords, PLAYER_MASS, entity, entity_free);
     sprite_t *sprite_player = sprite_animated(PLAYER_SPRITE, 
@@ -109,8 +113,8 @@ void initialize_terrain(scene_t *scene) {
     body_set_draw(floor, (draw_func_t) sdl_draw_polygon, black, free);
 }
 
-void add_bullet (scene_t *scene, vector_t center, rgb_color_t color,
-                    vector_t velocity, entity_t *bullet_entity, char *target_type) {
+void add_bullet (scene_t *scene, vector_t center, vector_t velocity,
+                 entity_t *bullet_entity, char *target_type) {
     body_t *bullet = body_init_with_info(
         compute_circle_points(center, BULLET_RADIUS, ARC_RESOLUTION),
         BULLET_MASS, bullet_entity, entity_free);
@@ -143,8 +147,13 @@ void sidescroll(scene_t *scene, vector_t *scroll_speed) {
 }
 
 void player_move (char key, key_event_type_t type, double held_time, void *scene) {
+<<<<<<< HEAD
     body_t *player = scene_get_body(scene, 1);
     entity_t *entity = body_get_info(player);
+=======
+    body_t *player = scene_get_body(scene, 0);
+    player_entity_t *entity = body_get_info(player);
+>>>>>>> 4aac7186890cf2f0df8fdf05747f5f6e89c636df
     vector_t new_velocity = {0, body_get_velocity(player).y};
     if (type == KEY_PRESSED) {
         switch (key) {
@@ -162,9 +171,9 @@ void player_move (char key, key_event_type_t type, double held_time, void *scene
                 break;
             case 'w':
             case UP_ARROW:
-                if (entity_get_colliding(entity) && held_time < 0.2) {
+                if (held_time < 0.2 && (entity_get_colliding(entity) ||
+                                        !strcmp(entity_get_powerup(entity), "JUMP"))) {
                     new_velocity.y = 0.8 * PLAYER_SPEED;
-                    //entity_set_colliding(entity, false);
                 }
                 break;
         }
@@ -182,53 +191,71 @@ void player_shoot(char key, mouse_event_type_t type, double held_time, void *sce
                 vector_t center = body_get_centroid(player);
                 vector_t shoot = vec_unit(vec_subtract(mouse, center));
                 entity_t *entity = entity_init("BULLET", false, false);
-                add_bullet(scene, center, PLAYER_BULLET_COLOR,
-                        vec_multiply(200, shoot), entity, "ENEMY");
+                add_bullet(scene, center, vec_multiply(200, shoot), entity, "ENEMY");
                 break;
         }
     }
 }
 
 int main(int argc, char *argv[]) {
-    srand((int)time(0));
-    
+    time_t t;
+    srand((unsigned) time(&t));
     sdl_init(MIN,MAX);
-
-    double *score = malloc(sizeof(double));
-    *score = 0;
-
-    scene_t *scene = scene_init();
-
-    vector_t *scroll_speed = malloc(sizeof(vector_t));
-    *scroll_speed = DEFAULT_SCROLL_SPEED;
 
     while (true) {
         sdl_on_key((event_handler_t) player_move);
         sdl_on_click((event_handler_t) player_shoot);
+<<<<<<< HEAD
         scene = scene_init();
         initialize_background(scene);
+=======
+
+        scene_t *scene = scene_init();
+        vector_t *scroll_speed = malloc(sizeof(vector_t));
+        *scroll_speed = DEFAULT_SCROLL_SPEED;
+        double *score = malloc(sizeof(double));
+        *score = 0;
+
+>>>>>>> 4aac7186890cf2f0df8fdf05747f5f6e89c636df
         initialize_player(scene);
         initialize_terrain(scene);
+        frame_spawn_random(scene, MAX, MAX.x);
 
+<<<<<<< HEAD
         body_t *player = scene_get_body(scene, 1);
         entity_t *player_entity = body_get_info(player);
+=======
+        player_entity_t *player_entity = body_get_info(scene_get_body(scene, 0));
+>>>>>>> 4aac7186890cf2f0df8fdf05747f5f6e89c636df
 
-        frame_spawn_random(scene, MAX, MAX.x);
         double time_since_last_enemy = 0;
         double time_since_last_frame = 0;
+        double time_since_last_powerup = 0;
+        double time_since_last_speedup = 0;
         while (!check_game_end(scene)) {
             entity_set_colliding(player_entity, false);
 
             double dt = time_since_last_tick();
             time_since_last_enemy += dt;
             time_since_last_frame += dt;
+            time_since_last_powerup += dt;
             if (time_since_last_enemy > ENEMY_INTERVAL) {
-                spawn_random_enemy(scene, MIN, MAX, ENEMY_RADIUS);
+                enemy_spawn_random(scene, MIN, MAX);
                 time_since_last_enemy = 0;
             }
             if (time_since_last_frame > MAX.x / -(scroll_speed->x)) {
                 frame_spawn_random(scene, MAX, MAX.x);
                 time_since_last_frame = 0;
+            }
+            if (time_since_last_powerup > POWERUP_INTERVAL) {
+                //powerup_spawn_random(scene, MIN, MAX, scroll_speed);
+                time_since_last_powerup = 0;
+            }
+            if (time_since_last_speedup > SPEEDUP_INTERVAL) {
+                *scroll_speed = vec_add(*scroll_speed,
+                    vec_multiply(strcmp(entity_get_powerup(player_entity), "SLOW")? 1:0.5,
+                                 DEFAULT_SPEEDUP));
+                time_since_last_speedup = 0;
             }
             *score += basic_score_calculation(dt);
 
@@ -241,10 +268,10 @@ int main(int argc, char *argv[]) {
                 game_end();
             }
         }
-        scene_free(scene);
+        free(scene);
+        free(scroll_speed);
+        free(score);
     }
 
-    free(scroll_speed);
-    free(score);
     return 0;
 }
