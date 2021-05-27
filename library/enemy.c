@@ -31,7 +31,8 @@ void spawn_goose(scene_t *scene, vector_t MIN, vector_t MAX) {
     vector_t center = {MAX.x + ENEMY_RADIUS, rand()%((int)(MAX.y - MIN.y))};
     entity_t *entity = entity_init("ENEMY", true, false);
     list_t *goose_coords = compute_rect_points(center, 2*ENEMY_RADIUS, 2*ENEMY_RADIUS);
-    body_t *goose = body_init_with_info(goose_coords, GAME_ENEMY_MASS, entity, entity_free);
+    body_t *goose = body_init_with_info(goose_coords, GAME_ENEMY_MASS, entity,
+                                        entity_free);
     sprite_t *goose_info = sprite_animated(GOOSE, 1, 10, 12);
     body_set_draw(goose, (draw_func_t) sdl_draw_animated, goose_info, sprite_free);
     create_drag(scene, drag_const, goose, free);
@@ -73,10 +74,11 @@ typedef struct param {
 } param_t;
 
 void one_way_gravity_creator(param_t *aux){
-    vector_t r = vec_subtract(body_get_centroid(aux->body1), body_get_centroid(aux->body2));
+    vector_t r = vec_subtract(body_get_centroid(aux->body1),
+                              body_get_centroid(aux->body2));
     double mass_product = body_get_mass(aux->body1)* body_get_mass(aux->body2);
     vector_t force = VEC_ZERO;
-    force = vec_multiply(- aux->constant * mass_product / pow(sqrt(vec_dot(r,r)), 3.0) , r);
+    force = vec_multiply(-aux->constant * mass_product / pow(sqrt(vec_dot(r,r)), 3.0), r);
     body_add_force(aux->body1, force);
 }
 
@@ -87,7 +89,8 @@ void create_one_way_gravity(scene_t *scene, double G, body_t *body1, body_t *bod
     list_t *bodies = list_init(2, body_free);
     list_add(bodies, body1);
     list_add(bodies, body2);
-    scene_add_bodies_force_creator(scene, one_way_gravity_creator, force_param, bodies, free);
+    scene_add_bodies_force_creator(scene, one_way_gravity_creator, force_param, bodies,
+                                   free);
 }
 
 void spawn_fly(scene_t *scene, vector_t MIN, vector_t MAX) {

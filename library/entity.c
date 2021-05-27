@@ -43,14 +43,7 @@ player_entity_t *player_entity_init(char *entity_type, bool scrollable, bool fal
 }
 
 void entity_free(entity_t *entity) {
-    //free(entity->entity_type);
     free(entity);
-}
-
-void player_entity_free(player_entity_t *player_entity) {
-    free(player_entity->entity_type);
-    free(player_entity->active_powerup);
-    free(player_entity);
 }
 
 char *entity_get_type(entity_t *entity) {

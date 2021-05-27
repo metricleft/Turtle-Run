@@ -38,12 +38,6 @@ player_entity_t *player_entity_init(char *entity_type, bool scrollable, bool fal
 void entity_free(entity_t *entity);
 
 /**
- * Frees a player_entity.
- */
-void player_entity_free(player_entity_t *player_entity);
-
-//TODO: consider changing to "returns a copy of the entity type of an entity" to encapsulate
-/**
  * Returns the entity type of an entity.
  * 
  * @param entity a pointer to an entity

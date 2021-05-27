@@ -1,7 +1,7 @@
 #include "shapelib.h"
 
 list_t *compute_circle_points(vector_t center, double radius, double arc_resolution) {
-     list_t *coords = list_init(arc_resolution, free);
+     list_t *coords = list_init((size_t) arc_resolution, free);
 
     double d_theta = (2*M_PI / arc_resolution);
     for (int i = 0; i < arc_resolution; i++) {
@@ -36,7 +36,7 @@ list_t *compute_rect_points(vector_t center, double width, double height) {
 
 list_t *compute_sector_points(vector_t center, double radius, double angle,
                               double arc_resolution) {
-    list_t *coords = list_init(arc_resolution+2, free);
+    list_t *coords = list_init((size_t)(arc_resolution + 2), free);
 
     vector_t *c = malloc(sizeof(vector_t));
     c->x = center.x;
