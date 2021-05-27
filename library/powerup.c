@@ -115,7 +115,7 @@ void powerup_spawn_random(scene_t *scene, vector_t MIN, vector_t MAX,
     int percent_slow = 60;
     int percent_jump = 100;
     int random_powerup = rand()%percent_max;
-    body_t *player = scene_get_body(scene, 1);
+    body_t *player = scene_get_body(scene, 3);
     body_t *powerup = spawn_powerup(scene, MIN, MAX, info);
     if (random_powerup <= percent_magnet) {
         sprite_t *magnet_info = sprite_animated(MAGNET, 1, 1, 1);

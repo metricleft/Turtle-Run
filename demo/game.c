@@ -47,7 +47,7 @@ const char* WATER_IMG = "static/background_water.png";
 const double BACKGROUND_SCALE = 2.0;
 
 const vector_t DEFAULT_GRAVITY = {0, -500};
-const vector_t DEFAULT_SCROLL_SPEED = {-500, 0};
+const vector_t DEFAULT_SCROLL_SPEED = {-200, 0};
 
 const double ELASTIC_COLLISION = 1;
 const double INELASTIC_COLLISION = 0;
@@ -84,9 +84,9 @@ void add_background(scene_t *scene, const char* img, int speed){
 }
 
 void initialize_background(scene_t *scene){
-    add_background(scene, SKY_IMG, abs(DEFAULT_SCROLL_SPEED.x /16));
-    add_background(scene, GRASS_IMG, abs(DEFAULT_SCROLL_SPEED.x /8));
-    add_background(scene, WATER_IMG, abs(DEFAULT_SCROLL_SPEED.x /6));
+    add_background(scene, SKY_IMG, abs((int)DEFAULT_SCROLL_SPEED.x /16));
+    add_background(scene, GRASS_IMG, abs((int)DEFAULT_SCROLL_SPEED.x /8));
+    add_background(scene, WATER_IMG, abs((int)DEFAULT_SCROLL_SPEED.x /6));
 }
 
 void initialize_player(scene_t *scene) {
