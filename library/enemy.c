@@ -27,13 +27,8 @@ void spawn_goose(scene_t *scene, vector_t MIN, vector_t MAX) {
     double *drag_const = malloc(sizeof(double));
     *drag_const = -(rand()%15+5);
 
-<<<<<<< HEAD
     body_t *player = scene_get_body(scene, 1);
-    vector_t center = {MAX.x + radius, rand()%((int)(MAX.y - MIN.y))};
-=======
-    body_t *player = scene_get_body(scene, 0);
     vector_t center = {MAX.x + ENEMY_RADIUS, rand()%((int)(MAX.y - MIN.y))};
->>>>>>> 4aac7186890cf2f0df8fdf05747f5f6e89c636df
     entity_t *entity = entity_init("ENEMY", true, false);
     list_t *goose_coords = compute_rect_points(center, 2*ENEMY_RADIUS, 2*ENEMY_RADIUS);
     body_t *goose = body_init_with_info(goose_coords, GAME_ENEMY_MASS, entity, entity_free);
@@ -99,13 +94,8 @@ void spawn_fly(scene_t *scene, vector_t MIN, vector_t MAX) {
     //Spawns a fly that lazily follows the player
     double gravity_const = rand()%500000+500000;
 
-<<<<<<< HEAD
     body_t *player = scene_get_body(scene, 1);
-    vector_t center = {MAX.x + radius, rand()%((int)(MAX.y - MIN.y))};
-=======
-    body_t *player = scene_get_body(scene, 0);
     vector_t center = {MAX.x + ENEMY_RADIUS, rand()%((int)(MAX.y - MIN.y))};
->>>>>>> 4aac7186890cf2f0df8fdf05747f5f6e89c636df
     entity_t *entity = entity_init("ENEMY", true, false);
     list_t *fly_coords = compute_rect_points(center, ENEMY_RADIUS, ENEMY_RADIUS);
     body_t *fly = body_init_with_info(fly_coords, GAME_ENEMY_MASS,  entity, entity_free);

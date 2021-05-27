@@ -147,13 +147,8 @@ void sidescroll(scene_t *scene, vector_t *scroll_speed) {
 }
 
 void player_move (char key, key_event_type_t type, double held_time, void *scene) {
-<<<<<<< HEAD
     body_t *player = scene_get_body(scene, 1);
-    entity_t *entity = body_get_info(player);
-=======
-    body_t *player = scene_get_body(scene, 0);
     player_entity_t *entity = body_get_info(player);
->>>>>>> 4aac7186890cf2f0df8fdf05747f5f6e89c636df
     vector_t new_velocity = {0, body_get_velocity(player).y};
     if (type == KEY_PRESSED) {
         switch (key) {
@@ -205,28 +200,19 @@ int main(int argc, char *argv[]) {
     while (true) {
         sdl_on_key((event_handler_t) player_move);
         sdl_on_click((event_handler_t) player_shoot);
-<<<<<<< HEAD
-        scene = scene_init();
-        initialize_background(scene);
-=======
 
         scene_t *scene = scene_init();
         vector_t *scroll_speed = malloc(sizeof(vector_t));
         *scroll_speed = DEFAULT_SCROLL_SPEED;
         double *score = malloc(sizeof(double));
         *score = 0;
-
->>>>>>> 4aac7186890cf2f0df8fdf05747f5f6e89c636df
+        initialize_background(scene);
         initialize_player(scene);
         initialize_terrain(scene);
         frame_spawn_random(scene, MAX, MAX.x);
-
-<<<<<<< HEAD
+        
         body_t *player = scene_get_body(scene, 1);
-        entity_t *player_entity = body_get_info(player);
-=======
-        player_entity_t *player_entity = body_get_info(scene_get_body(scene, 0));
->>>>>>> 4aac7186890cf2f0df8fdf05747f5f6e89c636df
+        player_entity_t *player_entity = body_get_info(player);
 
         double time_since_last_enemy = 0;
         double time_since_last_frame = 0;
