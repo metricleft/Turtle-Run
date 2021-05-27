@@ -109,8 +109,10 @@ double body_get_orientation(body_t *body);
  * @param body a pointer to a body returned from body_init()
  * @param drawer the function to draw a body
  * @param draw_info auxiliary info used to draw the body;
+ * @param draw_freer function to free draw_info;
  */
-void body_set_draw(body_t *body, draw_func_t drawer, void* draw_info, free_func_t draw_freer);
+void body_set_draw(body_t *body, draw_func_t drawer, void *draw_info,
+                   free_func_t draw_freer);
 
 /**
  * Translates a body to a new position.

@@ -37,7 +37,8 @@ typedef void (*collision_handler_t)
  * @param body2 the second body
  * @param freer the function that frees G
  */
-void create_newtonian_gravity(scene_t *scene, void *G, body_t *body1, body_t *body2, free_func_t freer);
+void create_newtonian_gravity(scene_t *scene, void *G, body_t *body1, body_t *body2,
+                              free_func_t freer);
 
 /**
  * Adds a force creator to a scene that acts like a spring between two bodies.
@@ -51,7 +52,8 @@ void create_newtonian_gravity(scene_t *scene, void *G, body_t *body1, body_t *bo
  * @param body2 the second body
  * @param freer the function that frees k
  */
-void create_spring(scene_t *scene, void *k, body_t *body1, body_t *body2, free_func_t freer);
+void create_spring(scene_t *scene, void *k, body_t *body1, body_t *body2,
+                   free_func_t freer);
 
 /**
  * Adds a force creator to a scene that applies a drag force on a body.

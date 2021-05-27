@@ -290,8 +290,6 @@ void sdl_draw_scroll(body_t *body, sprite_t *sprite){
     int *h = malloc(sizeof(int));
     assert(sprite->texture!=NULL);
     SDL_QueryTexture(sprite->texture, NULL, NULL, w, h);
-    vector_t window_center = get_window_center();
-    vector_t center = get_window_position(body_get_centroid(body), window_center);
     SDL_Rect *in = malloc(sizeof(SDL_Rect));
     SDL_Rect *out = malloc(sizeof(SDL_Rect));
     int width = *w / sprite->frames;

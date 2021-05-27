@@ -234,7 +234,7 @@ int main(int argc, char *argv[]) {
                 time_since_last_frame = 0;
             }
             if (time_since_last_powerup > POWERUP_INTERVAL) {
-                //powerup_spawn_random(scene, MIN, MAX, scroll_speed);
+                powerup_spawn_random(scene, MIN, MAX, scroll_speed);
                 time_since_last_powerup = 0;
             }
             if (time_since_last_speedup > SPEEDUP_INTERVAL) {
