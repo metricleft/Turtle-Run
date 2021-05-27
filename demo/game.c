@@ -36,17 +36,18 @@ const double PLAYER_SPEED = 600;
 const double PLAYER_RADIUS = 30;
 const double PLAYER_MASS = 10;
 //const rgb_color_t PLAYER_COLOR = {0, 1, 0};
-const char *PLAYER_SPRITE = "static/turtle_spritesheet.png";
+const char *PLAYER_SPRITE = "static/turtle_spritesheet2.png";
 const double PLAYER_SCALE = 2;
 const int PLAYER_FRAMES = 8;
 const int PLAYER_FPS = 6;
 
-const char* BACKGROUND_IMG = "static/background.png";
-const int SCROLL_SPEED = 30;
+const char* SKY_IMG = "static/background_sky.png";
+const char* GRASS_IMG = "static/background_grass.png";
+const char* WATER_IMG = "static/background_water.png";
 const double BACKGROUND_SCALE = 2.0;
 
 const vector_t DEFAULT_GRAVITY = {0, -500};
-const vector_t DEFAULT_SCROLL_SPEED = {-200, 0};
+const vector_t DEFAULT_SCROLL_SPEED = {-500, 0};
 
 const double ELASTIC_COLLISION = 1;
 const double INELASTIC_COLLISION = 0;
@@ -64,7 +65,7 @@ double basic_score_calculation(double dt) {
 
 bool check_game_end(scene_t *scene) {
     //Check if player is gone: lose condition.
-    entity_t *entity = body_get_info(scene_get_body(scene, 1));
+    entity_t *entity = body_get_info(scene_get_body(scene, 3));
     if (strcmp(entity_get_type(entity), "PLAYER")) {
         //game_end();
         return true;
@@ -72,16 +73,21 @@ bool check_game_end(scene_t *scene) {
     return false;
 }
 
-void initialize_background(scene_t *scene){
+void add_background(scene_t *scene, const char* img, int speed){
     vector_t center = {MAX.x / 2, MAX.y / 2};
     list_t *window = compute_rect_points(center, MAX.x, MAX.y);
-    entity_t *info = entity_init("OTHER", false, false);
+    entity_t *info = entity_init("BACKGROUND", false, false);
     body_t *background = body_init_with_info(window, INFINITY, info , entity_free);
-    sprite_t *back_info = sprite_scroll(BACKGROUND_IMG, BACKGROUND_SCALE, 3,  SCROLL_SPEED);
+    sprite_t *back_info = sprite_scroll(img, BACKGROUND_SCALE, 3, speed);
     body_set_draw(background, sdl_draw_scroll, back_info, sprite_free); 
     scene_add_body(scene, background);
 }
 
+void initialize_background(scene_t *scene){
+    add_background(scene, SKY_IMG, abs(DEFAULT_SCROLL_SPEED.x /16));
+    add_background(scene, GRASS_IMG, abs(DEFAULT_SCROLL_SPEED.x /8));
+    add_background(scene, WATER_IMG, abs(DEFAULT_SCROLL_SPEED.x /6));
+}
 
 void initialize_player(scene_t *scene) {
     vector_t center = {MAX.x / 2, MAX.y - PLAYER_RADIUS};
@@ -100,7 +106,7 @@ void initialize_player(scene_t *scene) {
 }
 
 void initialize_terrain(scene_t *scene) {
-    body_t *player = scene_get_body(scene, 1);
+    body_t *player = scene_get_body(scene, 3);
     vector_t center = (vector_t){MAX.x/2, 10};
     entity_t *entity = entity_init("TERRAIN", true, false);
     list_t *floor_coords = compute_rect_points(center, MAX.x, 50);
@@ -147,7 +153,7 @@ void sidescroll(scene_t *scene, vector_t *scroll_speed) {
 }
 
 void player_move (char key, key_event_type_t type, double held_time, void *scene) {
-    body_t *player = scene_get_body(scene, 1);
+    body_t *player = scene_get_body(scene, 3);
     player_entity_t *entity = body_get_info(player);
     vector_t new_velocity = {0, body_get_velocity(player).y};
     if (type == KEY_PRESSED) {
@@ -177,7 +183,7 @@ void player_move (char key, key_event_type_t type, double held_time, void *scene
 }
 
 void player_shoot(char key, mouse_event_type_t type, double held_time, void *scene){
-    body_t *player = scene_get_body(scene, 1);
+    body_t *player = scene_get_body(scene, 3);
     vector_t new_velocity = {0, 0};
     if (type == BUTTON_PRESSED) {
         switch (key) {
@@ -211,7 +217,7 @@ int main(int argc, char *argv[]) {
         initialize_terrain(scene);
         frame_spawn_random(scene, MAX, MAX.x);
         
-        body_t *player = scene_get_body(scene, 1);
+        body_t *player = scene_get_body(scene, 3);
         player_entity_t *player_entity = body_get_info(player);
 
         double time_since_last_enemy = 0;
@@ -249,7 +255,7 @@ int main(int argc, char *argv[]) {
             scene_tick(scene, dt);
             sdl_render_scene(scene);
             if (body_get_centroid(scene_get_body(scene,0)).y < MIN.y - PLAYER_RADIUS) {
-                body_remove(scene_get_body(scene, 1));
+                body_remove(scene_get_body(scene, 3));
             } else if (sdl_is_done(scene)) {
                 game_end();
             }
