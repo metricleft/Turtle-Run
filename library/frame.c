@@ -86,9 +86,6 @@ void frame_2(scene_t *scene, vector_t frame, double frame_start) {
 
 void frame_spawn_random(scene_t *scene, vector_t frame, double frame_start) {
     int frame_num;
-    time_t t;
-
-    srand((unsigned) time(&t));
 
     frame_num = rand() % 3;
     if (frame_num == 0) {

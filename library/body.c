@@ -90,7 +90,8 @@ double body_get_orientation(body_t *body){
     return body->orientation;
 }
 
-void body_set_draw(body_t *body, draw_func_t drawer, void* draw_info, free_func_t draw_freer){
+void body_set_draw(body_t *body, draw_func_t drawer, void* draw_info,
+                   free_func_t draw_freer){
     body->drawer = drawer;
     body->draw_info = draw_info;
     body->draw_freer = draw_freer;

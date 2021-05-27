@@ -38,23 +38,27 @@ double calculate_reduced_mass(body_t *body1, body_t *body2) {
 }
  
 void gravity_creator(param_t *aux){
-    vector_t r = vec_subtract(body_get_centroid(aux->body1), body_get_centroid(aux->body2));
+    vector_t r = vec_subtract(body_get_centroid(aux->body1),
+                              body_get_centroid(aux->body2));
     double mass_product = body_get_mass(aux->body1)* body_get_mass(aux->body2);
     vector_t force = VEC_ZERO;
     if (sqrt(vec_dot(r, r)) > SMALL_DISTANCE){
-        force = vec_multiply(- *(double *) aux->constant * mass_product / pow(sqrt(vec_dot(r,r)), 3.0) , r);
+        force = vec_multiply(- *(double *)aux->constant * mass_product /
+                             pow(sqrt(vec_dot(r,r)), 3.0) , r);
     }
     body_add_force(aux->body1, force);
     body_add_force(aux->body2, vec_negate(force));
 }
 
-void create_newtonian_gravity(scene_t *scene, void *G, body_t *body1, body_t *body2, free_func_t freer){
+void create_newtonian_gravity(scene_t *scene, void *G, body_t *body1, body_t *body2,
+                              free_func_t freer){
     param_t *force_param = malloc(sizeof(param_t));
     *force_param = (param_t){G, body1, body2, freer};
     list_t *bodies = list_init(2, body_free);
     list_add(bodies, body1);
     list_add(bodies, body2);
-    scene_add_bodies_force_creator(scene, gravity_creator, force_param, bodies, param_free);
+    scene_add_bodies_force_creator(scene, gravity_creator, force_param, bodies,
+                                   param_free);
 }
 
 void const_force_creator(param_t *aux){
@@ -67,28 +71,33 @@ void create_constant_force(scene_t *scene, void *A, body_t *body, free_func_t fr
     *force_param = (param_t){A, body, NULL, freer};
     list_t *bodies = list_init(1, body_free);
     list_add(bodies, body);
-    scene_add_bodies_force_creator(scene, const_force_creator, force_param, bodies, param_free);
+    scene_add_bodies_force_creator(scene, const_force_creator, force_param, bodies,
+                                   param_free);
 
 }
 
 void spring_creator(param_t *aux){
-    vector_t r = vec_subtract(body_get_centroid(aux->body1), body_get_centroid(aux->body2));
+    vector_t r = vec_subtract(body_get_centroid(aux->body1),
+                              body_get_centroid(aux->body2));
     vector_t force = vec_multiply(-1 * *(double *) aux->constant, r);
     body_add_force(aux->body1, force);
     body_add_force(aux->body2, vec_negate(force));
 } 
 
-void create_spring(scene_t *scene, void *k, body_t *body1, body_t *body2, free_func_t freer){
+void create_spring(scene_t *scene, void *k, body_t *body1, body_t *body2,
+                   free_func_t freer){
     param_t *force_param = malloc(sizeof(param_t));
     *force_param = (param_t){k, body1, body2, freer};
     list_t *bodies = list_init(2, body_free);
     list_add(bodies, body1);
     list_add(bodies, body2);
-    scene_add_bodies_force_creator(scene, spring_creator, force_param, bodies, param_free);
+    scene_add_bodies_force_creator(scene, spring_creator, force_param, bodies,
+                                   param_free);
 }
 
 void drag_creator(param_t *aux){
-    vector_t force = vec_multiply(- *(double *) aux->constant, body_get_velocity(aux->body1));
+    vector_t force = vec_multiply(- *(double *) aux->constant,
+                                  body_get_velocity(aux->body1));
     body_add_force(aux->body1, force);
 }
 
@@ -164,7 +173,8 @@ void normal_handler(collision_param_t *param){
             param->collided = true; 
         }
         if (fabs(collision.axis.x) < SMALL_DISTANCE && collision.axis.y < 0) {
-            vector_t force = vec_multiply(body_get_mass(param->body1), *(vector_t *) param->aux);
+            vector_t force = vec_multiply(body_get_mass(param->body1),
+                                          *(vector_t *) param->aux);
             body_add_force(param->body1, force);
         } else {
             double reduced_mass = calculate_reduced_mass(param->body1, param->body2);
@@ -225,7 +235,8 @@ void create_normal_collision(scene_t *scene, vector_t grav,
     list_add(bodies, body1);
     list_add(bodies, body2);
     collision_param_t *force_param = malloc(sizeof(collision_param_t));
-    *force_param = (collision_param_t) {normal_handler, body1, body2, grav_param, false};
+    *force_param = (collision_param_t) {(collision_handler_t) normal_handler, body1,
+                                        body2, grav_param, false};
     scene_add_bodies_force_creator(scene, normal_handler, force_param,
                                         bodies, free);
 
