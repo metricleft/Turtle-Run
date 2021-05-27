@@ -54,13 +54,18 @@ sprite_t *sprite_animated(const char *image, double scale, int frames, int fps){
     sprite->texture = IMG_LoadTexture(renderer, image);
     sprite->scale = scale;
     sprite->frames = frames;
-    sprite->fps = fps;
+    sprite->speed = fps;
     return sprite;
 }
 
 sprite_t *sprite_image(const char *image, double scale){
     return sprite_animated(image, scale, 0, 0);
 }
+
+sprite_t *sprite_scroll(const char *image, double scale, int frame,  int scroll){
+    return sprite_animated(image, scale, frame, scroll);
+}
+
 void sprite_free(sprite_t *sprite){
     SDL_DestroyTexture(sprite->texture);
     free(sprite);
@@ -264,7 +269,7 @@ void sdl_draw_animated(body_t *body, sprite_t *sprite){
     vector_t center = get_window_position(body_get_centroid(body), window_center);
     SDL_Rect *in = malloc(sizeof(SDL_Rect));
     SDL_Rect *out = malloc(sizeof(SDL_Rect));
-    int frame = (int)(time * sprite->fps) % sprite->frames;
+    int frame = (int)(time * sprite->speed) % sprite->frames;
     assert((frame < sprite->frames) && (frame >= 0));
     int width = *w / sprite->frames;
     *in = (SDL_Rect) { frame* (width), 0, width, *h };
@@ -273,6 +278,26 @@ void sdl_draw_animated(body_t *body, sprite_t *sprite){
                        sprite->scale * width, 
                        sprite->scale * *h};
     SDL_RenderCopy(renderer, sprite->texture, in, out );
+    free(w);
+    free(h);
+    free(in);
+    free(out);
+}
+
+void sdl_draw_scroll(body_t *body, sprite_t *sprite){
+    double time  = (double)clock() /CLOCKS_PER_SEC;
+    int *w = malloc(sizeof(int));
+    int *h = malloc(sizeof(int));
+    assert(sprite->texture!=NULL);
+    SDL_QueryTexture(sprite->texture, NULL, NULL, w, h);
+    vector_t window_center = get_window_center();
+    vector_t center = get_window_position(body_get_centroid(body), window_center);
+    SDL_Rect *in = malloc(sizeof(SDL_Rect));
+    SDL_Rect *out = malloc(sizeof(SDL_Rect));
+    int frame = (int)(time * sprite->speed) % *w/2;
+    assert((frame < *w/2) && (frame >= 0));
+    *in = (SDL_Rect) { frame, 0, *w/2, *h };
+    SDL_RenderCopy(renderer, sprite->texture, in, NULL);
     free(w);
     free(h);
     free(in);

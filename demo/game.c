@@ -37,6 +37,10 @@ const double PLAYER_SCALE = 2;
 const int PLAYER_FRAMES = 8;
 const int PLAYER_FPS = 6;
 
+const char* BACKGROUND_IMG = "static/background.png";
+const int SCROLL_SPEED = 30;
+const double BACKGROUND_SCALE = 2.0;
+
 const vector_t DEFAULT_GRAVITY = {0, -500};
 const vector_t DEFAULT_SCROLL_SPEED = {-200, 0};
 
@@ -56,13 +60,24 @@ double basic_score_calculation(double dt) {
 
 bool check_game_end(scene_t *scene) {
     //Check if player is gone: lose condition.
-    entity_t *entity = body_get_info(scene_get_body(scene, 0));
+    entity_t *entity = body_get_info(scene_get_body(scene, 1));
     if (strcmp(entity_get_type(entity), "PLAYER")) {
         //game_end();
         return true;
     }
     return false;
 }
+
+void initialize_background(scene_t *scene){
+    vector_t center = {MAX.x / 2, MAX.y / 2};
+    list_t *window = compute_rect_points(center, MAX.x, MAX.y);
+    entity_t *info = entity_init("OTHER", false, false);
+    body_t *background = body_init_with_info(window, INFINITY, info , entity_free);
+    sprite_t *back_info = sprite_scroll(BACKGROUND_IMG, BACKGROUND_SCALE, MAX.x,  SCROLL_SPEED);
+    body_set_draw(background, sdl_draw_scroll, back_info, sprite_free); 
+    scene_add_body(scene, background);
+}
+
 
 void initialize_player(scene_t *scene) {
     vector_t center = {MAX.x / 2, MAX.y - PLAYER_RADIUS};
@@ -81,13 +96,13 @@ void initialize_player(scene_t *scene) {
 }
 
 void initialize_terrain(scene_t *scene) {
-    body_t *player = scene_get_body(scene, 0);
+    body_t *player = scene_get_body(scene, 1);
     vector_t center = (vector_t){MAX.x/2, 10};
     entity_t *entity = entity_init("TERRAIN", true, false);
     list_t *floor_coords = compute_rect_points(center, MAX.x, 50);
     body_t *floor = body_init_with_info(floor_coords, INFINITY, entity, entity_free);
     scene_add_body(scene, floor);
-    create_normal_collision(scene, vec_negate(DEFAULT_GRAVITY), scene_get_body(scene, 0), floor);
+    create_normal_collision(scene, vec_negate(DEFAULT_GRAVITY), player, floor);
 
     rgb_color_t *black = malloc(sizeof(rgb_color_t));
     *black = BLACK;
@@ -128,7 +143,7 @@ void sidescroll(scene_t *scene, vector_t *scroll_speed) {
 }
 
 void player_move (char key, key_event_type_t type, double held_time, void *scene) {
-    body_t *player = scene_get_body(scene, 0);
+    body_t *player = scene_get_body(scene, 1);
     entity_t *entity = body_get_info(player);
     vector_t new_velocity = {0, body_get_velocity(player).y};
     if (type == KEY_PRESSED) {
@@ -158,7 +173,7 @@ void player_move (char key, key_event_type_t type, double held_time, void *scene
 }
 
 void player_shoot(char key, mouse_event_type_t type, double held_time, void *scene){
-    body_t *player = scene_get_body(scene, 0);
+    body_t *player = scene_get_body(scene, 1);
     vector_t new_velocity = {0, 0};
     if (type == BUTTON_PRESSED) {
         switch (key) {
@@ -191,10 +206,11 @@ int main(int argc, char *argv[]) {
         sdl_on_key((event_handler_t) player_move);
         sdl_on_click((event_handler_t) player_shoot);
         scene = scene_init();
+        initialize_background(scene);
         initialize_player(scene);
         initialize_terrain(scene);
 
-        body_t *player = scene_get_body(scene, 0);
+        body_t *player = scene_get_body(scene, 1);
         entity_t *player_entity = body_get_info(player);
 
         frame_spawn_random(scene, MAX, MAX.x);
@@ -220,7 +236,7 @@ int main(int argc, char *argv[]) {
             scene_tick(scene, dt);
             sdl_render_scene(scene);
             if (body_get_centroid(scene_get_body(scene,0)).y < MIN.y - PLAYER_RADIUS) {
-                body_remove(scene_get_body(scene, 0));
+                body_remove(scene_get_body(scene, 1));
             } else if (sdl_is_done(scene)) {
                 game_end();
             }

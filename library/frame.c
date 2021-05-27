@@ -17,7 +17,7 @@ void frame_0(scene_t *scene, vector_t frame, double frame_start) {
     body_set_draw(new_floor, (draw_func_t) sdl_draw_polygon, black, free);
     scene_add_body(scene, new_floor);
     create_normal_collision(scene, (vector_t) {0, 500},
-                            scene_get_body(scene,0), new_floor);
+                            scene_get_body(scene, 1), new_floor);
 }
 
 /**
@@ -37,7 +37,7 @@ void frame_1(scene_t *scene, vector_t frame, double frame_start) {
     body_set_draw(floor, (draw_func_t) sdl_draw_polygon, black, free);
     scene_add_body(scene, floor);
     create_normal_collision(scene, (vector_t) {0,500},
-                                scene_get_body(scene,0), floor);
+                                scene_get_body(scene, 1), floor);
 }
 
 /**
@@ -57,7 +57,7 @@ void frame_2(scene_t *scene, vector_t frame, double frame_start) {
     body_set_draw(floor, (draw_func_t) sdl_draw_polygon, black, free);
     scene_add_body(scene, floor);
     create_normal_collision(scene, (vector_t) {0,500},
-                                scene_get_body(scene,0),floor);
+                                scene_get_body(scene, 1),floor);
 
     vector_t platform1_center = (vector_t){0.25*frame.x+frame_start,0.25*frame.y+10.};
     entity_t *platform1_entity = entity_init("TERRAIN",true,false);
@@ -69,7 +69,7 @@ void frame_2(scene_t *scene, vector_t frame, double frame_start) {
     body_set_draw(platform1,(draw_func_t) sdl_draw_polygon,black1,free);
     scene_add_body(scene,platform1);
     create_normal_collision(scene, (vector_t) {0,500},
-                                scene_get_body(scene,0),platform1);
+                                scene_get_body(scene, 1),platform1);
     
     vector_t platform2_center = (vector_t){0.50*frame.x+frame_start,0.50*frame.y};
     entity_t *platform2_entity = entity_init("TERRAIN",true,false);
@@ -81,7 +81,7 @@ void frame_2(scene_t *scene, vector_t frame, double frame_start) {
     body_set_draw(platform2,(draw_func_t) sdl_draw_polygon,black2,free);
     scene_add_body(scene,platform2);
     create_normal_collision(scene, (vector_t) {0,500},
-                                scene_get_body(scene,0),platform2);
+                                scene_get_body(scene, 1),platform2);
 }
 
 void frame_spawn_random(scene_t *scene, vector_t frame, double frame_start) {

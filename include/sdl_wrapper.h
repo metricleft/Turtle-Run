@@ -53,7 +53,7 @@ typedef struct sprite{
     SDL_Texture *texture;
     double scale;
     int frames;
-    int fps;
+    int speed;
 }sprite_t;
 
 /**
@@ -86,6 +86,8 @@ sprite_t *sprite_animated(const char *image, double scale, int frames, int fps);
  * @return a pointer to info for a sprite
  */
 sprite_t *sprite_image(const char *image, double scale);
+
+sprite_t *sprite_scroll(const char *image, double scale, int frame,  int scroll);
 
 /**
  * Releases the memory allocated for sprite.
@@ -138,6 +140,9 @@ void sdl_draw_image(body_t *body, sprite_t *sprite);
  * @param sprite info needed to draw the animation
  */
 void sdl_draw_animated( body_t *body, sprite_t *sprite);
+
+
+void sdl_draw_scroll(body_t *body, sprite_t *sprite);
 
 /**
  * Displays the rendered frame on the SDL window.

@@ -35,7 +35,7 @@ entity_t *entity_init(char *entity_type, bool scrollable, bool fallable) {
 }
 
 void entity_free(entity_t *entity) {
-    free(entity->entity_type);
+    //free(entity->entity_type);
     free(entity);
 }
 
