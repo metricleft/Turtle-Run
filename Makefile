@@ -1,10 +1,10 @@
 # List of demo programs
-DEMOS = spaceinvaders breakout game
+DEMOS = game
 # List of C files in "libraries" that we provide
 STAFF_LIBS = test_util sdl_wrapper
 # List of C files in "libraries" that you will write.
 # This also defines the order in which the tests are run.
-STUDENT_LIBS = vector list polygon color body scene forces collision entity shapelib enemy
+STUDENT_LIBS = vector list polygon color body scene forces collision entity shapelib enemy frame
 
 # If we're not on Windows...
 ifneq ($(OS), Windows_NT)

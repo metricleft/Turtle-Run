@@ -21,6 +21,7 @@ typedef struct entity {
     bool scrollable;
     bool fallable;
     bool is_scrolling;
+    bool is_colliding;
 } entity_t;
 
 entity_t *entity_init(char *entity_type, bool scrollable, bool fallable) {
@@ -29,6 +30,7 @@ entity_t *entity_init(char *entity_type, bool scrollable, bool fallable) {
     entity->scrollable = scrollable;
     entity->fallable = fallable;
     entity->is_scrolling = false;
+    entity->is_colliding = false;
     return entity;
 }
 
@@ -55,4 +57,12 @@ bool entity_is_scrolling(entity_t *entity) {
 
 void entity_set_scrolling(entity_t *entity) {
     entity->is_scrolling = true;
+}
+
+bool entity_get_colliding(entity_t *entity) {
+    return entity->is_colliding;
+}
+
+void entity_set_colliding(entity_t *entity, bool value) {
+    entity->is_colliding = value;
 }
