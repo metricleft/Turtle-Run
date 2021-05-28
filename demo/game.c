@@ -233,7 +233,7 @@ int main(int argc, char *argv[]) {
     time_t t;
     srand((unsigned) time(&t));
     sdl_init(MIN,MAX);
-    Mix_Music *soundtrack = loadMedia("sounds/imperial_march.mp3");
+    Mix_Music *soundtrack = loadMedia("sounds/synth.wav");
     jump = loadEffects("sounds/jump1.wav");
     slide = loadEffects("sounds/sliding.wav");
     shot = loadEffects("sounds/shoot.wav");
