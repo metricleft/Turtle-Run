@@ -29,7 +29,7 @@ const int POWERUP_INTERVAL = 15;
 const int ENEMY_INTERVAL = 5;
 const int SPEEDUP_INTERVAL = 5;
 
-const double DEFAULT_SPEEDUP = -10;
+const double DEFAULT_SPEEDUP = -50;
 
 //const rgb_color_t PLAYER_BULLET_COLOR = {0, 1, 0};
 const double PLAYER_SPEED = 600;
@@ -44,7 +44,7 @@ const int PLAYER_FPS = 6;
 const char* SKY_IMG = "static/background_sky.png";
 const char* GRASS_IMG = "static/background_grass.png";
 const char* WATER_IMG = "static/background_water.png";
-const double BACKGROUND_SCALE = 2.0;
+const SDL_Rect BACKGROUND_FRAME = {0,0, 256, 128};
 
 const vector_t DEFAULT_GRAVITY = {0, -500};
 const vector_t DEFAULT_SCROLL_SPEED = {-200, 0};
@@ -78,15 +78,17 @@ void add_background(scene_t *scene, const char* img, int speed){
     list_t *window = compute_rect_points(center, MAX.x, MAX.y);
     entity_t *info = entity_init("BACKGROUND", false, false);
     body_t *background = body_init_with_info(window, INFINITY, info , entity_free);
-    sprite_t *back_info = sprite_scroll(img, BACKGROUND_SCALE, 3, speed);
+    SDL_Rect *frame = malloc(sizeof(SDL_Rect));
+    *frame = BACKGROUND_FRAME;
+    sprite_t *back_info = sprite_scroll(img, speed, frame);
     body_set_draw(background, sdl_draw_scroll, back_info, sprite_free); 
     scene_add_body(scene, background);
 }
 
 void initialize_background(scene_t *scene){
-    add_background(scene, SKY_IMG, abs((int)DEFAULT_SCROLL_SPEED.x /16));
-    add_background(scene, GRASS_IMG, abs((int)DEFAULT_SCROLL_SPEED.x /8));
-    add_background(scene, WATER_IMG, abs((int)DEFAULT_SCROLL_SPEED.x /6));
+    add_background(scene, SKY_IMG, abs((int)DEFAULT_SCROLL_SPEED.x /18));
+    add_background(scene, GRASS_IMG, abs((int)DEFAULT_SCROLL_SPEED.x/ 9));
+    add_background(scene, WATER_IMG, abs((int)DEFAULT_SCROLL_SPEED.x / 6));
 }
 
 void initialize_player(scene_t *scene) {
@@ -125,7 +127,7 @@ void add_bullet (scene_t *scene, vector_t center, vector_t velocity,
         compute_circle_points(center, BULLET_RADIUS, ARC_RESOLUTION),
         BULLET_MASS, bullet_entity, entity_free);
     body_set_velocity(bullet, velocity);
-    sprite_t *bullet_info = sprite_image(BULLET_SPRITE, 1);
+    sprite_t *bullet_info = sprite_image(BULLET_SPRITE, 1, NULL);
     body_set_draw(bullet, (draw_func_t) sdl_draw_image, bullet_info, sprite_free);
     scene_add_body(scene, bullet);
 
@@ -138,10 +140,14 @@ void add_bullet (scene_t *scene, vector_t center, vector_t velocity,
     }
 }
 
-void sidescroll(scene_t *scene, vector_t *scroll_speed) {
+void sidescroll(scene_t *scene, vector_t *scroll_speed, double dt) {
     for (size_t i = 0; i < scene_bodies(scene); i++) {
         body_t *body = scene_get_body(scene, i);
         entity_t *entity = body_get_info(body);
+        if(i < 3){
+            sprite_t *sprite = body_get_draw_info(body);
+            sprite_set_speed(sprite, abs(scroll_speed->x *(i+1) /18));
+        }
         //Applies a leftwards velocity to all objects with the "SCROLLABLE" tag
         if (entity_get_scrollable(entity) && !entity_is_scrolling(entity)) {
             vector_t scroll = {scroll_speed->x, body_get_velocity(body).y};
@@ -249,10 +255,14 @@ int main(int argc, char *argv[]) {
                 scroll_speed->x = scroll_speed->x + DEFAULT_SPEEDUP *
                     (strcmp(entity_get_powerup(player_entity), "SLOW")? 1:0.5);
                 time_since_last_speedup = 0;
+                for (int i = 0; i < 3 ; i++){
+                    sprite_t *sprite = body_get_draw_info(scene_get_body(scene, i));
+                    sprite_set_dt(sprite, 0);
+                }
             }
             *score += basic_score_calculation(dt);
 
-            sidescroll(scene, scroll_speed);
+            sidescroll(scene, scroll_speed, dt);
             scene_tick(scene, dt);
             sdl_render_scene(scene);
             if (body_get_centroid(scene_get_body(scene,0)).y < MIN.y - PLAYER_RADIUS) {

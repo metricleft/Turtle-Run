@@ -2,11 +2,69 @@
 #define __SDL_WRAPPER_H__
 
 #include <stdbool.h>
-#include <SDL2/SDL.h>
 #include "color.h"
 #include "list.h"
 #include "scene.h"
+#include <SDL2/SDL.h>
 #include "vector.h"
+
+/**
+ * Contains all the info needed to draw a sprite, including the texture used
+ * scaling of the image, and number of frames and fps animating
+ */
+
+typedef struct sprite{
+    SDL_Texture *texture;
+    double scale;
+    int frames;
+    int speed;
+    double dt;
+    double clock;
+    SDL_Rect *section;
+}sprite_t;
+
+/**
+ * Creates the info of animated sprite .
+ * 
+ * @param image file link of image used to create texture 
+ * @param scale the scaling of the image
+ * @param frames number of frames of animation 
+ * @param fps how fast the animation is
+ * @return a pointer to info for a sprite
+ */
+sprite_t *sprite_animated(char *image, double scale, int frames, int fps);
+
+/**
+ * Creates the info of unanimated sprite .
+ * 
+ * @param image file link of image used to create texture 
+ * @param scale the scaling of the image
+ * @param in rectangular section of image drawn
+ * @return a pointer to info for a sprite
+ */
+sprite_t *sprite_image(char *image, double scale, SDL_Rect *in);
+
+/**
+ * Creates the info of unanimated sprite .
+ * 
+ * @param image file link of image used to create texture 
+ * @param scroll speed of scrolling
+ * @param in initial frame of scroll
+ * @return a pointer to info for a sprite
+ */
+sprite_t *sprite_scroll(char *image, int scroll, SDL_Rect *in);
+
+/**
+ * Releases the memory allocated for sprite.
+ *
+ * @param body a pointer to a sprite
+ */
+void sprite_free(sprite_t *sprite);
+
+void sprite_set_speed(sprite_t *sprite, int speed);
+
+void sprite_set_dt(sprite_t *sprite, double dt);
+
 
 // Values passed to a key handler when the given arrow key is pressed
 typedef enum {
@@ -35,7 +93,6 @@ typedef enum {
     KEY_RELEASED
 } key_event_type_t;
 
-
 /**
  * The possible types of mouse button events.
  */
@@ -43,18 +100,6 @@ typedef enum {
     BUTTON_PRESSED,
     BUTTON_RELEASED
 } mouse_event_type_t;
-
-/**
- * Contains all the info needed to draw a sprite, including the texture used
- * scaling of the image, and number of frames and fps animating
- */
-
-typedef struct sprite{
-    SDL_Texture *texture;
-    double scale;
-    int frames;
-    int speed;
-}sprite_t;
 
 /**
  * A event handler.
@@ -68,41 +113,13 @@ typedef void (*event_handler_t)(char event, void *type, double held_time,
                               void *scene);
 
 /**
- * Creates the info of animated sprite .
- * 
- * @param image file link of image used to create texture 
- * @param scale the scaling of the image
- * @param frames number of frames of animation 
- * @param fps how fast the animation is
- * @return a pointer to info for a sprite
- */
-sprite_t *sprite_animated(const char *image, double scale, int frames, int fps);
-
-/**
- * Creates the info of unanimated sprite .
- * 
- * @param image file link of image used to create texture 
- * @param scale the scaling of the image
- * @return a pointer to info for a sprite
- */
-sprite_t *sprite_image(const char *image, double scale);
-
-sprite_t *sprite_scroll(const char *image, double scale, int frame,  int scroll);
-
-/**
- * Releases the memory allocated for sprite.
- *
- * @param body a pointer to a sprite
- */
-void sprite_free(sprite_t *sprite);
-/**
  * Initializes the SDL window and renderer.
  * Must be called once before any of the other SDL functions.
  *
  * @param min the x and y coordinates of the bottom left of the scene
  * @param max the x and y coordinates of the top right of the scene
  */
-void sdl_init(vector_t min, vector_t max);
+SDL_Renderer *sdl_init(vector_t min, vector_t max);
 
 /**
  * Processes all SDL events and returns whether the window has been closed.
