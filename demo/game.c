@@ -27,9 +27,9 @@ const char *BULLET_SPRITE = "static/bullet.png";
 
 const int POWERUP_INTERVAL = 15;
 const int ENEMY_INTERVAL = 5;
-const int SPEEDUP_INTERVAL = 30;
+const int SPEEDUP_INTERVAL = 5;
 
-const vector_t DEFAULT_SPEEDUP = {-10, 0};
+const double DEFAULT_SPEEDUP = -10;
 
 //const rgb_color_t PLAYER_BULLET_COLOR = {0, 1, 0};
 const double PLAYER_SPEED = 600;
@@ -47,7 +47,7 @@ const char* WATER_IMG = "static/background_water.png";
 const double BACKGROUND_SCALE = 2.0;
 
 const vector_t DEFAULT_GRAVITY = {0, -500};
-const vector_t DEFAULT_SCROLL_SPEED = {-500, 0};
+const vector_t DEFAULT_SCROLL_SPEED = {-200, 0};
 
 const double ELASTIC_COLLISION = 1;
 const double INELASTIC_COLLISION = 0;
@@ -84,9 +84,9 @@ void add_background(scene_t *scene, const char* img, int speed){
 }
 
 void initialize_background(scene_t *scene){
-    add_background(scene, SKY_IMG, abs(DEFAULT_SCROLL_SPEED.x /16));
-    add_background(scene, GRASS_IMG, abs(DEFAULT_SCROLL_SPEED.x /8));
-    add_background(scene, WATER_IMG, abs(DEFAULT_SCROLL_SPEED.x /6));
+    add_background(scene, SKY_IMG, abs((int)DEFAULT_SCROLL_SPEED.x /16));
+    add_background(scene, GRASS_IMG, abs((int)DEFAULT_SCROLL_SPEED.x /8));
+    add_background(scene, WATER_IMG, abs((int)DEFAULT_SCROLL_SPEED.x /6));
 }
 
 void initialize_player(scene_t *scene) {
@@ -225,12 +225,14 @@ int main(int argc, char *argv[]) {
         double time_since_last_powerup = 0;
         double time_since_last_speedup = 0;
         while (!check_game_end(scene)) {
+            printf("scroll speed: %f\n", scroll_speed->x);
             entity_set_colliding(player_entity, false);
 
             double dt = time_since_last_tick();
             time_since_last_enemy += dt;
             time_since_last_frame += dt;
             time_since_last_powerup += dt;
+            time_since_last_speedup += dt;
             if (time_since_last_enemy > ENEMY_INTERVAL) {
                 enemy_spawn_random(scene, MIN, MAX);
                 time_since_last_enemy = 0;
@@ -244,9 +246,8 @@ int main(int argc, char *argv[]) {
                 time_since_last_powerup = 0;
             }
             if (time_since_last_speedup > SPEEDUP_INTERVAL) {
-                *scroll_speed = vec_add(*scroll_speed,
-                    vec_multiply(strcmp(entity_get_powerup(player_entity), "SLOW")? 1:0.5,
-                                 DEFAULT_SPEEDUP));
+                scroll_speed->x = scroll_speed->x + DEFAULT_SPEEDUP *
+                    (strcmp(entity_get_powerup(player_entity), "SLOW")? 1:0.5);
                 time_since_last_speedup = 0;
             }
             *score += basic_score_calculation(dt);

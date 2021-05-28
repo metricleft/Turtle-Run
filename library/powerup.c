@@ -8,13 +8,14 @@
 
 const double POWERUP_MASS = 0.2;
 const double POWERUP_RADIUS = 15;
-const char* MAGNET = "static/magnet_spritesheet.png";
-const char* SLOW = "static/slow_spritesheet.png";
-const char* JUMP = "static/jump_spritesheet.png";
+const int POWERUP_PADDING = 50;
+const char* MAGNET = "static/magnet_powerup.png";
+const char* SLOW = "static/slow_powerup.png";
+const char* JUMP = "static/jump_powerup.png";
 
 void remove_old_powerup(char *powerup, vector_t *scroll_speed) {
     if (!strcmp(powerup, "SLOW")) {
-        *scroll_speed = vec_multiply(2, *scroll_speed);
+        scroll_speed->x = 2 * scroll_speed->x;
     }
     //for MAGNET, all remaining on-screen coins will be magnetized, but newer ones won't.
     //JUMP requires no adjustment beyond removing the tag.
@@ -77,7 +78,7 @@ void slow_handler(body_t *player, body_t *powerup, vector_t axis, void *aux) {
     if (strcmp(entity_get_powerup(entity), "SLOW")) {
         remove_old_powerup(entity_get_powerup(entity), scroll_speed);
         entity_set_powerup(entity, "SLOW");
-        *scroll_speed = vec_multiply(0.5, *scroll_speed);
+        scroll_speed->x = 0.5 * scroll_speed->x;
     }
     body_remove(powerup);
 }
@@ -93,7 +94,8 @@ void jump_handler(body_t *player, body_t *powerup, vector_t axis, void *aux) {
 }
 
 body_t *spawn_powerup(scene_t *scene, vector_t MIN, vector_t MAX, powerup_info_t *info) {
-    vector_t center = {MAX.x + POWERUP_RADIUS, rand()%((int)(MAX.y - MIN.y))};
+    vector_t center = {MAX.x + POWERUP_RADIUS,
+        rand()%(int)((MAX.y - MIN.y - 2*POWERUP_PADDING) + POWERUP_PADDING)};
     entity_t *entity = entity_init("POWERUP", true, false);
     list_t *powerup_coords = compute_rect_points(center, 2*POWERUP_RADIUS,
                                                  2*POWERUP_RADIUS);
@@ -113,30 +115,21 @@ void powerup_spawn_random(scene_t *scene, vector_t MIN, vector_t MAX,
     int percent_slow = 60;
     int percent_jump = 100;
     int random_powerup = rand()%percent_max;
-    body_t *player = scene_get_body(scene, 1);
+    body_t *player = scene_get_body(scene, 3);
     body_t *powerup = spawn_powerup(scene, MIN, MAX, info);
     if (random_powerup <= percent_magnet) {
-        //sprite_t *magnet_info = sprite_animated(MAGNET, 1, 10, 12);
-        //body_set_draw(powerup, (draw_func_t) sdl_draw_animated, magnet_info, sprite_free);
-        rgb_color_t *red = malloc(sizeof(rgb_color_t));
-        *red = RED;
-        body_set_draw(powerup, (draw_func_t) sdl_draw_polygon, red, free);
+        sprite_t *magnet_info = sprite_animated(MAGNET, 1, 1, 1);
+        body_set_draw(powerup, (draw_func_t) sdl_draw_animated, magnet_info, sprite_free);
         create_collision(scene, player, powerup, magnet_handler, info, free);
     }
     else if (random_powerup <= percent_slow) {
-        //sprite_t *slow_info = sprite_animated(SLOW, 1, 10, 12);
-        //body_set_draw(powerup, (draw_func_t) sdl_draw_animated, slow_info, sprite_free);
-        rgb_color_t *red = malloc(sizeof(rgb_color_t));
-        *red = GREEN;
-        body_set_draw(powerup, (draw_func_t) sdl_draw_polygon, red, free);
+        sprite_t *slow_info = sprite_animated(SLOW, 1, 1, 1);
+        body_set_draw(powerup, (draw_func_t) sdl_draw_animated, slow_info, sprite_free);
         create_collision(scene, player, powerup, slow_handler, info, free);
     }
     else if (random_powerup <= percent_jump) {
-        //sprite_t *jump_info = sprite_animated(JUMP, 1, 10, 12);
-        //body_set_draw(powerup, (draw_func_t) sdl_draw_animated, jump_info, sprite_free);
-        rgb_color_t *red = malloc(sizeof(rgb_color_t));
-        *red = BLUE;
-        body_set_draw(powerup, (draw_func_t) sdl_draw_polygon, red, free);
+        sprite_t *jump_info = sprite_animated(JUMP, 1, 1, 1);
+        body_set_draw(powerup, (draw_func_t) sdl_draw_animated, jump_info, sprite_free);
         create_collision(scene, player, powerup, jump_handler, info, free);
     }
 }
