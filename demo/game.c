@@ -18,7 +18,8 @@
 
 const vector_t MIN = {.x = 0, .y = 0};
 const vector_t MAX = {.x = 1000, .y = 500};
-Mix_Chunk *effects = NULL;
+Mix_Chunk *jump = NULL;
+Mix_Chunk *slide = NULL;
 
 const int ARC_RESOLUTION = 10;
 
@@ -163,12 +164,14 @@ void player_move (char key, key_event_type_t type, double held_time, void *scene
             case LEFT_ARROW:
                 if (body_get_centroid(player).x - PLAYER_RADIUS > MIN.x) {
                     new_velocity.x = -PLAYER_SPEED;
+                    Mix_PlayChannel(-1, slide, 0);
                 }
                 break;
             case 'd':
             case RIGHT_ARROW:
                 if (body_get_centroid(player).x + PLAYER_RADIUS < MAX.x) {
                     new_velocity.x = PLAYER_SPEED;
+                    Mix_PlayChannel(-1, slide, 0);
                 }
                 break;
             case 'w':
@@ -176,7 +179,7 @@ void player_move (char key, key_event_type_t type, double held_time, void *scene
                 if (held_time < 0.2 && (entity_get_colliding(entity) ||
                                         !strcmp(entity_get_powerup(entity), "JUMP"))) {
                     new_velocity.y = 0.8 * PLAYER_SPEED;
-                    Mix_PlayChannel(-1, effects, 0);
+                    Mix_PlayChannel(-1, jump, 0);
 
                     
                 }
@@ -207,7 +210,8 @@ int main(int argc, char *argv[]) {
     srand((unsigned) time(&t));
     sdl_init(MIN,MAX);
     Mix_Music *soundtrack = loadMedia("sounds/imperial_march.mp3");
-    effects = loadEffects("sounds/jump1.wav");
+    jump = loadEffects("sounds/jump1.wav");
+    slide = loadEffects("sounds/sliding.wav");
     Mix_PlayMusic(soundtrack, -1);
     //Mix_PlayChannel(-1, effect, 0);  
 
