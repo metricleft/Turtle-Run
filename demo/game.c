@@ -20,6 +20,7 @@ const vector_t MIN = {.x = 0, .y = 0};
 const vector_t MAX = {.x = 1000, .y = 500};
 Mix_Chunk *jump = NULL;
 Mix_Chunk *slide = NULL;
+Mix_Chunk *shot = NULL;
 
 const int ARC_RESOLUTION = 10;
 
@@ -199,6 +200,7 @@ void player_shoot(char key, mouse_event_type_t type, double held_time, void *sce
                 vector_t center = body_get_centroid(player);
                 vector_t shoot = vec_unit(vec_subtract(mouse, center));
                 entity_t *entity = entity_init("BULLET", false, false);
+                Mix_PlayChannel(-1, shot, 0);
                 add_bullet(scene, center, vec_multiply(200, shoot), entity, "ENEMY");
                 break;
         }
@@ -212,6 +214,7 @@ int main(int argc, char *argv[]) {
     Mix_Music *soundtrack = loadMedia("sounds/imperial_march.mp3");
     jump = loadEffects("sounds/jump1.wav");
     slide = loadEffects("sounds/sliding.wav");
+    shot = loadEffects("sounds/shoot.wav");
     Mix_PlayMusic(soundtrack, -1);
     //Mix_PlayChannel(-1, effect, 0);  
 
