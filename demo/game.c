@@ -18,6 +18,9 @@
 
 const vector_t MIN = {.x = 0, .y = 0};
 const vector_t MAX = {.x = 1000, .y = 500};
+Mix_Chunk *jump = NULL;
+Mix_Chunk *slide = NULL;
+Mix_Chunk *shot = NULL;
 
 const int ARC_RESOLUTION = 10;
 
@@ -168,12 +171,14 @@ void player_move (char key, key_event_type_t type, double held_time, void *scene
             case LEFT_ARROW:
                 if (body_get_centroid(player).x - PLAYER_RADIUS > MIN.x) {
                     new_velocity.x = -PLAYER_SPEED;
+                    Mix_PlayChannel(-1, slide, 0);
                 }
                 break;
             case 'd':
             case RIGHT_ARROW:
                 if (body_get_centroid(player).x + PLAYER_RADIUS < MAX.x) {
                     new_velocity.x = PLAYER_SPEED;
+                    Mix_PlayChannel(-1, slide, 0);
                 }
                 break;
             case 'w':
@@ -181,6 +186,9 @@ void player_move (char key, key_event_type_t type, double held_time, void *scene
                 if (held_time < 0.2 && (entity_get_colliding(entity) ||
                                         !strcmp(entity_get_powerup(entity), "JUMP"))) {
                     new_velocity.y = 0.8 * PLAYER_SPEED;
+                    Mix_PlayChannel(-1, jump, 0);
+
+                    
                 }
                 break;
         }
@@ -198,6 +206,7 @@ void player_shoot(char key, mouse_event_type_t type, double held_time, void *sce
                 vector_t center = body_get_centroid(player);
                 vector_t shoot = vec_unit(vec_subtract(mouse, center));
                 entity_t *entity = entity_init("BULLET", false, false);
+                Mix_PlayChannel(-1, shot, 0);
                 add_bullet(scene, center, vec_multiply(200, shoot), entity, "ENEMY");
                 break;
         }
@@ -208,6 +217,12 @@ int main(int argc, char *argv[]) {
     time_t t;
     srand((unsigned) time(&t));
     sdl_init(MIN,MAX);
+    Mix_Music *soundtrack = loadMedia("sounds/imperial_march.mp3");
+    jump = loadEffects("sounds/jump1.wav");
+    slide = loadEffects("sounds/sliding.wav");
+    shot = loadEffects("sounds/shoot.wav");
+    Mix_PlayMusic(soundtrack, -1);
+    //Mix_PlayChannel(-1, effect, 0);  
 
     while (true) {
         sdl_on_key((event_handler_t) player_move);
@@ -222,7 +237,7 @@ int main(int argc, char *argv[]) {
         initialize_player(scene);
         initialize_terrain(scene);
         frame_spawn_random(scene, MAX, MAX.x);
-        
+
         body_t *player = scene_get_body(scene, 3);
         player_entity_t *player_entity = body_get_info(player);
 
@@ -231,8 +246,9 @@ int main(int argc, char *argv[]) {
         double time_since_last_powerup = 0;
         double time_since_last_speedup = 0;
         while (!check_game_end(scene)) {
-            printf("scroll speed: %f\n", scroll_speed->x);
+            // printf("scroll speed: %f\n", scroll_speed->x);
             entity_set_colliding(player_entity, false);
+            
 
             double dt = time_since_last_tick();
             time_since_last_enemy += dt;
@@ -270,11 +286,14 @@ int main(int argc, char *argv[]) {
             } else if (sdl_is_done(scene)) {
                 game_end();
             }
+
         }
+        
         free(scene);
         free(scroll_speed);
         free(score);
     }
+    Mix_HaltMusic();
 
     return 0;
 }
