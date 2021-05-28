@@ -63,7 +63,23 @@ bool game_end() {
 
 double basic_score_calculation(double dt) {
     assert(dt >= 0);
-    return dt * 100.0;
+    return dt * 10.0;
+}
+
+double advanced_score_calculation(double dt) {
+    assert(dt >= 0);
+    if (dt <= 10) {
+        return dt * 10;
+    }
+    if (dt > 10 && dt <= 20) {
+        return dt * 20;
+    }
+    if (dt > 20 && dt <= 30) {
+        return dt * 30;
+    }
+    if (dt > 30) {
+        return dt * 50;
+    } 
 }
 
 bool check_game_end(scene_t *scene) {
@@ -216,7 +232,9 @@ int main(int argc, char *argv[]) {
     slide = loadEffects("sounds/sliding.wav");
     shot = loadEffects("sounds/shoot.wav");
     Mix_PlayMusic(soundtrack, -1);
-    //Mix_PlayChannel(-1, effect, 0);  
+    //Mix_PlayChannel(-1, effect, 0);
+    //double *score = malloc(sizeof(double));
+    double score = 0;
 
     while (true) {
         sdl_on_key((event_handler_t) player_move);
@@ -225,8 +243,7 @@ int main(int argc, char *argv[]) {
         scene_t *scene = scene_init();
         vector_t *scroll_speed = malloc(sizeof(vector_t));
         *scroll_speed = DEFAULT_SCROLL_SPEED;
-        double *score = malloc(sizeof(double));
-        *score = 0;
+        
         initialize_background(scene);
         initialize_player(scene);
         initialize_terrain(scene);
@@ -266,7 +283,8 @@ int main(int argc, char *argv[]) {
                     (strcmp(entity_get_powerup(player_entity), "SLOW")? 1:0.5);
                 time_since_last_speedup = 0;
             }
-            *score += basic_score_calculation(dt);
+            score += advanced_score_calculation(dt);
+            printf("%f\n", score);
 
             sidescroll(scene, scroll_speed);
             scene_tick(scene, dt);
@@ -281,7 +299,7 @@ int main(int argc, char *argv[]) {
         
         free(scene);
         free(scroll_speed);
-        free(score);
+        //free(score);
     }
     Mix_HaltMusic();
 
