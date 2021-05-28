@@ -2,8 +2,8 @@
 #include <math.h>
 #include <stdlib.h>
 #include <time.h>
-#include <SDL2/SDL_image.h>
 #include <SDL2/SDL2_gfxPrimitives.h>
+#include <SDL2/SDL_image.h>
 #include "sdl_wrapper.h"
 #include <SDL2/SDL_mixer.h>
 
@@ -71,28 +71,6 @@ uint32_t key_start_timestamp;
  * Initially 0.
  */
 clock_t last_clock = 0;
-
-sprite_t *sprite_animated(const char *image, double scale, int frames, int fps){
-    sprite_t *sprite = malloc(sizeof(sprite_t));
-    sprite->texture = IMG_LoadTexture(renderer, image);
-    sprite->scale = scale;
-    sprite->frames = frames;
-    sprite->speed = fps;
-    return sprite;
-}
-
-sprite_t *sprite_image(const char *image, double scale){
-    return sprite_animated(image, scale, 0, 0);
-}
-
-sprite_t *sprite_scroll(const char *image, double scale, int frame,  int scroll){
-    return sprite_animated(image, scale, frame, scroll);
-}
-
-void sprite_free(sprite_t *sprite){
-    SDL_DestroyTexture(sprite->texture);
-    free(sprite);
-}
 
 /** Computes the center of the window in pixel coordinates */
 vector_t get_window_center(void) {
@@ -163,7 +141,63 @@ char get_mousecode(SDL_MouseButtonEvent mouse) {
     }
 }
 
-void sdl_init(vector_t min, vector_t max) {
+sprite_t *sprite_image(char *image, double scale, SDL_Rect *in){
+    sprite_t *sprite = malloc(sizeof(sprite_t));
+    sprite->texture = IMG_LoadTexture(renderer, image);
+    int *w = malloc(sizeof(int));
+    int *h = malloc(sizeof(int));
+    SDL_QueryTexture(sprite->texture, NULL, NULL, w, h);
+    sprite->scale = scale;
+    sprite->frames = 0;
+    sprite->speed = 0;
+    sprite->dt = 0;
+    sprite->clock = 0;
+    if (in == NULL){
+        sprite->section = malloc(sizeof(SDL_Rect));
+        *sprite->section = (SDL_Rect){0, 0, *w, *h};
+    }
+    else {
+        assert(in->w <= *w && *w >= 0);
+        assert(in->h <= *h && *h >= 0);
+        sprite->section = in;
+    }
+    free(w);
+    free(h);
+    return sprite;
+}
+
+sprite_t *sprite_animated(char *image, double scale, int frames, int fps){
+    sprite_t *sprite = sprite_image(image, scale, NULL);
+    printf("%d %d\n", sprite->section->w, sprite->section->h );
+    *sprite->section = (SDL_Rect){0, 0, sprite->section->w / frames, sprite->section->h};
+    printf("%d %d\n", sprite->section->w, sprite->section->h );
+    sprite->frames = frames;
+    sprite->speed = fps;
+    return sprite;
+}
+
+sprite_t *sprite_scroll(char *image, int scroll, SDL_Rect *in){
+    sprite_t *sprite = sprite_image(image, 1, in);
+    sprite->speed = scroll;
+    return sprite;
+}
+
+void sprite_free(sprite_t *sprite){
+    SDL_DestroyTexture(sprite->texture);
+    free(sprite->section);
+    free(sprite);
+}
+
+void sprite_set_speed(sprite_t *sprite, int speed){
+    sprite->speed = speed;
+}
+
+void sprite_set_dt(sprite_t *sprite, double dt){
+    sprite->dt = dt;
+}
+
+
+SDL_Renderer *sdl_init(vector_t min, vector_t max) {
     // Check parameters
     assert(min.x < max.x);
     assert(min.y < max.y);
@@ -181,6 +215,7 @@ void sdl_init(vector_t min, vector_t max) {
         SDL_WINDOW_RESIZABLE
     );
     renderer = SDL_CreateRenderer(window, -1, 0);
+    return renderer;
 }
 
 bool sdl_is_done(void *scene) {
@@ -263,68 +298,58 @@ void sdl_draw_polygon(body_t *body, rgb_color_t *color) {
 }
 
 void sdl_draw_image(body_t *body, sprite_t *sprite) {
-    list_t *shape = body_get_shape(body);
-    int *w = malloc(sizeof(int));
-    int *h = malloc(sizeof(int));
-    SDL_QueryTexture(sprite->texture, NULL, NULL, w, h);
     vector_t window_center = get_window_center();
     vector_t center = get_window_position(body_get_centroid(body), window_center);
-    SDL_Rect *in = malloc(sizeof(SDL_Rect));
     SDL_Rect *out = malloc(sizeof(SDL_Rect));
-    *in = (SDL_Rect) { 0, 0, *w, *h };
-    *out = (SDL_Rect) {center.x - sprite->scale * *w/2,
-                       center.y - sprite->scale * *h/2, 
-                       sprite->scale * *w , 
-                       sprite->scale * *h};
-    SDL_RenderCopy(renderer, sprite->texture, in, out);
-    free(w);
-    free(h);
-    free(in);
+    *out = (SDL_Rect) {center.x - sprite->scale * sprite->section->w/2,
+                       center.y - sprite->scale * sprite->section->h/2, 
+                       sprite->scale * sprite->section->w, 
+                       sprite->scale * sprite->section->w};
+    SDL_RenderCopy(renderer, sprite->texture, sprite->section, out);
     free(out);
 }
 
 void sdl_draw_animated(body_t *body, sprite_t *sprite){
     double time  = (double)clock() /CLOCKS_PER_SEC;
-    int *w = malloc(sizeof(int));
-    int *h = malloc(sizeof(int));
-    assert(sprite->texture!=NULL);
-    SDL_QueryTexture(sprite->texture, NULL, NULL, w, h);
     vector_t window_center = get_window_center();
     vector_t center = get_window_position(body_get_centroid(body), window_center);
-    SDL_Rect *in = malloc(sizeof(SDL_Rect));
-    SDL_Rect *out = malloc(sizeof(SDL_Rect));
     int frame = (int)(time * sprite->speed) % sprite->frames;
     assert((frame < sprite->frames) && (frame >= 0));
-    int width = *w / sprite->frames;
-    *in = (SDL_Rect) { frame* (width), 0, width, *h };
+    int width = sprite->section->w;
+    SDL_Rect *out = malloc(sizeof(SDL_Rect));
+    *sprite->section = (SDL_Rect) { frame * (width), 0, width, sprite->section->h };
     *out = (SDL_Rect) {center.x - (sprite->scale * width/2),
-                       center.y - (sprite->scale* *h/2), 
+                       center.y - (sprite->scale* sprite->section->h/2), 
                        sprite->scale * width, 
-                       sprite->scale * *h};
-    SDL_RenderCopy(renderer, sprite->texture, in, out );
-    free(w);
-    free(h);
-    free(in);
+                       sprite->scale * sprite->section->h};
+    SDL_RenderCopy(renderer, sprite->texture, sprite->section, out);
     free(out);
 }
 
 void sdl_draw_scroll(body_t *body, sprite_t *sprite){
     double time  = (double)clock() /CLOCKS_PER_SEC;
+    if(sprite->dt == 0){
+        sprite->clock = time;
+        sprite->dt = 0.00000001;
+        *sprite->section = (SDL_Rect) {sprite->frames,
+                                       0, 
+                                       sprite->section->w, 
+                                       sprite->section->h};
+    }
+    else{
+        sprite->dt = time - sprite->clock;
+    }
     int *w = malloc(sizeof(int));
-    int *h = malloc(sizeof(int));
-    assert(sprite->texture!=NULL);
-    SDL_QueryTexture(sprite->texture, NULL, NULL, w, h);
-    SDL_Rect *in = malloc(sizeof(SDL_Rect));
-    SDL_Rect *out = malloc(sizeof(SDL_Rect));
-    int width = *w / sprite->frames;
-    int frame = (int)(time * sprite->speed) % (*w - width);
+    SDL_QueryTexture(sprite->texture, NULL, NULL, w, NULL);
+    int width = sprite->section->w;
+    int frame = (int)( sprite->dt * sprite->speed + sprite->section->x) % 
+                (*w - width);
+    printf("%f %d\n", (sprite->dt * sprite->speed) , sprite->section->x);
     assert((frame < *w - width) && (frame >= 0));
-    *in = (SDL_Rect) { frame, 0, width, *h };
+    sprite->frames = frame;
+    SDL_Rect *in = malloc(sizeof(SDL_Rect));
+    *in = (SDL_Rect) {frame, 0, width, sprite->section->h};   
     SDL_RenderCopy(renderer, sprite->texture, in, NULL);
-    free(w);
-    free(h);
-    free(in);
-    free(out);
 }
 
 void sdl_show(void) {

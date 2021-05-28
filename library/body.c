@@ -86,6 +86,10 @@ void *body_get_info(body_t *body) {
     return body->info;
 }
 
+void *body_get_draw_info(body_t *body) {
+    return body->draw_info;
+}
+
 double body_get_orientation(body_t *body){
     return body->orientation;
 }

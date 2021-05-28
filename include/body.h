@@ -96,6 +96,14 @@ double body_get_mass(body_t *body);
 void *body_get_info(body_t *body);
 
 /**
+ * Gets the information associated with drawing the body.
+ *
+ * @param body a pointer to a body returned from body_init()
+ * @return the info needed to draw body
+ */
+void *body_get_draw_info(body_t *body);
+
+/**
  * Gets the orientation in radians of a body.
  *
  * @param body a pointer to a body returned from body_init()
