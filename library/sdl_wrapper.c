@@ -5,12 +5,35 @@
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL2_gfxPrimitives.h>
 #include "sdl_wrapper.h"
+#include <SDL2/SDL_mixer.h>
 
 const char WINDOW_TITLE[] = "CS 3";
 const int WINDOW_WIDTH = 1000;
 const int WINDOW_HEIGHT = 500;
 const double MS_PER_S = 1e3;
 const rgb_color_t BACKGROUND = {28, 163, 236};
+
+Mix_Music *loadMedia(char *music_name){
+    Mix_Music *music = Mix_LoadMUS(music_name);
+    if (music == NULL) {
+        printf("Failed %s", Mix_GetError());
+    }
+    //printf("Music loaded");
+    return music;
+}
+
+Mix_Chunk *loadEffects(char *effect_name){
+    Mix_Chunk *effect = Mix_LoadWAV(effect_name);
+    if (effect == NULL) {
+        printf("Failed");
+    }
+    return effect;
+}
+
+
+
+
+
 
 /**
  * The coordinate at the center of the screen.
@@ -148,6 +171,7 @@ void sdl_init(vector_t min, vector_t max) {
     center = vec_multiply(0.5, vec_add(min, max));
     max_diff = vec_subtract(max, center);
     SDL_Init(SDL_INIT_EVERYTHING);
+    Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048);
     window = SDL_CreateWindow(
         WINDOW_TITLE,
         SDL_WINDOWPOS_CENTERED,
