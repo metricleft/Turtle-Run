@@ -165,7 +165,7 @@ void sidescroll(scene_t *scene, vector_t *scroll_speed, double dt) {
         entity_t *entity = body_get_info(body);
         if(i < 3){
             sprite_t *sprite = body_get_draw_info(body);
-            sprite_set_speed(sprite, abs(scroll_speed->x *(i+1) /18));
+            sprite_set_speed(sprite, (int)abs((int)(scroll_speed->x) *((int)i+1) /18));
         }
         //Applies a leftwards velocity to all objects with the "SCROLLABLE" tag
         if (entity_get_scrollable(entity) && !entity_is_scrolling(entity)) {
@@ -185,15 +185,15 @@ void player_move (char key, key_event_type_t type, double held_time, void *scene
         switch (key) {
             case 'a':
             case LEFT_ARROW:
-                if (body_get_centroid(player).x - PLAYER_RADIUS > MIN.x) {
-                    new_velocity.x = -PLAYER_SPEED;
+                new_velocity.x = -PLAYER_SPEED;
+                if (held_time < 0.2) {
                     Mix_PlayChannel(-1, slide, 0);
                 }
                 break;
             case 'd':
             case RIGHT_ARROW:
-                if (body_get_centroid(player).x + PLAYER_RADIUS < MAX.x) {
-                    new_velocity.x = PLAYER_SPEED;
+                new_velocity.x = PLAYER_SPEED;
+                if (held_time < 0.2) {
                     Mix_PlayChannel(-1, slide, 0);
                 }
                 break;
@@ -263,7 +263,6 @@ int main(int argc, char *argv[]) {
         double time_since_last_powerup = 0;
         double time_since_last_speedup = 0;
         while (!check_game_end(scene)) {
-            // printf("scroll speed: %f\n", scroll_speed->x);
             entity_set_colliding(player_entity, false);
             
 

@@ -34,7 +34,7 @@ typedef struct sprite{
  * @param fps how fast the animation is
  * @return a pointer to info for a sprite
  */
-sprite_t *sprite_animated(char *image, double scale, int frames, int fps);
+sprite_t *sprite_animated(const char *image, double scale, int frames, int fps);
 
 /**
  * Creates the info of unanimated sprite .
@@ -44,7 +44,7 @@ sprite_t *sprite_animated(char *image, double scale, int frames, int fps);
  * @param in rectangular section of image drawn
  * @return a pointer to info for a sprite
  */
-sprite_t *sprite_image(char *image, double scale, SDL_Rect *in);
+sprite_t *sprite_image(const char *image, double scale, SDL_Rect *in);
 
 /**
  * Creates the info of unanimated sprite .
@@ -54,7 +54,7 @@ sprite_t *sprite_image(char *image, double scale, SDL_Rect *in);
  * @param in initial frame of scroll
  * @return a pointer to info for a sprite
  */
-sprite_t *sprite_scroll(char *image, int scroll, SDL_Rect *in);
+sprite_t *sprite_scroll(const char *image, int scroll, SDL_Rect *in);
 
 /**
  * Releases the memory allocated for sprite.

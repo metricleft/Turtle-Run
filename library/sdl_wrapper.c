@@ -141,7 +141,7 @@ char get_mousecode(SDL_MouseButtonEvent mouse) {
     }
 }
 
-sprite_t *sprite_image(char *image, double scale, SDL_Rect *in){
+sprite_t *sprite_image(const char *image, double scale, SDL_Rect *in){
     sprite_t *sprite = malloc(sizeof(sprite_t));
     sprite->texture = IMG_LoadTexture(renderer, image);
     int *w = malloc(sizeof(int));
@@ -166,7 +166,7 @@ sprite_t *sprite_image(char *image, double scale, SDL_Rect *in){
     return sprite;
 }
 
-sprite_t *sprite_animated(char *image, double scale, int frames, int fps){
+sprite_t *sprite_animated(const char *image, double scale, int frames, int fps){
     sprite_t *sprite = sprite_image(image, scale, NULL);
     printf("%d %d\n", sprite->section->w, sprite->section->h );
     *sprite->section = (SDL_Rect){0, 0, sprite->section->w / frames, sprite->section->h};
@@ -176,7 +176,7 @@ sprite_t *sprite_animated(char *image, double scale, int frames, int fps){
     return sprite;
 }
 
-sprite_t *sprite_scroll(char *image, int scroll, SDL_Rect *in){
+sprite_t *sprite_scroll(const char *image, int scroll, SDL_Rect *in){
     sprite_t *sprite = sprite_image(image, 1, in);
     sprite->speed = scroll;
     return sprite;
@@ -260,14 +260,14 @@ bool sdl_is_done(void *scene) {
 }
 
 void sdl_clear(void) {
-    SDL_SetRenderDrawColor(renderer, BACKGROUND.r, BACKGROUND.g, BACKGROUND.b, 255);
+    SDL_SetRenderDrawColor(renderer, (Uint8)BACKGROUND.r, (Uint8)BACKGROUND.g, (Uint8)BACKGROUND.b, 255);
     SDL_RenderClear(renderer);
 }
 
 void sdl_draw_polygon(body_t *body, rgb_color_t *color) {
     // Check parameters
     list_t *points = body_get_shape(body);
-    size_t n = list_size(points);
+    int n = (int)list_size(points);
     assert(n >= 3);
     assert(0 <= (*color).r && color->r <= 1);
     assert(0 <= (*color).g && color->g <= 1);
@@ -283,15 +283,15 @@ void sdl_draw_polygon(body_t *body, rgb_color_t *color) {
     for (size_t i = 0; i < n; i++) {
         vector_t *vertex = list_get(points, i);
         vector_t pixel = get_window_position(*vertex, window_center);
-        x_points[i] = pixel.x;
-        y_points[i] = pixel.y;
+        x_points[i] = (int16_t)pixel.x;
+        y_points[i] = (int16_t)pixel.y;
     }
 
     // Draw polygon with the given color
     filledPolygonRGBA(
         renderer,
         x_points, y_points, n,
-        (*color).r * 255, (*color).g * 255, (*color).b * 255, 255
+        (Uint8)(*color).r * 255, (Uint8)(*color).g * 255, (Uint8)(*color).b * 255, 255
     );
     free(x_points);
     free(y_points);
@@ -301,10 +301,10 @@ void sdl_draw_image(body_t *body, sprite_t *sprite) {
     vector_t window_center = get_window_center();
     vector_t center = get_window_position(body_get_centroid(body), window_center);
     SDL_Rect *out = malloc(sizeof(SDL_Rect));
-    *out = (SDL_Rect) {center.x - sprite->scale * sprite->section->w/2,
-                       center.y - sprite->scale * sprite->section->h/2, 
-                       sprite->scale * sprite->section->w, 
-                       sprite->scale * sprite->section->w};
+    *out = (SDL_Rect) {(int)(center.x - sprite->scale * sprite->section->w/2),
+                       (int)(center.y - sprite->scale * sprite->section->h/2), 
+                       (int)(sprite->scale * sprite->section->w), 
+                       (int)(sprite->scale * sprite->section->w)};
     SDL_RenderCopy(renderer, sprite->texture, sprite->section, out);
     free(out);
 }
@@ -318,10 +318,10 @@ void sdl_draw_animated(body_t *body, sprite_t *sprite){
     int width = sprite->section->w;
     SDL_Rect *out = malloc(sizeof(SDL_Rect));
     *sprite->section = (SDL_Rect) { frame * (width), 0, width, sprite->section->h };
-    *out = (SDL_Rect) {center.x - (sprite->scale * width/2),
-                       center.y - (sprite->scale* sprite->section->h/2), 
-                       sprite->scale * width, 
-                       sprite->scale * sprite->section->h};
+    *out = (SDL_Rect) {(int)(center.x - (sprite->scale * width/2)),
+                       (int)(center.y - (sprite->scale* sprite->section->h/2)), 
+                       (int)(sprite->scale * width), 
+                       (int)(sprite->scale * sprite->section->h)};
     SDL_RenderCopy(renderer, sprite->texture, sprite->section, out);
     free(out);
 }
@@ -360,10 +360,10 @@ void sdl_show(void) {
     vector_t max_pixel = get_window_position(max, window_center),
              min_pixel = get_window_position(min, window_center);
     SDL_Rect *boundary = malloc(sizeof(*boundary));
-    boundary->x = min_pixel.x;
-    boundary->y = max_pixel.y;
-    boundary->w = max_pixel.x - min_pixel.x;
-    boundary->h = min_pixel.y - max_pixel.y;
+    boundary->x = (int)(min_pixel.x);
+    boundary->y = (int)(max_pixel.y);
+    boundary->w = (int)(max_pixel.x - min_pixel.x);
+    boundary->h = (int)(min_pixel.y - max_pixel.y);
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderDrawRect(renderer, boundary);
     free(boundary);
