@@ -68,6 +68,7 @@ void spawn_frog(scene_t *scene, vector_t MIN, vector_t MAX) {
     create_destructive_collision(scene, player, frog);
     create_bullet_collisions(scene, frog);
     create_bounds_collisions(scene, frog, ENEMY_RADIUS);
+    create_bounds_collisions(scene, anchor, ENEMY_RADIUS);
 }
 
 typedef struct param {
