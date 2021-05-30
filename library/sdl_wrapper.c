@@ -221,6 +221,12 @@ bool sdl_is_done(void *scene) {
     assert(event != NULL);
     while (SDL_PollEvent(event)) {
         switch (event->type) {
+            case SDL_WINDOWEVENT:
+                if (event->window.event == SDL_WINDOWEVENT_CLOSE) {
+                    free(event);
+                    return true;
+                }
+                break;
             case SDL_QUIT:
                 free(event);
                 return true;

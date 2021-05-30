@@ -112,6 +112,7 @@ typedef enum {
  * @param event a character indicating which key or button was pressed
  * @param type the type of event (KEY_PRESSED/KEY_RELEASED or BUTTONP_PRESSED/BUTTON_RELEASED)
  * @param held_time if a press event, the time the key has been held in seconds
+ * @param scene an aux variable, usually a pointer to a scene_t
  */
 typedef void (*event_handler_t)(char event, void *type, double held_time,
                               void *scene);
