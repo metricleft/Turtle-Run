@@ -346,11 +346,11 @@ void menu_mouse_handler(char key, mouse_event_type_t type, double held_time,
 int main(int argc, char *argv[]) {
     time_t t;
     srand((unsigned) time(&t));
+    Mix_OpenAudio( 44100, MIX_DEFAULT_FORMAT, 2, 2048 );
     Mix_Music *soundtrack = loadMedia("sounds/synth.wav");
     jump = loadEffects("sounds/jump1.wav");
     slide = loadEffects("sounds/sliding.wav");
     shot = loadEffects("sounds/shoot.wav");
-
     SDL_Window *window = sdl_init(MIN,MAX);
     //Mix_PlayMusic(soundtrack, -1);
 
