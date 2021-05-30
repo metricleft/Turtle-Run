@@ -352,7 +352,7 @@ int main(int argc, char *argv[]) {
     slide = loadEffects("sounds/sliding.wav");
     shot = loadEffects("sounds/shoot.wav");
     SDL_Window *window = sdl_init(MIN,MAX);
-    //Mix_PlayMusic(soundtrack, -1);
+    Mix_PlayMusic(soundtrack, -1);
 
     while (!sdl_is_done(window)) {
         //sdl_on_key((event_handler_t) menu_key_handler);
