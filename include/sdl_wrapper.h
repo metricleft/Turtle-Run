@@ -123,7 +123,7 @@ typedef void (*event_handler_t)(char event, void *type, double held_time,
  * @param min the x and y coordinates of the bottom left of the scene
  * @param max the x and y coordinates of the top right of the scene
  */
-SDL_Renderer *sdl_init(vector_t min, vector_t max);
+SDL_Window *sdl_init(vector_t min, vector_t max);
 
 /**
  * Processes all SDL events and returns whether the window has been closed.

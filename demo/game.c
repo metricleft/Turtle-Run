@@ -57,10 +57,11 @@ const vector_t DEFAULT_SCROLL_SPEED = {-200, 0};
 const double ELASTIC_COLLISION = 1;
 const double INELASTIC_COLLISION = 0;
 
-bool game_end() {
+bool game_end(SDL_Window *window) {
     sdl_on_key(NULL);
     sdl_on_click(NULL);
-    exit(0);
+    SDL_DestroyWindow(window);
+    //exit(0);
 }
 
 double basic_score_calculation(double dt) {
@@ -236,86 +237,91 @@ void player_shoot(char key, mouse_event_type_t type, double held_time, void *sce
 int main(int argc, char *argv[]) {
     time_t t;
     srand((unsigned) time(&t));
-    sdl_init(MIN,MAX);
     Mix_Music *soundtrack = loadMedia("sounds/synth.wav");
     jump = loadEffects("sounds/jump1.wav");
     slide = loadEffects("sounds/sliding.wav");
     shot = loadEffects("sounds/shoot.wav");
-    Mix_PlayMusic(soundtrack, -1);
-    //Mix_PlayChannel(-1, effect, 0);
-    //double *score = malloc(sizeof(double));
-    double score = 0;
 
-    while (true) {
-        sdl_on_key((event_handler_t) player_move);
-        sdl_on_click((event_handler_t) player_shoot);
+    //Window operations:
+    //while (true) {
+        SDL_Window *window = sdl_init(MIN,MAX);
+        Mix_PlayMusic(soundtrack, -1);
+        bool stop_game = false;
 
-        scene_t *scene = scene_init();
-        vector_t *scroll_speed = malloc(sizeof(vector_t));
-        *scroll_speed = DEFAULT_SCROLL_SPEED;
-        
-        initialize_background(scene);
-        initialize_player(scene);
-        initialize_bounds(scene, MIN, MAX);
-        initialize_terrain(scene);
-        frame_spawn_random(scene, MAX, MAX.x);
+        //Inside "Play Game":
+        while (!stop_game) {
+            sdl_on_key((event_handler_t) player_move);
+            sdl_on_click((event_handler_t) player_shoot);
 
-        body_t *player = scene_get_body(scene, 3);
-        player_entity_t *player_entity = body_get_info(player);
-        create_bounds_collisions(scene, player, PLAYER_RADIUS);
+            scene_t *scene = scene_init();
+            vector_t *scroll_speed = malloc(sizeof(vector_t));
+            *scroll_speed = DEFAULT_SCROLL_SPEED;
+            //double *score = malloc(sizeof(double));
+            double score = 0;
 
-        double time_since_last_enemy = 0;
-        double time_since_last_frame = 0;
-        double time_since_last_powerup = 0;
-        double time_since_last_speedup = 0;
-        while (!check_game_end(scene)) {
-            entity_set_colliding(player_entity, false);
+            initialize_background(scene);
+            initialize_player(scene);
+            initialize_bounds(scene, MIN, MAX);
+            initialize_terrain(scene);
+            frame_spawn_random(scene, MAX, MAX.x);
 
-            double dt = time_since_last_tick();
-            time_since_last_enemy += dt;
-            time_since_last_frame += dt;
-            time_since_last_powerup += dt;
-            time_since_last_speedup += dt;
-            if (time_since_last_enemy > ENEMY_INTERVAL) {
-                enemy_spawn_random(scene, MIN, MAX);
-                time_since_last_enemy = 0;
-            }
-            if (time_since_last_frame > MAX.x / -(scroll_speed->x)) {
-                frame_spawn_random(scene, MAX, MAX.x);
-                time_since_last_frame = 0;
-            }
-            if (time_since_last_powerup > POWERUP_INTERVAL) {
-                powerup_spawn_random(scene, MIN, MAX, scroll_speed);
-                time_since_last_powerup = 0;
-            }
-            if (time_since_last_speedup > SPEEDUP_INTERVAL) {
-                scroll_speed->x = scroll_speed->x + DEFAULT_SPEEDUP *
-                    (strcmp(entity_get_powerup(player_entity), "SLOW")? 1:0.5);
-                time_since_last_speedup = 0;
-                for (int i = 0; i < 3 ; i++){
-                    sprite_t *sprite = body_get_draw_info(scene_get_body(scene, i));
-                    sprite_set_dt(sprite, 0);
+            body_t *player = scene_get_body(scene, 3);
+            player_entity_t *player_entity = body_get_info(player);
+            create_bounds_collisions(scene, player, PLAYER_RADIUS);
+
+            double time_since_last_enemy = 0;
+            double time_since_last_frame = 0;
+            double time_since_last_powerup = 0;
+            double time_since_last_speedup = 0;
+
+            //Every tick inside "Play Game":
+            while (!check_game_end(scene)) {
+                entity_set_colliding(player_entity, false);
+
+                double dt = time_since_last_tick();
+                time_since_last_enemy += dt;
+                time_since_last_frame += dt;
+                time_since_last_powerup += dt;
+                time_since_last_speedup += dt;
+                if (time_since_last_enemy > ENEMY_INTERVAL) {
+                    enemy_spawn_random(scene, MIN, MAX);
+                    time_since_last_enemy = 0;
+                }
+                if (time_since_last_frame > MAX.x / -(scroll_speed->x)) {
+                    frame_spawn_random(scene, MAX, MAX.x);
+                    time_since_last_frame = 0;
+                }
+                if (time_since_last_powerup > POWERUP_INTERVAL) {
+                    powerup_spawn_random(scene, MIN, MAX, scroll_speed);
+                    time_since_last_powerup = 0;
+                }
+                if (time_since_last_speedup > SPEEDUP_INTERVAL) {
+                    scroll_speed->x = scroll_speed->x + DEFAULT_SPEEDUP *
+                        (strcmp(entity_get_powerup(player_entity), "SLOW")? 1:0.5);
+                    time_since_last_speedup = 0;
+                    for (int i = 0; i < 3 ; i++){
+                        sprite_t *sprite = body_get_draw_info(scene_get_body(scene, i));
+                        sprite_set_dt(sprite, 0);
+                    }
+                }
+                score += advanced_score_calculation(dt);
+                //printf("%f\n", score);
+
+                sidescroll(scene, scroll_speed, dt);
+                scene_tick(scene, dt);
+                sdl_render_scene(scene);
+                if (body_get_centroid(scene_get_body(scene,0)).y < MIN.y - PLAYER_RADIUS) {
+                    body_remove(scene_get_body(scene, 3));
+                } else if (sdl_is_done(scene)) {
+                    game_end(window);
+                    stop_game = true;
                 }
             }
-            score += advanced_score_calculation(dt);
-            //printf("%f\n", score);
-
-            sidescroll(scene, scroll_speed, dt);
-            scene_tick(scene, dt);
-            sdl_render_scene(scene);
-            if (body_get_centroid(scene_get_body(scene,0)).y < MIN.y - PLAYER_RADIUS) {
-                body_remove(scene_get_body(scene, 3));
-            } else if (sdl_is_done(scene)) {
-                game_end();
-            }
-
+            free(scene);
+            free(scroll_speed);
+            //free(score);
         }
-        
-        free(scene);
-        free(scroll_speed);
-        //free(score);
-    }
+    //}
     Mix_HaltMusic();
-
     return 0;
 }

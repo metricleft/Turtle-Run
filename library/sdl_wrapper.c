@@ -195,7 +195,7 @@ void sprite_set_dt(sprite_t *sprite, double dt){
 }
 
 
-SDL_Renderer *sdl_init(vector_t min, vector_t max) {
+SDL_Window *sdl_init(vector_t min, vector_t max) {
     // Check parameters
     assert(min.x < max.x);
     assert(min.y < max.y);
@@ -213,7 +213,7 @@ SDL_Renderer *sdl_init(vector_t min, vector_t max) {
         SDL_WINDOW_RESIZABLE
     );
     renderer = SDL_CreateRenderer(window, -1, 0);
-    return renderer;
+    return window;
 }
 
 bool sdl_is_done(void *scene) {
