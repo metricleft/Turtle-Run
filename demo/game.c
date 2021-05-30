@@ -15,9 +15,11 @@
 #include "enemy.h"
 #include "frame.h"
 #include "powerup.h"
+#include "bounds.h"
 
 const vector_t MIN = {.x = 0, .y = 0};
 const vector_t MAX = {.x = 1000, .y = 500};
+
 Mix_Chunk *jump = NULL;
 Mix_Chunk *slide = NULL;
 Mix_Chunk *shot = NULL;
@@ -134,6 +136,7 @@ void initialize_terrain(scene_t *scene) {
     body_t *floor = body_init_with_info(floor_coords, INFINITY, entity, entity_free);
     scene_add_body(scene, floor);
     create_normal_collision(scene, vec_negate(DEFAULT_GRAVITY), player, floor);
+    create_terrain_collisions(scene, floor);
 
     rgb_color_t *black = malloc(sizeof(rgb_color_t));
     *black = BLACK;
@@ -149,6 +152,7 @@ void add_bullet (scene_t *scene, vector_t center, vector_t velocity,
     sprite_t *bullet_info = sprite_image(BULLET_SPRITE, 1, NULL);
     body_set_draw(bullet, (draw_func_t) sdl_draw_image, bullet_info, sprite_free);
     scene_add_body(scene, bullet);
+    create_bounds_collisions(scene, bullet, BULLET_RADIUS);
 
     for (size_t i = 0; i < scene_bodies(scene); i++) {
         body_t *body = scene_get_body(scene, i);
@@ -252,11 +256,13 @@ int main(int argc, char *argv[]) {
         
         initialize_background(scene);
         initialize_player(scene);
+        initialize_bounds(scene, MIN, MAX);
         initialize_terrain(scene);
         frame_spawn_random(scene, MAX, MAX.x);
 
         body_t *player = scene_get_body(scene, 3);
         player_entity_t *player_entity = body_get_info(player);
+        create_bounds_collisions(scene, player, PLAYER_RADIUS);
 
         double time_since_last_enemy = 0;
         double time_since_last_frame = 0;
@@ -264,7 +270,6 @@ int main(int argc, char *argv[]) {
         double time_since_last_speedup = 0;
         while (!check_game_end(scene)) {
             entity_set_colliding(player_entity, false);
-            
 
             double dt = time_since_last_tick();
             time_since_last_enemy += dt;
@@ -293,7 +298,7 @@ int main(int argc, char *argv[]) {
                 }
             }
             score += advanced_score_calculation(dt);
-            printf("%f\n", score);
+            //printf("%f\n", score);
 
             sidescroll(scene, scroll_speed, dt);
             scene_tick(scene, dt);

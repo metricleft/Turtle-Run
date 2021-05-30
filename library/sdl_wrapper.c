@@ -168,9 +168,7 @@ sprite_t *sprite_image(const char *image, double scale, SDL_Rect *in){
 
 sprite_t *sprite_animated(const char *image, double scale, int frames, int fps){
     sprite_t *sprite = sprite_image(image, scale, NULL);
-    printf("%d %d\n", sprite->section->w, sprite->section->h );
     *sprite->section = (SDL_Rect){0, 0, sprite->section->w / frames, sprite->section->h};
-    printf("%d %d\n", sprite->section->w, sprite->section->h );
     sprite->frames = frames;
     sprite->speed = fps;
     return sprite;
@@ -344,7 +342,6 @@ void sdl_draw_scroll(body_t *body, sprite_t *sprite){
     int width = sprite->section->w;
     int frame = (int)( sprite->dt * sprite->speed + sprite->section->x) % 
                 (*w - width);
-    printf("%f %d\n", (sprite->dt * sprite->speed) , sprite->section->x);
     assert((frame < *w - width) && (frame >= 0));
     sprite->frames = frame;
     SDL_Rect *in = malloc(sizeof(SDL_Rect));

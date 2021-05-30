@@ -5,6 +5,7 @@
 
 #include "sdl_wrapper.h"
 #include "powerup.h"
+#include "bounds.h"
 
 const double POWERUP_MASS = 0.2;
 const double POWERUP_RADIUS = 15;
@@ -117,6 +118,7 @@ void powerup_spawn_random(scene_t *scene, vector_t MIN, vector_t MAX,
     int random_powerup = rand()%percent_max;
     body_t *player = scene_get_body(scene, 3);
     body_t *powerup = spawn_powerup(scene, MIN, MAX, info);
+    create_bounds_collisions(scene, powerup, POWERUP_RADIUS);
     if (random_powerup <= percent_magnet) {
         sprite_t *magnet_info = sprite_animated(MAGNET, 1, 1, 1);
         body_set_draw(powerup, (draw_func_t) sdl_draw_animated, magnet_info, sprite_free);

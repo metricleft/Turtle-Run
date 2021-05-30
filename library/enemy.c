@@ -5,6 +5,7 @@
 
 #include "sdl_wrapper.h"
 #include "enemy.h"
+#include "bounds.h"
 
 const int GAME_ENEMY_MASS = 10;
 const int ENEMY_RADIUS = 20;
@@ -39,6 +40,7 @@ void spawn_goose(scene_t *scene, vector_t MIN, vector_t MAX) {
     scene_add_body(scene, goose);
     create_destructive_collision(scene, player, goose);
     create_bullet_collisions(scene, goose);
+    create_bounds_collisions(scene, goose, ENEMY_RADIUS);
 }
 
 void spawn_frog(scene_t *scene, vector_t MIN, vector_t MAX) {
@@ -65,6 +67,7 @@ void spawn_frog(scene_t *scene, vector_t MIN, vector_t MAX) {
     scene_add_body(scene, anchor);
     create_destructive_collision(scene, player, frog);
     create_bullet_collisions(scene, frog);
+    create_bounds_collisions(scene, frog, ENEMY_RADIUS);
 }
 
 typedef struct param {
@@ -108,6 +111,7 @@ void spawn_fly(scene_t *scene, vector_t MIN, vector_t MAX) {
     scene_add_body(scene, fly);
     create_destructive_collision(scene, player, fly);
     create_bullet_collisions(scene, fly);
+    create_bounds_collisions(scene, fly, ENEMY_RADIUS/2);
 }
 
 void enemy_spawn_random(scene_t *scene, vector_t MIN, vector_t MAX) {
