@@ -2,13 +2,15 @@
 #define __SDL_WRAPPER_H__
 
 #include <stdbool.h>
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_mixer.h>
-#include "color.h"
 #include "list.h"
 #include "scene.h"
-#include <SDL2/SDL.h>
 #include "vector.h"
+#include "color.h"
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_mixer.h>
+#include <SDL2/SDL2_gfxPrimitives.h>
+#include <SDL2/SDL_image.h>
+#include <SDL2/SDL_ttf.h>
 
 /**
  * Contains all the info needed to draw a sprite, including the texture used
@@ -234,5 +236,15 @@ vector_t sdl_mouse_pos();
  * @return the number of seconds that have elapsed
  */
 double time_since_last_tick(void);
+
+/**
+ * Draws text in the specified color in the window with top-left coordinates coords.
+ * 
+ * @param window a pointer to an SDL_Window that the text will be drawn in
+ * @param text the text to be drawn
+ * @param color the color of the text in RGB
+ * @param coords the coordinates of the top-left corner of the text
+ */
+void sdl_draw_text(SDL_Window *window, char *text, rgb_color_t color, vector_t coords);
 
 #endif // #ifndef __SDL_WRAPPER_H__

@@ -27,7 +27,7 @@ Mix_Chunk *shot = NULL;
 const int ARC_RESOLUTION = 10;
 
 const double MAX_DT = 0.01;
-const double MIN_DT = 0.003;
+const double MIN_DT = 0.002;
 
 const double BULLET_RADIUS = 6;
 const double BULLET_MASS = 0.2;
@@ -60,7 +60,7 @@ const vector_t DEFAULT_SCROLL_SPEED = {-200, 0};
 const double ELASTIC_COLLISION = 1;
 const double INELASTIC_COLLISION = 0;
 
-bool game_end() {
+void game_end() {
     sdl_on_key(NULL);
     sdl_on_click(NULL);
     //exit(0);
@@ -351,8 +351,11 @@ int main(int argc, char *argv[]) {
     jump = loadEffects("sounds/jump1.wav");
     slide = loadEffects("sounds/sliding.wav");
     shot = loadEffects("sounds/shoot.wav");
+
     SDL_Window *window = sdl_init(MIN,MAX);
-    Mix_PlayMusic(soundtrack, -1);
+    //Mix_PlayMusic(soundtrack, -1);
+    sdl_draw_text(window, "Turtle Run", GREEN, (vector_t){100, 100});
+
 
     while (!sdl_is_done(window)) {
         //sdl_on_key((event_handler_t) menu_key_handler);

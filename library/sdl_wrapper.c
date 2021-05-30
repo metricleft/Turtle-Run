@@ -2,10 +2,7 @@
 #include <math.h>
 #include <stdlib.h>
 #include <time.h>
-#include <SDL2/SDL2_gfxPrimitives.h>
-#include <SDL2/SDL_image.h>
 #include "sdl_wrapper.h"
-#include <SDL2/SDL_mixer.h>
 
 const char WINDOW_TITLE[] = "CS 3";
 const int WINDOW_WIDTH = 1000;
@@ -203,6 +200,7 @@ SDL_Window *sdl_init(vector_t min, vector_t max) {
     center = vec_multiply(0.5, vec_add(min, max));
     max_diff = vec_subtract(max, center);
     SDL_Init(SDL_INIT_EVERYTHING);
+    TTF_Init();
     Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048);
     window = SDL_CreateWindow(
         WINDOW_TITLE,
@@ -412,3 +410,26 @@ double time_since_last_tick(void) {
     last_clock = now;
     return difference;
 }
+
+void sdl_draw_text(SDL_Window *window, char *text, rgb_color_t color, vector_t coords) {
+    SDL_Renderer *renderer = SDL_GetRenderer(window);
+    TTF_Font *font = TTF_OpenFont("static/Sans.ttf", 24);
+    SDL_Color sdl_color = {(Uint8)color.r, (Uint8)color.g, (Uint8)color.b};
+    SDL_Surface *text_surface = TTF_RenderText_Solid(font, text, sdl_color);
+    SDL_Texture *text_texture = SDL_CreateTextureFromSurface(renderer, text_surface);
+
+    int *width = malloc(sizeof(int));
+    int *height = malloc(sizeof(int));
+    TTF_SizeText(font, text, width, height);
+    SDL_Rect *text_rect = malloc(sizeof(SDL_Rect));
+    *text_rect = (SDL_Rect){(int)coords.x, (int)coords.y, *width, *height};
+
+    SDL_RenderCopy(renderer, text_texture, NULL, text_rect);
+
+    SDL_FreeSurface(text_surface);
+    SDL_DestroyTexture(text_texture);
+    free(text_rect);
+    free(width);
+    free(height);
+}
+
