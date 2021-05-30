@@ -66,12 +66,38 @@ overlap_return_t overlap(list_t *axis, list_t *shape1, list_t *shape2){
 
 
 collision_info_t find_collision(list_t *shape1, list_t *shape2){
+    vector_t shape1_min = *(vector_t *) list_get(shape1,0);
+    vector_t shape1_max = *(vector_t *) list_get(shape1,0);
+
+    vector_t shape2_min = *(vector_t *) list_get(shape2,0);
+    vector_t shape2_max = *(vector_t *) list_get(shape2,0);
+
+    for (int i = 0; i < list_size(shape1); i++) {
+        shape1_min.x = fmin(shape1_min.x, (*(vector_t *) list_get(shape1,i)).x);
+        shape1_max.x = fmax(shape1_max.x, (*(vector_t *) list_get(shape1,i)).x);
+        shape1_min.y = fmin(shape1_min.y, (*(vector_t *) list_get(shape1,i)).y);
+        shape1_max.y = fmax(shape1_max.y, (*(vector_t *) list_get(shape1,i)).y);
+    }
+    for (int i = 0; i < list_size(shape2); i++) {
+        shape2_min.x = fmin(shape2_min.x, (*(vector_t *) list_get(shape2,i)).x);
+        shape2_max.x = fmax(shape2_max.x, (*(vector_t *) list_get(shape2,i)).x);
+        shape2_min.y = fmin(shape2_min.y, (*(vector_t *) list_get(shape2,i)).y);
+        shape2_max.y = fmax(shape2_max.y, (*(vector_t *) list_get(shape2,i)).y);
+    }
+
+    if (shape1_max.x < shape2_min.x || shape1_max.y < shape2_min.y ||
+                shape2_max.x < shape1_min.x || shape2_max.y < shape1_min.y) {
+                    return (collision_info_t) {false, VEC_ZERO};
+                }
+    
+    /*
     vector_t shape1_centroid = polygon_centroid(shape1);
     vector_t shape2_centroid = polygon_centroid(shape2);
 
     double shape1_r = 0;
     double shape2_r = 0;
     for (int i = 0; i < list_size(shape1); i++) {
+        
         shape1_r = fmax(shape1_r, 
                 vec_mag(vec_subtract(*(vector_t *) list_get(shape1,i), 
                                         shape1_centroid)));
@@ -85,6 +111,8 @@ collision_info_t find_collision(list_t *shape1, list_t *shape2){
             shape1_r + shape2_r) {
                 return (collision_info_t) {false, VEC_ZERO};
     }
+    */
+   
     list_t *axis1 = get_axis(shape1);
     list_t *axis2 = get_axis(shape2);
     overlap_return_t shape1_overlap = overlap(axis1, shape1, shape2);
