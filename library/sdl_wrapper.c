@@ -214,7 +214,7 @@ SDL_Window *sdl_init(vector_t min, vector_t max) {
     return window;
 }
 
-void sdl_set_window(SDL_Renderer *new_window) {
+void sdl_set_window(SDL_Window *new_window) {
     window = new_window;
     renderer = SDL_GetRenderer(new_window);
 }

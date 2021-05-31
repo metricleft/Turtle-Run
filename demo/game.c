@@ -38,6 +38,7 @@ const int ENEMY_INTERVAL = 5;
 const int SPEEDUP_INTERVAL = 5;
 
 const double DEFAULT_SPEEDUP = -50;
+const double MAX_SPEED = 700;
 
 //const rgb_color_t PLAYER_BULLET_COLOR = {0, 1, 0};
 const double PLAYER_SPEED = 600;
@@ -51,10 +52,12 @@ const int PLAYER_FPS = 6;
 
 const char *DEFAULT_FONT = "static/Sans.ttf";
 const int TEXT_HEIGHT = 50;
+const int SMALL_TEXT_HEIGHT = 30;
 const int THICK_OUTLINE = 4;
 const int THIN_OUTLINE = 2;
-const int MENU_INTERVAL = 80;
-const int BUTTON_OFFSET = 10;
+const int TEXT_SPACING = 80;
+const int SMALL_TEXT_SPACING = 60;
+const int TEXT_OFFSET = 10;
 
 const char *SKY_IMG = "static/background_sky.png";
 const char *GRASS_IMG = "static/background_grass.png";
@@ -245,51 +248,64 @@ void player_shoot(char key, mouse_event_type_t type, double held_time, void *sce
     }
 }
 
-void display_main_menu(SDL_Window *window) {
+void draw_background() {
     scene_t *menu = scene_init();
     add_background(menu, BACKGROUND_IMG, 0);
     sdl_render_scene(menu);
     free(menu);
+}
+
+void click_to_continue(char key, mouse_event_type_t type, double held_time,
+                        void *window){
+    if (type == BUTTON_PRESSED) {
+        switch (key) {
+            case LEFT_CLICK:
+                SDL_DestroyWindow(window);
+                SDL_Event *event = malloc(sizeof(event));
+                event->type = SDL_QUIT;
+                SDL_PushEvent(event);
+                break;
+        }
+    }
+}
+
+void display_main_menu(SDL_Window *window) {
+    draw_background();
 
     //Draw title:
     vector_t center = {(MAX.x - MIN.x)/2, MAX.y};
-    /*body_t *backing =
-        body_init(compute_rect_points(center, MAX.x-MIN.x, TEXT_HEIGHT*3), INFINITY);
-    rgb_color_t *lime = malloc(sizeof(rgb_color_t));
-    *lime = LIME;
-    sdl_draw_polygon(backing, lime);*/
     center = (vector_t){
         sdl_text_center(MIN, MAX, "TURTLE RUN", DEFAULT_FONT, TEXT_HEIGHT), MIN.y};
-    sdl_draw_outlined_text(window, "TURTLE RUN", DEFAULT_FONT, LIME, WHITE, TEXT_HEIGHT,
+    sdl_draw_outlined_text(window, "TURTLE RUN", DEFAULT_FONT, LIME, INDIGO, TEXT_HEIGHT,
                            THICK_OUTLINE, center);
     
     //Draw options:
     center = (vector_t){
                     sdl_text_center(MIN, MAX, "Play Game", DEFAULT_FONT, TEXT_HEIGHT),
-                                    MENU_INTERVAL*2};
-    sdl_draw_outlined_text(window, "Play Game", DEFAULT_FONT, LIME, WHITE, TEXT_HEIGHT,
+                                    TEXT_SPACING*2};
+    sdl_draw_outlined_text(window, "Play Game", DEFAULT_FONT, LIME, INDIGO, TEXT_HEIGHT,
                            THIN_OUTLINE, center);
     center = (vector_t){
                     sdl_text_center(MIN, MAX, "Instructions", DEFAULT_FONT, TEXT_HEIGHT),
-                                    MENU_INTERVAL*3};
-    sdl_draw_outlined_text(window, "Instructions", DEFAULT_FONT, LIME, WHITE, TEXT_HEIGHT,
+                                    TEXT_SPACING*3};
+    sdl_draw_outlined_text(window, "Instructions", DEFAULT_FONT, LIME, INDIGO,TEXT_HEIGHT,
                            THIN_OUTLINE, center);
 
     center = (vector_t){
                     sdl_text_center(MIN, MAX, "High Scores", DEFAULT_FONT, TEXT_HEIGHT),
-                                    MENU_INTERVAL*4};
-    sdl_draw_outlined_text(window, "High Scores", DEFAULT_FONT, LIME, WHITE, TEXT_HEIGHT,
+                                    TEXT_SPACING*4};
+    sdl_draw_outlined_text(window, "High Scores", DEFAULT_FONT, LIME, INDIGO, TEXT_HEIGHT,
                            THIN_OUTLINE, center);
 
     center = (vector_t){
                     sdl_text_center(MIN, MAX, "Quit Game", DEFAULT_FONT, TEXT_HEIGHT),
-                                    MENU_INTERVAL*5};
-    sdl_draw_outlined_text(window, "Quit Game", DEFAULT_FONT, LIME, WHITE, TEXT_HEIGHT,
+                                    TEXT_SPACING*5};
+    sdl_draw_outlined_text(window, "Quit Game", DEFAULT_FONT, LIME, INDIGO, TEXT_HEIGHT,
                            THIN_OUTLINE, center);
 }
 
 void menu_play_game() {
-    SDL_Window *window = sdl_init(MIN,MAX);
+    SDL_Window *window = sdl_init(MIN, MAX);
     bool stop_game = false;
 
     //Inside "Play Game":
@@ -339,8 +355,10 @@ void menu_play_game() {
                 time_since_last_powerup = 0;
             }
             if (time_since_last_speedup > SPEEDUP_INTERVAL) {
-                scroll_speed->x = scroll_speed->x + DEFAULT_SPEEDUP *
-                    (strcmp(entity_get_powerup(player_entity), "SLOW")? 1:0.5);
+                scroll_speed->x = fmin(
+                    scroll_speed->x + DEFAULT_SPEEDUP *
+                    (strcmp(entity_get_powerup(player_entity), "SLOW")? 1:0.5),
+                    MAX_SPEED);
                 time_since_last_speedup = 0;
                 for (int i = 0; i < 3 ; i++){
                     sprite_t *sprite = body_get_draw_info(scene_get_body(scene, i));
@@ -368,24 +386,88 @@ void menu_play_game() {
     SDL_DestroyWindow(window);
 }
 
+void menu_instructions() {
+    SDL_Window *window = sdl_init(MIN, MAX);
+    sdl_on_click((event_handler_t)click_to_continue);
+    draw_background();
+
+    vector_t center = (vector_t){
+        sdl_text_center(MIN, MAX, "INSTRUCTIONS", DEFAULT_FONT, TEXT_HEIGHT), MIN.y};
+    sdl_draw_outlined_text(window, "INSTRUCTIONS", DEFAULT_FONT, LIME, INDIGO,TEXT_HEIGHT,
+                           THICK_OUTLINE, center);
+    
+    char *message = "Press AD or arrow keys to move left and right.";
+    center = (vector_t){
+                    sdl_text_center(MIN, MAX, message, DEFAULT_FONT, SMALL_TEXT_HEIGHT),
+                    SMALL_TEXT_SPACING*2};
+    sdl_draw_outlined_text(window, message, DEFAULT_FONT, LIME, INDIGO, SMALL_TEXT_HEIGHT,
+                           THIN_OUTLINE, center);
+    
+    message = "Press W or the up arrow to jump.";
+    center = (vector_t){
+                    sdl_text_center(MIN, MAX, message, DEFAULT_FONT, SMALL_TEXT_HEIGHT),
+                    SMALL_TEXT_SPACING*3};
+    sdl_draw_outlined_text(window, message, DEFAULT_FONT, LIME, INDIGO, SMALL_TEXT_HEIGHT,
+                           THIN_OUTLINE, center);
+
+    message = "Dodge enemies and avoid going off-screen.";
+    center = (vector_t){
+                    sdl_text_center(MIN, MAX, message, DEFAULT_FONT, SMALL_TEXT_HEIGHT),
+                    SMALL_TEXT_SPACING*4};
+    sdl_draw_outlined_text(window, message, DEFAULT_FONT, LIME, INDIGO, SMALL_TEXT_HEIGHT,
+                           THIN_OUTLINE, center);
+    
+    message = "Left-click to shoot water drops at enemies.";
+    center = (vector_t){
+                    sdl_text_center(MIN, MAX, message, DEFAULT_FONT, SMALL_TEXT_HEIGHT),
+                    SMALL_TEXT_SPACING*5};
+    sdl_draw_outlined_text(window, message, DEFAULT_FONT, LIME, INDIGO, SMALL_TEXT_HEIGHT,
+                           THIN_OUTLINE, center);
+
+    message = "Collect powerups to gain special powers.";
+    center = (vector_t){
+                    sdl_text_center(MIN, MAX, message, DEFAULT_FONT, SMALL_TEXT_HEIGHT),
+                    SMALL_TEXT_SPACING*6};
+    sdl_draw_outlined_text(window, message, DEFAULT_FONT, LIME, INDIGO, SMALL_TEXT_HEIGHT,
+                           THIN_OUTLINE, center);
+    
+    message = "Left-click anywhere to continue...";
+    center = (vector_t){MIN.x+TEXT_OFFSET, SMALL_TEXT_SPACING*7.5};
+    sdl_draw_outlined_text(window, message, DEFAULT_FONT, LIME, INDIGO, SMALL_TEXT_HEIGHT,
+                           THIN_OUTLINE, center);
+
+    while (!sdl_is_done(window)) {
+    }
+}
+
 int is_in_button_bounds(double x, double y, vector_t box, int width) {
     return x > box.x && x < box.x+width &&
-           y > box.y-MENU_INTERVAL+BUTTON_OFFSET && y < box.y-BUTTON_OFFSET;
+           y > box.y-TEXT_SPACING+TEXT_OFFSET && y < box.y-TEXT_OFFSET;
+}
+
+void menu_mouse_handler(char key, mouse_event_type_t type, double held_time,
+                        void *window);
+
+void show_window(SDL_Window *window) {
+    sdl_set_window(window);
+    SDL_ShowWindow(window);
+    sdl_on_click((event_handler_t)menu_mouse_handler);
+    display_main_menu(window);
 }
 
 void menu_mouse_handler(char key, mouse_event_type_t type, double held_time,
                         void *window){
     vector_t box1 = {sdl_text_center(MIN, MAX, "Play Game", DEFAULT_FONT, TEXT_HEIGHT),
-                     MAX.y - MENU_INTERVAL*2};
+                     MAX.y - TEXT_SPACING*2};
     int width1 = sdl_text_width("Play Game", DEFAULT_FONT, TEXT_HEIGHT);
     vector_t box2 = {sdl_text_center(MIN, MAX, "Instructions", DEFAULT_FONT, TEXT_HEIGHT),
-                     MAX.y - MENU_INTERVAL*3};
+                     MAX.y - TEXT_SPACING*3};
     int width2 = sdl_text_width("Play Game", DEFAULT_FONT, TEXT_HEIGHT);
     vector_t box3 = {sdl_text_center(MIN, MAX, "High Scores", DEFAULT_FONT, TEXT_HEIGHT),
-                     MAX.y - MENU_INTERVAL*4};
+                     MAX.y - TEXT_SPACING*4};
     int width3 = sdl_text_width("Play Game", DEFAULT_FONT, TEXT_HEIGHT);
     vector_t box4 = {sdl_text_center(MIN, MAX, "Quit Game", DEFAULT_FONT, TEXT_HEIGHT),
-                     MAX.y - MENU_INTERVAL*5};
+                     MAX.y - TEXT_SPACING*5};
     int width4 = sdl_text_width("Play Game", DEFAULT_FONT, TEXT_HEIGHT);
 
     if (type == BUTTON_PRESSED) {
@@ -398,13 +480,13 @@ void menu_mouse_handler(char key, mouse_event_type_t type, double held_time,
                     printf("PLAY GAME\n");
                     SDL_HideWindow(window);
                     menu_play_game();
-                    sdl_set_window(window);
-                    SDL_ShowWindow(window);
-                    display_main_menu(window);
+                    show_window(window);
                 }
                 else if (is_in_button_bounds(x, y, box2, width2)) {
                     printf("INSTRUCTIONS\n");
-                    //TODO
+                    SDL_HideWindow(window);
+                    menu_instructions();
+                    show_window(window);
                 }
                 else if (is_in_button_bounds(x, y, box3, width3)) {
                     printf("HIGH SCORES\n");
@@ -412,6 +494,8 @@ void menu_mouse_handler(char key, mouse_event_type_t type, double held_time,
                 }
                 else if (is_in_button_bounds(x, y, box4, width4)) {
                     printf("QUIT GAME\n");
+                    SDL_DestroyWindow(window);
+                    Mix_HaltMusic();
                     exit(0);
                 }
                 break;
@@ -431,11 +515,10 @@ int main(int argc, char *argv[]) {
     SDL_Window *window = sdl_init(MIN,MAX);
     display_main_menu(window);
     Mix_PlayMusic(soundtrack, -1);
+    sdl_on_click((event_handler_t) menu_mouse_handler);
 
     while (!sdl_is_done(window)) {
-        sdl_on_click((event_handler_t) menu_mouse_handler);
     }
 
-    Mix_HaltMusic();
     return 0;
 }

@@ -133,7 +133,7 @@ SDL_Window *sdl_init(vector_t min, vector_t max);
  * 
  * @param renderer the new renderer.
  */
-void sdl_set_window(SDL_Renderer *window);
+void sdl_set_window(SDL_Window *window);
 
 /**
  * Processes all SDL events and returns whether the window has been closed.
