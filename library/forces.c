@@ -164,18 +164,59 @@ void physics_collision_handler(body_t *body1, body_t *body2,
 void normal_handler(collision_param_t *param){
     list_t *shape1 = body_get_shape(param->body1);
     list_t *shape2 = body_get_shape(param->body2);
+
+    vector_t shape1_min = *(vector_t *) list_get(shape1,0);
+    vector_t shape1_max = *(vector_t *) list_get(shape1,0);
+
+    vector_t shape2_min = *(vector_t *) list_get(shape2,0);
+    vector_t shape2_max = *(vector_t *) list_get(shape2,0);
+
+    for (int i = 0; i < list_size(shape1); i++) {
+        shape1_min.x = fmin(shape1_min.x, (*(vector_t *) list_get(shape1,i)).x);
+        shape1_max.x = fmax(shape1_max.x, (*(vector_t *) list_get(shape1,i)).x);
+        shape1_min.y = fmin(shape1_min.y, (*(vector_t *) list_get(shape1,i)).y);
+        shape1_max.y = fmax(shape1_max.y, (*(vector_t *) list_get(shape1,i)).y);
+    }
+    for (int i = 0; i < list_size(shape2); i++) {
+        shape2_min.x = fmin(shape2_min.x, (*(vector_t *) list_get(shape2,i)).x);
+        shape2_max.x = fmax(shape2_max.x, (*(vector_t *) list_get(shape2,i)).x);
+        shape2_min.y = fmin(shape2_min.y, (*(vector_t *) list_get(shape2,i)).y);
+        shape2_max.y = fmax(shape2_max.y, (*(vector_t *) list_get(shape2,i)).y);
+    }
+
+    if (body_get_velocity(param->body1).y < 0 &&
+            shape1_max.x > shape2_min.x && shape1_min.x < shape2_max.x &&
+            shape1_min.y > shape2_max.y &&
+            shape1_min.y - shape2_max.y < SMALL_DISTANCE) {
+        player_entity_t *entity1 = body_get_info(param->body1); //This must be the player.
+        entity_set_colliding(entity1, true);
+        vector_t new_centroid = {body_get_centroid(param->body1).x,
+                            shape2_max.y + 0.5*(shape1_max.y - shape1_min.y)+SMALL_DISTANCE};
+        body_set_centroid(param->body1, new_centroid);
+        vector_t new_velocity = {body_get_velocity(param->body1).x, 0};
+        body_set_velocity(param->body1, new_velocity);
+        vector_t force = vec_multiply(body_get_mass(param->body1),
+                                          *(vector_t *) param->aux);
+        body_add_force(param->body1, force);
+    }
+    /*
     collision_info_t collision = find_collision(shape1, shape2);
     if (collision.collided) {
         player_entity_t *entity1 = body_get_info(param->body1); //This must be the player.
         entity_set_colliding(entity1, true);
         if (!(param->collided)){
-            body_set_velocity(param->body1, VEC_ZERO);
+            // body_set_velocity(param->body1, VEC_ZERO);
             param->collided = true; 
         }
         if (fabs(collision.axis.x) < SMALL_DISTANCE && collision.axis.y < 0) {
             vector_t force = vec_multiply(body_get_mass(param->body1),
                                           *(vector_t *) param->aux);
             body_add_force(param->body1, force);
+            vector_t offset_centroid = vec_add(body_get_centroid(param->body1),
+                    vec_negate(vec_multiply(collision.overlap, collision.axis)));
+            offset_centroid.y = offset_centroid.y + SMALL_DISTANCE;
+            body_set_centroid(param->body1,offset_centroid);
+            printf("%f\n",offset_centroid.y);
         } else {
             double reduced_mass = calculate_reduced_mass(param->body1, param->body2);
             vector_t impulse = 
@@ -189,7 +230,10 @@ void normal_handler(collision_param_t *param){
     }
     else if (!collision.collided) {
         param->collided = false;
+        player_entity_t *entity1 = body_get_info(param->body1); //This must be the player.
+        entity_set_colliding(entity1, false);
     }
+    */
     free(shape1);
     free(shape2);
 }
@@ -235,7 +279,7 @@ void create_normal_collision(scene_t *scene, vector_t grav,
     list_add(bodies, body1);
     list_add(bodies, body2);
     collision_param_t *force_param = malloc(sizeof(collision_param_t));
-    *force_param = (collision_param_t) {(collision_handler_t) normal_handler, body1,
+    *force_param = (collision_param_t) {normal_handler, body1,
                                         body2, grav_param, false};
     scene_add_bodies_force_creator(scene, normal_handler, force_param,
                                         bodies, free);

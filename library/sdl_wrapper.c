@@ -2,16 +2,13 @@
 #include <math.h>
 #include <stdlib.h>
 #include <time.h>
-#include <SDL2/SDL2_gfxPrimitives.h>
-#include <SDL2/SDL_image.h>
 #include "sdl_wrapper.h"
-#include <SDL2/SDL_mixer.h>
 
 const char WINDOW_TITLE[] = "CS 3";
 const int WINDOW_WIDTH = 1000;
 const int WINDOW_HEIGHT = 500;
 const double MS_PER_S = 1e3;
-const rgb_color_t BACKGROUND = {28, 163, 236};
+const rgb_color_t BACKGROUND = {255, 255, 255};
 
 Mix_Music *loadMedia(char *music_name){
     Mix_Music *music = Mix_LoadMUS(music_name);
@@ -203,6 +200,7 @@ SDL_Window *sdl_init(vector_t min, vector_t max) {
     center = vec_multiply(0.5, vec_add(min, max));
     max_diff = vec_subtract(max, center);
     SDL_Init(SDL_INIT_EVERYTHING);
+    TTF_Init();
     Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048);
     window = SDL_CreateWindow(
         WINDOW_TITLE,
@@ -214,6 +212,10 @@ SDL_Window *sdl_init(vector_t min, vector_t max) {
     );
     renderer = SDL_CreateRenderer(window, -1, 0);
     return window;
+}
+
+void sdl_set_renderer(SDL_Renderer *new_renderer) {
+    renderer = new_renderer;
 }
 
 bool sdl_is_done(void *scene) {
@@ -264,7 +266,8 @@ bool sdl_is_done(void *scene) {
 }
 
 void sdl_clear(void) {
-    SDL_SetRenderDrawColor(renderer, (Uint8)BACKGROUND.r, (Uint8)BACKGROUND.g, (Uint8)BACKGROUND.b, 255);
+    SDL_SetRenderDrawColor(renderer, (Uint8)BACKGROUND.r, (Uint8)BACKGROUND.g,
+                           (Uint8)BACKGROUND.b, 255);
     SDL_RenderClear(renderer);
 }
 
@@ -295,7 +298,7 @@ void sdl_draw_polygon(body_t *body, rgb_color_t *color) {
     filledPolygonRGBA(
         renderer,
         x_points, y_points, n,
-        (Uint8)(*color).r * 255, (Uint8)(*color).g * 255, (Uint8)(*color).b * 255, 255
+        (Uint8)((*color).r*255), (Uint8)((*color).g*255), (Uint8)((*color).b*255), 255
     );
     free(x_points);
     free(y_points);
@@ -367,7 +370,7 @@ void sdl_show(void) {
     boundary->y = (int)(max_pixel.y);
     boundary->w = (int)(max_pixel.x - min_pixel.x);
     boundary->h = (int)(min_pixel.y - max_pixel.y);
-    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
     SDL_RenderDrawRect(renderer, boundary);
     free(boundary);
     SDL_RenderPresent(renderer);
@@ -375,14 +378,13 @@ void sdl_show(void) {
 
 void sdl_render_scene(scene_t *scene) {
     sdl_clear();
-    size_t body_count = scene_bodies(scene);
-    for (size_t i = 0; i < body_count; i++) {
+    size_t bodies = scene_bodies(scene);
+    for (size_t i = 0; i < bodies; i++) {
         body_t *body = scene_get_body(scene, i);
         body_draw(body);
     }
     sdl_show();
 }
-
 
 void sdl_on_key(event_handler_t handler) {
     key_handler = handler;
@@ -411,4 +413,52 @@ double time_since_last_tick(void) {
         : 0.0; // return 0 the first time this is called
     last_clock = now;
     return difference;
+}
+
+void sdl_draw_text(SDL_Window *window, char *text, const char *font, rgb_color_t color,
+                   int size, vector_t coords) {
+    TTF_Font *ttf_font = TTF_OpenFont(font, size);
+
+    SDL_Renderer *renderer = SDL_GetRenderer(window);
+    SDL_Color sdl_color = {(Uint8)(color.r*255), (Uint8)(color.g*255),
+                           (Uint8)(color.b*255)};
+    SDL_Surface *text_surface = TTF_RenderText_Solid(ttf_font, text, sdl_color);
+    SDL_Texture *text_texture = SDL_CreateTextureFromSurface(renderer, text_surface);
+
+    int *width = malloc(sizeof(int));
+    int *height = malloc(sizeof(int));
+    TTF_SizeText(ttf_font, text, width, height);
+    SDL_Rect *text_rect = malloc(sizeof(SDL_Rect));
+    *text_rect = (SDL_Rect){(int)coords.x, (int)coords.y, *width, *height};
+    SDL_RenderCopy(renderer, text_texture, NULL, text_rect);
+    sdl_show();
+
+    SDL_FreeSurface(text_surface);
+    SDL_DestroyTexture(text_texture);
+    free(text_rect);
+    free(width);
+    free(height);
+    TTF_CloseFont(ttf_font);
+}
+
+void sdl_draw_outlined_text(SDL_Window *window, char *text, const char *font,
+                            rgb_color_t color, rgb_color_t outline_color,
+                            int size, int thickness, vector_t coords) {
+    double x = coords.x;
+    double y = coords.y;
+    sdl_draw_text(window, text, font, outline_color, size, (vector_t){x-thickness, y});
+    sdl_draw_text(window, text, font, outline_color, size, (vector_t){x+thickness, y});
+    sdl_draw_text(window, text, font, outline_color, size, (vector_t){x, y-thickness});
+    sdl_draw_text(window, text, font, outline_color, size, (vector_t){x, y+thickness});
+    sdl_draw_text(window, text, font, color, size, (vector_t){x, y});
+}
+
+int sdl_text_center(vector_t min, vector_t max, char *text, const char *font, int size) {
+    TTF_Font *ttf_font = TTF_OpenFont(font, size);
+    int *width = malloc(sizeof(int));
+    TTF_SizeText(ttf_font, text, width, NULL);
+    int mid = (int)(max.x - min.x - *width)/2;
+    free(width);
+    TTF_CloseFont(ttf_font);
+    return mid;
 }
