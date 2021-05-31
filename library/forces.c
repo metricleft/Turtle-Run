@@ -176,6 +176,9 @@ void normal_handler(collision_param_t *param){
             vector_t force = vec_multiply(body_get_mass(param->body1),
                                           *(vector_t *) param->aux);
             body_add_force(param->body1, force);
+            body_set_centroid(param->body1,
+                        vec_add(body_get_centroid(param->body1),
+                vec_negate(vec_multiply(collision.overlap, collision.axis))));
         } else {
             double reduced_mass = calculate_reduced_mass(param->body1, param->body2);
             vector_t impulse = 
@@ -189,6 +192,7 @@ void normal_handler(collision_param_t *param){
     }
     else if (!collision.collided) {
         param->collided = false;
+        
     }
     free(shape1);
     free(shape2);
@@ -235,7 +239,7 @@ void create_normal_collision(scene_t *scene, vector_t grav,
     list_add(bodies, body1);
     list_add(bodies, body2);
     collision_param_t *force_param = malloc(sizeof(collision_param_t));
-    *force_param = (collision_param_t) {(collision_handler_t) normal_handler, body1,
+    *force_param = (collision_param_t) {normal_handler, body1,
                                         body2, grav_param, false};
     scene_add_bodies_force_creator(scene, normal_handler, force_param,
                                         bodies, free);
