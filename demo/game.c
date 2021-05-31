@@ -49,9 +49,11 @@ const double PLAYER_SCALE = 2;
 const int PLAYER_FRAMES = 8;
 const int PLAYER_FPS = 6;
 
-const char* SKY_IMG = "static/background_sky.png";
-const char* GRASS_IMG = "static/background_grass.png";
-const char* WATER_IMG = "static/background_water.png";
+const char *DEFAULT_FONT = "static/Sans.ttf";
+const char *SKY_IMG = "static/background_sky.png";
+const char *GRASS_IMG = "static/background_grass.png";
+const char *WATER_IMG = "static/background_water.png";
+const char *BACKGROUND_IMG = "static/background.png";
 const SDL_Rect BACKGROUND_FRAME = {0,0, 256, 128};
 
 const vector_t DEFAULT_GRAVITY = {0, -500};
@@ -236,6 +238,23 @@ void player_shoot(char key, mouse_event_type_t type, double held_time, void *sce
     }
 }
 
+void display_main_menu(SDL_Window *window) {
+    /*scene_t *menu = scene_init();
+    add_background(menu, BACKGROUND_IMG, 0);*/
+    //Draw title:
+    sdl_clear();
+    vector_t center = {(MAX.x - MIN.x)/2, MAX.y};
+    body_t *backing = body_init(compute_rect_points(center, MAX.x-MIN.x, 140), INFINITY);
+    rgb_color_t *lime = malloc(sizeof(rgb_color_t));
+    *lime = LIME;
+    sdl_draw_polygon(backing, lime);
+    center = (vector_t){sdl_text_center(MIN, MAX, "TURTLE RUN", DEFAULT_FONT, 50), MIN.y};
+    sdl_draw_outlined_text(window, "TURTLE RUN", DEFAULT_FONT, GREEN, WHITE, 50, 4,
+                           center);
+    sdl_show();
+    //free(menu);
+}
+
 void menu_play_game() {
     SDL_Window *window = sdl_init(MIN,MAX);
     bool stop_game = false;
@@ -337,7 +356,9 @@ void menu_mouse_handler(char key, mouse_event_type_t type, double held_time,
                 //vector_t mouse_coords = sdl_mouse_pos();
                 SDL_HideWindow(window);
                 menu_play_game();
+                sdl_set_renderer(SDL_GetRenderer(window));
                 SDL_ShowWindow(window);
+                display_main_menu(window);
                 break;
         }
     }
@@ -353,9 +374,8 @@ int main(int argc, char *argv[]) {
     shot = loadEffects("sounds/shoot.wav");
 
     SDL_Window *window = sdl_init(MIN,MAX);
+    display_main_menu(window);
     //Mix_PlayMusic(soundtrack, -1);
-    sdl_draw_text(window, "Turtle Run", GREEN, (vector_t){100, 100});
-
 
     while (!sdl_is_done(window)) {
         //sdl_on_key((event_handler_t) menu_key_handler);
