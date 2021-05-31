@@ -212,8 +212,7 @@ void player_move (char key, key_event_type_t type, double held_time, void *scene
                                         !strcmp(entity_get_powerup(entity), "JUMP"))) {
                     new_velocity.y = 0.8 * PLAYER_SPEED;
                     Mix_PlayChannel(-1, jump, 0);
-
-                    
+                    entity_set_colliding(entity, false);
                 }
                 break;
         }
@@ -287,7 +286,6 @@ void menu_play_game() {
 
         //Every tick inside "Play Game":
         while (!check_game_end(scene) && !stop_game) {
-            entity_set_colliding(player_entity, false);
 
             double dt = fmax(fmin(time_since_last_tick(), MAX_DT), MIN_DT);
             time_since_last_enemy += dt;
