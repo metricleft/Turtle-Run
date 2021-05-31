@@ -65,7 +65,7 @@ const char *WATER_IMG = "static/background_water.png";
 const char *BACKGROUND_IMG = "static/background.png";
 const SDL_Rect BACKGROUND_FRAME = {0,0, 256, 128};
 
-const vector_t DEFAULT_GRAVITY = {0, -500};
+const vector_t DEFAULT_GRAVITY = {0, -600};
 const vector_t DEFAULT_SCROLL_SPEED = {-200, 0};
 
 const double ELASTIC_COLLISION = 1;
@@ -180,13 +180,11 @@ void sidescroll(scene_t *scene, vector_t *scroll_speed, double dt) {
             sprite_set_speed(sprite, (int)abs((int)(scroll_speed->x) *((int)i+1) /18));
         }
         //Applies a leftwards velocity to all objects with the "SCROLLABLE" tag
-        if (entity_get_scrollable(entity) && 
-                (!entity_is_scrolling(entity) || 
-                    !strcmp(entity_get_type(entity), "TERRAIN"))) {
+        if (entity_get_scrollable(entity) && !entity_is_scrolling(entity)) {
             vector_t scroll = {scroll_speed->x, body_get_velocity(body).y};
             body_set_velocity(body, scroll);
-            //Ensures that every object only gets an initial velocity assigned once
-            entity_set_scrolling(entity);
+            //Ensures that enemies (which accelerate) only get a velocity assigned once
+            if (!strcmp(entity_get_type(entity), "ENEMY")) entity_set_scrolling(entity);
         }
     }
 }
@@ -306,14 +304,14 @@ void menu_play_game() {
     scene_t *scene = scene_init();
     vector_t *scroll_speed = malloc(sizeof(vector_t));
     *scroll_speed = DEFAULT_SCROLL_SPEED;
-    //double *score = malloc(sizeof(double));
-    double score = 0;
+    double *score = malloc(sizeof(double));
+    *score = 0;
 
     initialize_background(scene);
     initialize_player(scene);
     initialize_bounds(scene, MIN, MAX);
     initialize_terrain(scene);
-    frame_spawn_random(scene, MAX, MAX.x);
+    frame_spawn_random(scene, MAX, MAX.x, score);
 
     body_t *player = scene_get_body(scene, 3);
     player_entity_t *player_entity = body_get_info(player);
@@ -337,7 +335,7 @@ void menu_play_game() {
             time_since_last_enemy = 0;
         }
         if (time_since_last_frame > MAX.x / -(scroll_speed->x)) {
-            frame_spawn_random(scene, MAX, MAX.x - 5);
+            frame_spawn_random(scene, MAX, MAX.x - 5, score);
             time_since_last_frame = 0;
         }
         if (time_since_last_powerup > POWERUP_INTERVAL) {
@@ -355,8 +353,8 @@ void menu_play_game() {
                 sprite_set_dt(sprite, 0);
             }
         }
-        score += advanced_score_calculation(dt);
-        //printf("%f\n", score);
+        *score = *score + advanced_score_calculation(dt);
+        //printf("%f\n", *score);
 
         sidescroll(scene, scroll_speed, dt);
         scene_tick(scene, dt);
@@ -369,7 +367,7 @@ void menu_play_game() {
     sdl_on_click(NULL);
     free(scene);
     free(scroll_speed);
-    //free(score);
+    free(score);
     SDL_DestroyWindow(window);
 }
 
@@ -471,13 +469,11 @@ void menu_mouse_handler(char key, mouse_event_type_t type, double held_time,
                 double x = mouse_coords.x;
                 double y = mouse_coords.y;
                 if (is_in_button_bounds(x, y, box1, width1)) {
-                    printf("PLAY GAME\n");
                     SDL_HideWindow(window);
                     menu_play_game();
                     show_window(window);
                 }
                 else if (is_in_button_bounds(x, y, box2, width2)) {
-                    printf("INSTRUCTIONS\n");
                     SDL_HideWindow(window);
                     menu_instructions();
                     show_window(window);
@@ -487,7 +483,6 @@ void menu_mouse_handler(char key, mouse_event_type_t type, double held_time,
                     //TODO
                 }
                 else if (is_in_button_bounds(x, y, box4, width4)) {
-                    printf("QUIT GAME\n");
                     SDL_DestroyWindow(window);
                     Mix_HaltMusic();
                     exit(0);

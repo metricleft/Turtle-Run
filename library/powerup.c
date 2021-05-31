@@ -1,18 +1,22 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
+#include <stdio.h>
 #include <math.h>
 
 #include "sdl_wrapper.h"
 #include "powerup.h"
 #include "bounds.h"
 
-const double POWERUP_MASS = 0.2;
-const double POWERUP_RADIUS = 15;
+const double POWERUP_MASS = 10;
+const double POWERUP_RADIUS = 20;
 const int POWERUP_PADDING = 50;
+const double COIN_SCORE = 100;
+const double GRAVITY_CONST = 10000000;
 const char* MAGNET = "static/magnet_powerup.png";
 const char* SLOW = "static/slow_powerup.png";
 const char* JUMP = "static/jump_powerup.png";
+const char *COIN = "static/coin_spritesheet.png";
 
 void remove_old_powerup(char *powerup, vector_t *scroll_speed) {
     if (!strcmp(powerup, "SLOW")) {
@@ -54,8 +58,6 @@ void create_magnet_gravity(scene_t *scene, double G, body_t *body1, body_t *body
 }
 
 void magnet_handler(body_t *player, body_t *powerup, vector_t axis, void *aux) {
-    double gravity_const = 1000000;
-
     powerup_info_t *info = aux;
     scene_t *scene = info->scene;
     player_entity_t *entity = body_get_info(player);
@@ -65,7 +67,7 @@ void magnet_handler(body_t *player, body_t *powerup, vector_t axis, void *aux) {
         for (size_t i = 0; i < scene_bodies(info->scene); i++) {
             body_t *body = scene_get_body(scene, i);
             if (!strcmp(entity_get_type(body_get_info(body)), "COIN")) {
-                create_magnet_gravity(scene, gravity_const, player, body);
+                create_magnet_gravity(scene, GRAVITY_CONST, body, player);
             }
         }
     }
@@ -94,6 +96,12 @@ void jump_handler(body_t *player, body_t *powerup, vector_t axis, void *aux) {
     body_remove(powerup);
 }
 
+void coin_handler(body_t *player, body_t *coin, vector_t axis, void *aux) {
+    double *score = aux;
+    *score = *score + COIN_SCORE;
+    body_remove(coin);
+}
+
 body_t *spawn_powerup(scene_t *scene, vector_t MIN, vector_t MAX, powerup_info_t *info) {
     vector_t center = {MAX.x + POWERUP_RADIUS,
         rand()%(int)((MAX.y - MIN.y - 2*POWERUP_PADDING) + POWERUP_PADDING)};
@@ -112,7 +120,10 @@ void powerup_spawn_random(scene_t *scene, vector_t MIN, vector_t MAX,
     info->scene = scene;
     info->scroll_speed = scroll_speed;
     int percent_max = 100;
-    int percent_magnet = 10;
+    /*int percent_magnet = 10;
+    int percent_slow = 60;
+    int percent_jump = 100;*/
+    int percent_magnet = 100;
     int percent_slow = 60;
     int percent_jump = 100;
     int random_powerup = rand()%percent_max;
@@ -133,5 +144,21 @@ void powerup_spawn_random(scene_t *scene, vector_t MIN, vector_t MAX,
         sprite_t *jump_info = sprite_animated(JUMP, 1, 1, 1);
         body_set_draw(powerup, (draw_func_t) sdl_draw_animated, jump_info, sprite_free);
         create_collision(scene, player, powerup, jump_handler, info, free);
+    }
+}
+
+void powerup_spawn_coin(scene_t *scene, vector_t center, double *score) {
+    body_t *player = scene_get_body(scene, 3);
+    entity_t *entity = entity_init("COIN", true, false);
+    list_t *coin_coords = compute_rect_points(center, 2*POWERUP_RADIUS,
+                                                 2*POWERUP_RADIUS);
+    body_t *coin = body_init_with_info(coin_coords, POWERUP_MASS, entity,
+                                          entity_free);
+    scene_add_body(scene, coin);
+    sprite_t *coin_info = sprite_animated(COIN, 1, 6, 6);
+    body_set_draw(coin, (draw_func_t) sdl_draw_animated, coin_info, sprite_free);
+    create_collision(scene, player, coin, coin_handler, score, free);
+    if (!strcmp(entity_get_powerup(body_get_info(player)), "MAGNET")) {
+        create_magnet_gravity(scene, GRAVITY_CONST, coin, player);
     }
 }
