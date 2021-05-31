@@ -65,7 +65,7 @@ const char *WATER_IMG = "static/background_water.png";
 const char *BACKGROUND_IMG = "static/background.png";
 const SDL_Rect BACKGROUND_FRAME = {0,0, 256, 128};
 
-const vector_t DEFAULT_GRAVITY = {0, -600};
+const vector_t DEFAULT_GRAVITY = {0, -800};
 const vector_t DEFAULT_SCROLL_SPEED = {-200, 0};
 
 const double ELASTIC_COLLISION = 1;
@@ -318,25 +318,26 @@ void menu_play_game() {
     create_bounds_collisions(scene, player, PLAYER_RADIUS);
 
     double time_since_last_enemy = 0;
-    double time_since_last_frame = 0;
     double time_since_last_powerup = 0;
     double time_since_last_speedup = 0;
+    double distance_since_last_frame = 0;
 
     //Every tick inside "Play Game":
     while (!sdl_is_done(scene)) {
 
-        double dt = fmax(fmin(time_since_last_tick(), MAX_DT), MIN_DT);
+        //double dt = fmax(fmin(time_since_last_tick(), MAX_DT), MIN_DT);
+        double dt = time_since_last_tick();
         time_since_last_enemy += dt;
-        time_since_last_frame += dt;
+        distance_since_last_frame += dt*(-(scroll_speed->x));
         time_since_last_powerup += dt;
         time_since_last_speedup += dt;
         if (time_since_last_enemy > ENEMY_INTERVAL) {
             enemy_spawn_random(scene, MIN, MAX);
             time_since_last_enemy = 0;
         }
-        if (time_since_last_frame > MAX.x / -(scroll_speed->x)) {
-            frame_spawn_random(scene, MAX, MAX.x - 5, score);
-            time_since_last_frame = 0;
+        if (distance_since_last_frame >= MAX.x) {
+            frame_spawn_random(scene, MAX, MAX.x, score);
+            distance_since_last_frame = 0;
         }
         if (time_since_last_powerup > POWERUP_INTERVAL) {
             powerup_spawn_random(scene, MIN, MAX, scroll_speed);

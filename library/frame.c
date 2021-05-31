@@ -5,7 +5,28 @@
 const int TERRAIN_HEIGHT = 50;
 const int PLATFORM_HEIGHT = 10;
 const int TERRAIN_PAD = 10;
-const vector_t NORMAL_GRAV = {0, 500};
+const vector_t NORMAL_GRAV = {0, 800};
+
+/**
+ * Creates a block of terrain in the specified position
+ * @param scene the scene to add the terrain to
+ * @param center vector_t to the center of the rectangular block
+ * @param width width of the rectangle
+ * @param height height of the rectangle
+ */
+void create_terrain_rect(scene_t *scene, vector_t center,
+                            double width, double height) {
+    entity_t *entity = entity_init("TERRAIN", true, false);
+    list_t *rect_coords = compute_rect_points(center, width, height);
+    body_t *body = body_init_with_info(rect_coords, INFINITY,
+                                            entity, entity_free);
+    rgb_color_t *black = malloc(sizeof(rgb_color_t));
+    *black = BLACK;
+    body_set_draw(body, sdl_draw_polygon, black, free);
+    scene_add_body(scene, body);
+    create_normal_collision(scene, NORMAL_GRAV, scene_get_body(scene,3), body);
+    create_terrain_collisions(scene, body);
+}
 
 /**
  * Simple frame that consists of a black box that acts as the floor.
@@ -15,38 +36,20 @@ const vector_t NORMAL_GRAV = {0, 500};
  */
 void frame_0(scene_t *scene, vector_t frame, double frame_start, double *score) {
     vector_t floor_center = (vector_t){0.5*frame.x+frame_start, TERRAIN_PAD};
-    entity_t *entity = entity_init("TERRAIN", true, false);
-    list_t *floor_coords = compute_rect_points(floor_center, frame.x, TERRAIN_HEIGHT);
-    body_t *floor = body_init_with_info(floor_coords, INFINITY,
-                                                entity, entity_free);
-    rgb_color_t *black = malloc(sizeof(rgb_color_t));
-    *black = BLACK;
-    body_set_draw(floor, (draw_func_t) sdl_draw_polygon, black, free);
-    scene_add_body(scene, floor);
-    create_normal_collision(scene, NORMAL_GRAV, scene_get_body(scene, 3), floor);
-    create_terrain_collisions(scene, floor);
+    create_terrain_rect(scene, floor_center, frame.x, TERRAIN_HEIGHT);
 }
 
 /**
- * Frame with a pitfall that occupies the first 1/4 of the ground
+ * Frame with a pitfall that occupies the first 2/5 of the ground
  * @param scene the scene to add the frame to
  * @param frame a vector_t describing the size of the frame.
  * @param frame_start the x coordinate starting point of the frame
  */
 void frame_1(scene_t *scene, vector_t frame, double frame_start, double *score) {
-    vector_t floor_center = (vector_t) {0.625*frame.x+frame_start, TERRAIN_PAD};
-    entity_t *floor_entity = entity_init("TERRAIN", true, false);
-    list_t *floor_coords = compute_rect_points(floor_center,0.75*frame.x,TERRAIN_HEIGHT);
-    body_t *floor = body_init_with_info(floor_coords, INFINITY,
-                                            floor_entity, entity_free);
-    rgb_color_t *black = malloc(sizeof(rgb_color_t));
-    *black = BLACK;
-    body_set_draw(floor, (draw_func_t) sdl_draw_polygon, black, free);
-    scene_add_body(scene, floor);
+    vector_t floor_center = (vector_t) {0.7*frame.x+frame_start, TERRAIN_PAD};
+    create_terrain_rect(scene, floor_center, 0.6*frame.x, TERRAIN_HEIGHT);
     powerup_spawn_coin(scene, (vector_t){0.625*frame.x+frame_start, 2*TERRAIN_HEIGHT},
                        score);
-    create_normal_collision(scene, NORMAL_GRAV, scene_get_body(scene, 3), floor);
-    create_terrain_collisions(scene, floor);
 }
 
 /**
@@ -56,36 +59,17 @@ void frame_1(scene_t *scene, vector_t frame, double frame_start, double *score) 
  * @param frame_start the x coordinate starting point of the frame
  */
 void frame_2(scene_t *scene, vector_t frame, double frame_start, double *score) {
-    vector_t floor_center = (vector_t) {0.625*frame.x+frame_start, TERRAIN_PAD};
-    entity_t *floor_entity = entity_init("TERRAIN", true, false);
-    list_t *floor_coords = compute_rect_points(floor_center,frame.x,TERRAIN_HEIGHT);
-    body_t *floor = body_init_with_info(floor_coords, INFINITY,
-                                            floor_entity, entity_free);
-    rgb_color_t *black = malloc(sizeof(rgb_color_t));
-    *black = BLACK;
-    body_set_draw(floor, (draw_func_t) sdl_draw_polygon, black, free);
-    scene_add_body(scene, floor);
-    powerup_spawn_coin(scene, (vector_t){0.625*frame.x+frame_start, 2*TERRAIN_HEIGHT},
+    vector_t floor_center = (vector_t) {0.5*frame.x+frame_start, TERRAIN_PAD};
+    create_terrain_rect(scene, floor_center, frame.x, TERRAIN_HEIGHT);
+    powerup_spawn_coin(scene, (vector_t){frame.x+frame_start, 2*TERRAIN_HEIGHT},
                        score);
-    create_normal_collision(scene, NORMAL_GRAV, scene_get_body(scene, 3),floor);
-    create_terrain_collisions(scene, floor);
 
     vector_t platform1_center = (vector_t){0.25*frame.x+frame_start,
                                            0.25*frame.y+TERRAIN_PAD};
-    entity_t *platform1_entity = entity_init("TERRAIN",true,false);
-    list_t *platform1_coords = compute_rect_points(platform1_center,frame.x/8.,
-                                                   PLATFORM_HEIGHT);
-    body_t *platform1 = body_init_with_info(platform1_coords,INFINITY,
-                                                platform1_entity,entity_free);
-    rgb_color_t *black1 = malloc(sizeof(rgb_color_t));
-    *black1 = BLACK;
-    body_set_draw(platform1,(draw_func_t) sdl_draw_polygon,black1,free);
-    scene_add_body(scene,platform1);
+    create_terrain_rect(scene, platform1_center, frame.x/8., PLATFORM_HEIGHT);
     powerup_spawn_coin(scene,
                        (vector_t){0.25*frame.x+frame_start,
                                   0.25*frame.y+TERRAIN_PAD+TERRAIN_HEIGHT}, score);
-    create_normal_collision(scene, NORMAL_GRAV, scene_get_body(scene, 3),platform1);
-    create_terrain_collisions(scene, platform1);
     
     vector_t platform2_center = (vector_t){0.5*frame.x + frame_start, 0.5*frame.y};
     entity_t *platform2_entity = entity_init("TERRAIN",true,false);
@@ -108,6 +92,19 @@ void frame_spawn_random(scene_t *scene, vector_t frame, double frame_start,
     int frame_num;
 
     frame_num = rand() % 3;
+    /* Stuff for debugging frames
+    printf("%d\n",frame_num);
+
+    vector_t debug_center = (vector_t) {frame_start, 50};
+    entity_t *debug_entity = entity_init("TERRAIN",true,false);
+    list_t *debug_coords = compute_rect_points(debug_center, 10, 50);
+    body_t *debug_body = body_init_with_info(debug_coords, INFINITY, debug_entity, entity_free);
+    rgb_color_t *red = malloc(sizeof(rgb_color_t));
+    *red = RED;
+    body_set_draw(debug_body, sdl_draw_polygon, red, free);
+    scene_add_body(scene, debug_body);
+    create_terrain_collisions(scene,debug_body);
+    */
     if (frame_num == 0) {
         frame_0(scene, frame, frame_start, score);
     }
