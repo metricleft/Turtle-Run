@@ -56,7 +56,7 @@ const int SMALL_TEXT_HEIGHT = 30;
 const int THICK_OUTLINE = 4;
 const int THIN_OUTLINE = 2;
 const int TEXT_SPACING = 80;
-const int SMALL_TEXT_SPACING = 60;
+const int SMALL_TEXT_SPACING = 50;
 const int TEXT_OFFSET = 10;
 
 const char *SKY_IMG = "static/background_sky.png";
@@ -70,12 +70,6 @@ const vector_t DEFAULT_SCROLL_SPEED = {-200, 0};
 
 const double ELASTIC_COLLISION = 1;
 const double INELASTIC_COLLISION = 0;
-
-void game_end() {
-    sdl_on_key(NULL);
-    sdl_on_click(NULL);
-    //exit(0);
-}
 
 double basic_score_calculation(double dt) {
     assert(dt >= 0);
@@ -306,83 +300,76 @@ void display_main_menu(SDL_Window *window) {
 
 void menu_play_game() {
     SDL_Window *window = sdl_init(MIN, MAX);
-    bool stop_game = false;
+    sdl_on_key((event_handler_t) player_move);
+    sdl_on_click((event_handler_t) player_shoot);
 
-    //Inside "Play Game":
-    while (!stop_game) {
-        sdl_on_key((event_handler_t) player_move);
-        sdl_on_click((event_handler_t) player_shoot);
+    scene_t *scene = scene_init();
+    vector_t *scroll_speed = malloc(sizeof(vector_t));
+    *scroll_speed = DEFAULT_SCROLL_SPEED;
+    //double *score = malloc(sizeof(double));
+    double score = 0;
 
-        scene_t *scene = scene_init();
-        vector_t *scroll_speed = malloc(sizeof(vector_t));
-        *scroll_speed = DEFAULT_SCROLL_SPEED;
-        //double *score = malloc(sizeof(double));
-        double score = 0;
+    initialize_background(scene);
+    initialize_player(scene);
+    initialize_bounds(scene, MIN, MAX);
+    initialize_terrain(scene);
+    frame_spawn_random(scene, MAX, MAX.x);
 
-        initialize_background(scene);
-        initialize_player(scene);
-        initialize_bounds(scene, MIN, MAX);
-        initialize_terrain(scene);
-        frame_spawn_random(scene, MAX, MAX.x);
+    body_t *player = scene_get_body(scene, 3);
+    player_entity_t *player_entity = body_get_info(player);
+    create_bounds_collisions(scene, player, PLAYER_RADIUS);
 
-        body_t *player = scene_get_body(scene, 3);
-        player_entity_t *player_entity = body_get_info(player);
-        create_bounds_collisions(scene, player, PLAYER_RADIUS);
+    double time_since_last_enemy = 0;
+    double time_since_last_frame = 0;
+    double time_since_last_powerup = 0;
+    double time_since_last_speedup = 0;
 
-        double time_since_last_enemy = 0;
-        double time_since_last_frame = 0;
-        double time_since_last_powerup = 0;
-        double time_since_last_speedup = 0;
+    //Every tick inside "Play Game":
+    while (!sdl_is_done(scene)) {
 
-        //Every tick inside "Play Game":
-        while (!check_game_end(scene) && !stop_game) {
-
-            double dt = fmax(fmin(time_since_last_tick(), MAX_DT), MIN_DT);
-            time_since_last_enemy += dt;
-            time_since_last_frame += dt;
-            time_since_last_powerup += dt;
-            time_since_last_speedup += dt;
-            if (time_since_last_enemy > ENEMY_INTERVAL) {
-                enemy_spawn_random(scene, MIN, MAX);
-                time_since_last_enemy = 0;
-            }
-            if (time_since_last_frame > MAX.x / -(scroll_speed->x)) {
-                frame_spawn_random(scene, MAX, MAX.x - 5);
-                time_since_last_frame = 0;
-            }
-            if (time_since_last_powerup > POWERUP_INTERVAL) {
-                powerup_spawn_random(scene, MIN, MAX, scroll_speed);
-                time_since_last_powerup = 0;
-            }
-            if (time_since_last_speedup > SPEEDUP_INTERVAL) {
-                scroll_speed->x = fmin(
-                    scroll_speed->x + DEFAULT_SPEEDUP *
-                    (strcmp(entity_get_powerup(player_entity), "SLOW")? 1:0.5),
-                    MAX_SPEED);
-                time_since_last_speedup = 0;
-                for (int i = 0; i < 3 ; i++){
-                    sprite_t *sprite = body_get_draw_info(scene_get_body(scene, i));
-                    sprite_set_dt(sprite, 0);
-                }
-            }
-            score += advanced_score_calculation(dt);
-            //printf("%f\n", score);
-
-            sidescroll(scene, scroll_speed, dt);
-            scene_tick(scene, dt);
-            sdl_render_scene(scene);
-            if (body_get_centroid(scene_get_body(scene,0)).y < MIN.y - PLAYER_RADIUS) {
-                body_remove(scene_get_body(scene, 3));
-            }
-            else if (sdl_is_done(scene)) {
-                game_end();
-                stop_game = true;
+        double dt = fmax(fmin(time_since_last_tick(), MAX_DT), MIN_DT);
+        time_since_last_enemy += dt;
+        time_since_last_frame += dt;
+        time_since_last_powerup += dt;
+        time_since_last_speedup += dt;
+        if (time_since_last_enemy > ENEMY_INTERVAL) {
+            enemy_spawn_random(scene, MIN, MAX);
+            time_since_last_enemy = 0;
+        }
+        if (time_since_last_frame > MAX.x / -(scroll_speed->x)) {
+            frame_spawn_random(scene, MAX, MAX.x - 5);
+            time_since_last_frame = 0;
+        }
+        if (time_since_last_powerup > POWERUP_INTERVAL) {
+            powerup_spawn_random(scene, MIN, MAX, scroll_speed);
+            time_since_last_powerup = 0;
+        }
+        if (time_since_last_speedup > SPEEDUP_INTERVAL) {
+            scroll_speed->x = fmin(
+                scroll_speed->x + DEFAULT_SPEEDUP *
+                (strcmp(entity_get_powerup(player_entity), "SLOW")? 1:0.5),
+                MAX_SPEED);
+            time_since_last_speedup = 0;
+            for (int i = 0; i < 3 ; i++){
+                sprite_t *sprite = body_get_draw_info(scene_get_body(scene, i));
+                sprite_set_dt(sprite, 0);
             }
         }
-        free(scene);
-        free(scroll_speed);
-        //free(score);
+        score += advanced_score_calculation(dt);
+        //printf("%f\n", score);
+
+        sidescroll(scene, scroll_speed, dt);
+        scene_tick(scene, dt);
+        sdl_render_scene(scene);
+        if (check_game_end(scene)) {
+            break;
+        }
     }
+    sdl_on_key(NULL);
+    sdl_on_click(NULL);
+    free(scene);
+    free(scroll_speed);
+    //free(score);
     SDL_DestroyWindow(window);
 }
 
@@ -430,9 +417,16 @@ void menu_instructions() {
                     SMALL_TEXT_SPACING*6};
     sdl_draw_outlined_text(window, message, DEFAULT_FONT, LIME, INDIGO, SMALL_TEXT_HEIGHT,
                            THIN_OUTLINE, center);
+
+    message = "Collect coins and survive to gain points.";
+    center = (vector_t){
+                    sdl_text_center(MIN, MAX, message, DEFAULT_FONT, SMALL_TEXT_HEIGHT),
+                    SMALL_TEXT_SPACING*7};
+    sdl_draw_outlined_text(window, message, DEFAULT_FONT, LIME, INDIGO, SMALL_TEXT_HEIGHT,
+                           THIN_OUTLINE, center);
     
     message = "Left-click anywhere to continue...";
-    center = (vector_t){MIN.x+TEXT_OFFSET, SMALL_TEXT_SPACING*7.5};
+    center = (vector_t){MIN.x+TEXT_OFFSET, SMALL_TEXT_SPACING*9};
     sdl_draw_outlined_text(window, message, DEFAULT_FONT, LIME, INDIGO, SMALL_TEXT_HEIGHT,
                            THIN_OUTLINE, center);
 
