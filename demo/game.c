@@ -177,7 +177,9 @@ void sidescroll(scene_t *scene, vector_t *scroll_speed, double dt) {
             sprite_set_speed(sprite, (int)abs((int)(scroll_speed->x) *((int)i+1) /18));
         }
         //Applies a leftwards velocity to all objects with the "SCROLLABLE" tag
-        if (entity_get_scrollable(entity) && !entity_is_scrolling(entity)) {
+        if (entity_get_scrollable(entity) /*&& 
+                (!entity_is_scrolling(entity) || 
+                    strcmp(entity_get_type(entity), "TERRAIN"))*/) {
             vector_t scroll = {scroll_speed->x, body_get_velocity(body).y};
             body_set_velocity(body, scroll);
             //Ensures that every object only gets an initial velocity assigned once
@@ -297,7 +299,7 @@ void menu_play_game() {
                 time_since_last_enemy = 0;
             }
             if (time_since_last_frame > MAX.x / -(scroll_speed->x)) {
-                frame_spawn_random(scene, MAX, MAX.x);
+                frame_spawn_random(scene, MAX, MAX.x - 5);
                 time_since_last_frame = 0;
             }
             if (time_since_last_powerup > POWERUP_INTERVAL) {

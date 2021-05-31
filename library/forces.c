@@ -11,6 +11,7 @@
 #include <stdio.h>
 
 const double SMALL_DISTANCE = 5;
+const double SMALL_VALUE = 1e-6;
 
 typedef struct param {
     void *constant;
@@ -191,13 +192,29 @@ void normal_handler(collision_param_t *param){
         player_entity_t *entity1 = body_get_info(param->body1); //This must be the player.
         entity_set_colliding(entity1, true);
         vector_t new_centroid = {body_get_centroid(param->body1).x,
-                            shape2_max.y + 0.5*(shape1_max.y - shape1_min.y)+SMALL_DISTANCE};
+                shape2_max.y + 0.5*(shape1_max.y - shape1_min.y)+SMALL_DISTANCE};
         body_set_centroid(param->body1, new_centroid);
         vector_t new_velocity = {body_get_velocity(param->body1).x, 0};
         body_set_velocity(param->body1, new_velocity);
         vector_t force = vec_multiply(body_get_mass(param->body1),
                                           *(vector_t *) param->aux);
         body_add_force(param->body1, force);
+    } else {
+        collision_info_t collision = find_collision(shape1,shape2);
+
+        if (collision.collided) {    
+            if (fabs(collision.axis.y) < SMALL_VALUE){
+
+                double reduced_mass = calculate_reduced_mass(param->body1, param->body2);
+                vector_t impulse = 
+                    vec_multiply(
+                        reduced_mass * 
+                        (vec_dot(body_get_velocity(param->body2),collision.axis)-
+                        vec_dot(body_get_velocity(param->body1),collision.axis)),
+                        collision.axis);
+                body_add_impulse(param->body1, impulse);
+            }
+        }
     }
     /*
     collision_info_t collision = find_collision(shape1, shape2);
