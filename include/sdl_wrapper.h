@@ -2,13 +2,15 @@
 #define __SDL_WRAPPER_H__
 
 #include <stdbool.h>
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_mixer.h>
-#include "color.h"
 #include "list.h"
 #include "scene.h"
-#include <SDL2/SDL.h>
 #include "vector.h"
+#include "color.h"
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_mixer.h>
+#include <SDL2/SDL2_gfxPrimitives.h>
+#include <SDL2/SDL_image.h>
+#include <SDL2/SDL_ttf.h>
 
 /**
  * Contains all the info needed to draw a sprite, including the texture used
@@ -127,6 +129,13 @@ typedef void (*event_handler_t)(char event, void *type, double held_time,
 SDL_Window *sdl_init(vector_t min, vector_t max);
 
 /**
+ * Sets the focused renderer.
+ * 
+ * @param renderer the new renderer.
+ */
+void sdl_set_renderer(SDL_Renderer *renderer);
+
+/**
  * Processes all SDL events and returns whether the window has been closed.
  * This function must be called in order to handle keypresses.
  *
@@ -234,5 +243,45 @@ vector_t sdl_mouse_pos();
  * @return the number of seconds that have elapsed
  */
 double time_since_last_tick(void);
+
+/**
+ * Draws text.
+ * 
+ * @param window a pointer to an SDL_Window that the text will be drawn in
+ * @param text the text to be drawn
+ * @param font the font type
+ * @param color the color of the text in RGB
+ * @param size the font size of the text
+ * @param coords the coordinates of the top-left corner of the text
+ */
+void sdl_draw_text(SDL_Window *window, char *text, const char *font, rgb_color_t color,
+                   int size, vector_t coords);
+
+/**
+ * Draws text with an outline.
+ * 
+ * @param window a pointer to an SDL_Window that the text will be drawn in
+ * @param text the text to be drawn
+ * @param font the font type
+ * @param color the color of the text in RGB
+ * @param size the font size of the text
+ * @param thickness the thickness of the outline
+ * @param coords the coordinates of the top-left corner of the text
+ */
+void sdl_draw_outlined_text(SDL_Window *window, char *text, const char *font,
+                            rgb_color_t color, rgb_color_t outline_color,
+                            int size, int thickness, vector_t coords);
+
+/**
+ * Gives the x-coordinate that would center the text on the screen.
+ * 
+ * @param MIN the minimum coordinates of the screen
+ * @param MAX the maximum coordinates of the screen
+ * @param text the text to be centered
+ * @param font the font type
+ * @param size the font size of the text
+ * @return the x-coordinate of the top-left corner that would center the text
+ */
+int sdl_text_center(vector_t min, vector_t max, char *text, const char *font, int size);
 
 #endif // #ifndef __SDL_WRAPPER_H__

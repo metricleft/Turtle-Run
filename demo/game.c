@@ -27,7 +27,7 @@ Mix_Chunk *shot = NULL;
 const int ARC_RESOLUTION = 10;
 
 const double MAX_DT = 0.01;
-const double MIN_DT = 0.003;
+const double MIN_DT = 0.002;
 
 const double BULLET_RADIUS = 6;
 const double BULLET_MASS = 0.2;
@@ -49,9 +49,11 @@ const double PLAYER_SCALE = 2;
 const int PLAYER_FRAMES = 8;
 const int PLAYER_FPS = 6;
 
-const char* SKY_IMG = "static/background_sky.png";
-const char* GRASS_IMG = "static/background_grass.png";
-const char* WATER_IMG = "static/background_water.png";
+const char *DEFAULT_FONT = "static/Sans.ttf";
+const char *SKY_IMG = "static/background_sky.png";
+const char *GRASS_IMG = "static/background_grass.png";
+const char *WATER_IMG = "static/background_water.png";
+const char *BACKGROUND_IMG = "static/background.png";
 const SDL_Rect BACKGROUND_FRAME = {0,0, 256, 128};
 
 const vector_t DEFAULT_GRAVITY = {0, -500};
@@ -60,7 +62,7 @@ const vector_t DEFAULT_SCROLL_SPEED = {-200, 0};
 const double ELASTIC_COLLISION = 1;
 const double INELASTIC_COLLISION = 0;
 
-bool game_end() {
+void game_end() {
     sdl_on_key(NULL);
     sdl_on_click(NULL);
     //exit(0);
@@ -236,6 +238,23 @@ void player_shoot(char key, mouse_event_type_t type, double held_time, void *sce
     }
 }
 
+void display_main_menu(SDL_Window *window) {
+    /*scene_t *menu = scene_init();
+    add_background(menu, BACKGROUND_IMG, 0);*/
+    //Draw title:
+    sdl_clear();
+    vector_t center = {(MAX.x - MIN.x)/2, MAX.y};
+    body_t *backing = body_init(compute_rect_points(center, MAX.x-MIN.x, 140), INFINITY);
+    rgb_color_t *lime = malloc(sizeof(rgb_color_t));
+    *lime = LIME;
+    sdl_draw_polygon(backing, lime);
+    center = (vector_t){sdl_text_center(MIN, MAX, "TURTLE RUN", DEFAULT_FONT, 50), MIN.y};
+    sdl_draw_outlined_text(window, "TURTLE RUN", DEFAULT_FONT, GREEN, WHITE, 50, 4,
+                           center);
+    sdl_show();
+    //free(menu);
+}
+
 void menu_play_game() {
     SDL_Window *window = sdl_init(MIN,MAX);
     bool stop_game = false;
@@ -337,7 +356,9 @@ void menu_mouse_handler(char key, mouse_event_type_t type, double held_time,
                 //vector_t mouse_coords = sdl_mouse_pos();
                 SDL_HideWindow(window);
                 menu_play_game();
+                sdl_set_renderer(SDL_GetRenderer(window));
                 SDL_ShowWindow(window);
+                display_main_menu(window);
                 break;
         }
     }
@@ -351,8 +372,10 @@ int main(int argc, char *argv[]) {
     jump = loadEffects("sounds/jump1.wav");
     slide = loadEffects("sounds/sliding.wav");
     shot = loadEffects("sounds/shoot.wav");
+
     SDL_Window *window = sdl_init(MIN,MAX);
-    Mix_PlayMusic(soundtrack, -1);
+    display_main_menu(window);
+    //Mix_PlayMusic(soundtrack, -1);
 
     while (!sdl_is_done(window)) {
         //sdl_on_key((event_handler_t) menu_key_handler);
