@@ -22,7 +22,7 @@ Mix_Music *loadMedia(char *music_name){
 Mix_Chunk *loadEffects(char *effect_name){
     Mix_Chunk *effect = Mix_LoadWAV(effect_name);
     if (effect == NULL) {
-        printf("Failed");
+        printf("Failed %s", Mix_GetError());
     }
     return effect;
 }
