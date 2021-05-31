@@ -120,10 +120,7 @@ void powerup_spawn_random(scene_t *scene, vector_t MIN, vector_t MAX,
     info->scene = scene;
     info->scroll_speed = scroll_speed;
     int percent_max = 100;
-    /*int percent_magnet = 10;
-    int percent_slow = 60;
-    int percent_jump = 100;*/
-    int percent_magnet = 100;
+    int percent_magnet = 10;
     int percent_slow = 60;
     int percent_jump = 100;
     int random_powerup = rand()%percent_max;
