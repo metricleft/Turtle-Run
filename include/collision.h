@@ -19,6 +19,7 @@ typedef struct {
      * If collided is false, this value is undefined.
      */
     vector_t axis;
+    double overlap;
 } collision_info_t;
 
 /**

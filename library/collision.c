@@ -87,7 +87,7 @@ collision_info_t find_collision(list_t *shape1, list_t *shape2){
 
     if (shape1_max.x < shape2_min.x || shape1_max.y < shape2_min.y ||
                 shape2_max.x < shape1_min.x || shape2_max.y < shape1_min.y) {
-                    return (collision_info_t) {false, VEC_ZERO};
+                    return (collision_info_t) {false, VEC_ZERO, 0.};
                 }
     
     /*
@@ -112,12 +112,12 @@ collision_info_t find_collision(list_t *shape1, list_t *shape2){
                 return (collision_info_t) {false, VEC_ZERO};
     }
     */
-   
+
     list_t *axis1 = get_axis(shape1);
     list_t *axis2 = get_axis(shape2);
     overlap_return_t shape1_overlap = overlap(axis1, shape1, shape2);
     if (!shape1_overlap.collided) {
-        return (collision_info_t) {false, VEC_ZERO};
+        return (collision_info_t) {false, VEC_ZERO, 0};
     }
     overlap_return_t shape2_overlap = overlap(axis2, shape1, shape2);
     list_free(axis1);
@@ -125,11 +125,14 @@ collision_info_t find_collision(list_t *shape1, list_t *shape2){
     //if there is a separating axis from either
     if (shape1_overlap.collided && shape2_overlap.collided) {
         if (shape1_overlap.overlap < shape2_overlap.overlap) {
-            return (collision_info_t) {true, vec_unit(shape1_overlap.axis)};
+            return (collision_info_t) {true, vec_unit(shape1_overlap.axis),
+                                        shape1_overlap.overlap};
         } else {
-            return (collision_info_t) {true, vec_unit(vec_negate(shape2_overlap.axis))};
+            return (collision_info_t) {true,
+                                    vec_unit(vec_negate(shape2_overlap.axis)),
+                                        shape2_overlap.overlap};
         }
     } else {
-        return (collision_info_t) {false, VEC_ZERO};
+        return (collision_info_t) {false, VEC_ZERO, 0.};
     }
 }
