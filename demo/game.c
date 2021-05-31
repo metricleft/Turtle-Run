@@ -50,6 +50,12 @@ const int PLAYER_FRAMES = 8;
 const int PLAYER_FPS = 6;
 
 const char *DEFAULT_FONT = "static/Sans.ttf";
+const int TEXT_HEIGHT = 50;
+const int THICK_OUTLINE = 4;
+const int THIN_OUTLINE = 2;
+const int MENU_INTERVAL = 80;
+const int BUTTON_OFFSET = 10;
+
 const char *SKY_IMG = "static/background_sky.png";
 const char *GRASS_IMG = "static/background_grass.png";
 const char *WATER_IMG = "static/background_water.png";
@@ -240,20 +246,46 @@ void player_shoot(char key, mouse_event_type_t type, double held_time, void *sce
 }
 
 void display_main_menu(SDL_Window *window) {
-    /*scene_t *menu = scene_init();
-    add_background(menu, BACKGROUND_IMG, 0);*/
+    scene_t *menu = scene_init();
+    add_background(menu, BACKGROUND_IMG, 0);
+    sdl_render_scene(menu);
+    free(menu);
+
     //Draw title:
-    sdl_clear();
     vector_t center = {(MAX.x - MIN.x)/2, MAX.y};
-    body_t *backing = body_init(compute_rect_points(center, MAX.x-MIN.x, 140), INFINITY);
+    /*body_t *backing =
+        body_init(compute_rect_points(center, MAX.x-MIN.x, TEXT_HEIGHT*3), INFINITY);
     rgb_color_t *lime = malloc(sizeof(rgb_color_t));
     *lime = LIME;
-    sdl_draw_polygon(backing, lime);
-    center = (vector_t){sdl_text_center(MIN, MAX, "TURTLE RUN", DEFAULT_FONT, 50), MIN.y};
-    sdl_draw_outlined_text(window, "TURTLE RUN", DEFAULT_FONT, GREEN, WHITE, 50, 4,
-                           center);
-    sdl_show();
-    //free(menu);
+    sdl_draw_polygon(backing, lime);*/
+    center = (vector_t){
+        sdl_text_center(MIN, MAX, "TURTLE RUN", DEFAULT_FONT, TEXT_HEIGHT), MIN.y};
+    sdl_draw_outlined_text(window, "TURTLE RUN", DEFAULT_FONT, LIME, WHITE, TEXT_HEIGHT,
+                           THICK_OUTLINE, center);
+    
+    //Draw options:
+    center = (vector_t){
+                    sdl_text_center(MIN, MAX, "Play Game", DEFAULT_FONT, TEXT_HEIGHT),
+                                    MENU_INTERVAL*2};
+    sdl_draw_outlined_text(window, "Play Game", DEFAULT_FONT, LIME, WHITE, TEXT_HEIGHT,
+                           THIN_OUTLINE, center);
+    center = (vector_t){
+                    sdl_text_center(MIN, MAX, "Instructions", DEFAULT_FONT, TEXT_HEIGHT),
+                                    MENU_INTERVAL*3};
+    sdl_draw_outlined_text(window, "Instructions", DEFAULT_FONT, LIME, WHITE, TEXT_HEIGHT,
+                           THIN_OUTLINE, center);
+
+    center = (vector_t){
+                    sdl_text_center(MIN, MAX, "High Scores", DEFAULT_FONT, TEXT_HEIGHT),
+                                    MENU_INTERVAL*4};
+    sdl_draw_outlined_text(window, "High Scores", DEFAULT_FONT, LIME, WHITE, TEXT_HEIGHT,
+                           THIN_OUTLINE, center);
+
+    center = (vector_t){
+                    sdl_text_center(MIN, MAX, "Quit Game", DEFAULT_FONT, TEXT_HEIGHT),
+                                    MENU_INTERVAL*5};
+    sdl_draw_outlined_text(window, "Quit Game", DEFAULT_FONT, LIME, WHITE, TEXT_HEIGHT,
+                           THIN_OUTLINE, center);
 }
 
 void menu_play_game() {
@@ -336,29 +368,52 @@ void menu_play_game() {
     SDL_DestroyWindow(window);
 }
 
-/*
-void menu_key_handler(char key, key_event_type_t type, double held_time, void *scene) {
-    if (type == KEY_PRESSED) {
-        switch (key) {
-            case '1':
-                menu_play_game();
-                break;
-        }
-    }
+int is_in_button_bounds(double x, double y, vector_t box, int width) {
+    return x > box.x && x < box.x+width &&
+           y > box.y-MENU_INTERVAL+BUTTON_OFFSET && y < box.y-BUTTON_OFFSET;
 }
-*/
 
 void menu_mouse_handler(char key, mouse_event_type_t type, double held_time,
                         void *window){
+    vector_t box1 = {sdl_text_center(MIN, MAX, "Play Game", DEFAULT_FONT, TEXT_HEIGHT),
+                     MAX.y - MENU_INTERVAL*2};
+    int width1 = sdl_text_width("Play Game", DEFAULT_FONT, TEXT_HEIGHT);
+    vector_t box2 = {sdl_text_center(MIN, MAX, "Instructions", DEFAULT_FONT, TEXT_HEIGHT),
+                     MAX.y - MENU_INTERVAL*3};
+    int width2 = sdl_text_width("Play Game", DEFAULT_FONT, TEXT_HEIGHT);
+    vector_t box3 = {sdl_text_center(MIN, MAX, "High Scores", DEFAULT_FONT, TEXT_HEIGHT),
+                     MAX.y - MENU_INTERVAL*4};
+    int width3 = sdl_text_width("Play Game", DEFAULT_FONT, TEXT_HEIGHT);
+    vector_t box4 = {sdl_text_center(MIN, MAX, "Quit Game", DEFAULT_FONT, TEXT_HEIGHT),
+                     MAX.y - MENU_INTERVAL*5};
+    int width4 = sdl_text_width("Play Game", DEFAULT_FONT, TEXT_HEIGHT);
+
     if (type == BUTTON_PRESSED) {
         switch (key) {
             case LEFT_CLICK:
-                //vector_t mouse_coords = sdl_mouse_pos();
-                SDL_HideWindow(window);
-                menu_play_game();
-                sdl_set_renderer(SDL_GetRenderer(window));
-                SDL_ShowWindow(window);
-                display_main_menu(window);
+                vector_t mouse_coords = sdl_mouse_pos();
+                double x = mouse_coords.x;
+                double y = mouse_coords.y;
+                if (is_in_button_bounds(x, y, box1, width1)) {
+                    printf("PLAY GAME\n");
+                    SDL_HideWindow(window);
+                    menu_play_game();
+                    sdl_set_window(window);
+                    SDL_ShowWindow(window);
+                    display_main_menu(window);
+                }
+                else if (is_in_button_bounds(x, y, box2, width2)) {
+                    printf("INSTRUCTIONS\n");
+                    //TODO
+                }
+                else if (is_in_button_bounds(x, y, box3, width3)) {
+                    printf("HIGH SCORES\n");
+                    //TODO
+                }
+                else if (is_in_button_bounds(x, y, box4, width4)) {
+                    printf("QUIT GAME\n");
+                    exit(0);
+                }
                 break;
         }
     }
@@ -375,10 +430,9 @@ int main(int argc, char *argv[]) {
 
     SDL_Window *window = sdl_init(MIN,MAX);
     display_main_menu(window);
-    //Mix_PlayMusic(soundtrack, -1);
+    Mix_PlayMusic(soundtrack, -1);
 
     while (!sdl_is_done(window)) {
-        //sdl_on_key((event_handler_t) menu_key_handler);
         sdl_on_click((event_handler_t) menu_mouse_handler);
     }
 

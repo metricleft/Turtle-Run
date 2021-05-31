@@ -202,7 +202,7 @@ void normal_handler(collision_param_t *param){
     } else {
         collision_info_t collision = find_collision(shape1,shape2);
 
-        if (collision.collided) {    
+        if (collision.collided) {
             if (fabs(collision.axis.y) < SMALL_VALUE){
 
                 double reduced_mass = calculate_reduced_mass(param->body1, param->body2);

@@ -133,7 +133,7 @@ SDL_Window *sdl_init(vector_t min, vector_t max);
  * 
  * @param renderer the new renderer.
  */
-void sdl_set_renderer(SDL_Renderer *renderer);
+void sdl_set_window(SDL_Renderer *window);
 
 /**
  * Processes all SDL events and returns whether the window has been closed.
@@ -271,6 +271,16 @@ void sdl_draw_text(SDL_Window *window, char *text, const char *font, rgb_color_t
 void sdl_draw_outlined_text(SDL_Window *window, char *text, const char *font,
                             rgb_color_t color, rgb_color_t outline_color,
                             int size, int thickness, vector_t coords);
+
+/**
+ * Gives the width of the text that would be drawn.
+ * 
+ * @param text the text to be centered
+ * @param font the font type
+ * @param size the font size of the text
+ * @return the width of the text
+ */
+int sdl_text_width(char *text, const char *font, int size);
 
 /**
  * Gives the x-coordinate that would center the text on the screen.

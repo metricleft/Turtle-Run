@@ -214,8 +214,9 @@ SDL_Window *sdl_init(vector_t min, vector_t max) {
     return window;
 }
 
-void sdl_set_renderer(SDL_Renderer *new_renderer) {
-    renderer = new_renderer;
+void sdl_set_window(SDL_Renderer *new_window) {
+    window = new_window;
+    renderer = SDL_GetRenderer(new_window);
 }
 
 bool sdl_is_done(void *scene) {
@@ -453,12 +454,17 @@ void sdl_draw_outlined_text(SDL_Window *window, char *text, const char *font,
     sdl_draw_text(window, text, font, color, size, (vector_t){x, y});
 }
 
-int sdl_text_center(vector_t min, vector_t max, char *text, const char *font, int size) {
+int sdl_text_width(char *text, const char *font, int size) {
     TTF_Font *ttf_font = TTF_OpenFont(font, size);
     int *width = malloc(sizeof(int));
     TTF_SizeText(ttf_font, text, width, NULL);
-    int mid = (int)(max.x - min.x - *width)/2;
+    int text_width = *width;
     free(width);
     TTF_CloseFont(ttf_font);
+    return text_width;
+}
+
+int sdl_text_center(vector_t min, vector_t max, char *text, const char *font, int size) {
+    int mid = (int)(max.x - min.x - sdl_text_width(text, font, size))/2;
     return mid;
 }
