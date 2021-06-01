@@ -79,16 +79,16 @@ double basic_score_calculation(double dt) {
 double advanced_score_calculation(double dt) {
     assert(dt >= 0);
     if (dt <= 10) {
-        return dt * 10;
+        return 10;
     }
     if (dt > 10 && dt <= 20) {
-        return dt * 20;
+        return 20;
     }
     if (dt > 20 && dt <= 30) {
-        return dt * 30;
+        return 30;
     }
     if (dt > 30) {
-        return dt * 50;
+        return 50;
     } 
 }
 
@@ -326,14 +326,9 @@ void menu_play_game() {
     //Every tick inside "Play Game":
     while (!sdl_is_done(scene)) {
 
-<<<<<<< HEAD
         //double dt = fmax(fmin(time_since_last_tick(), MAX_DT), MIN_DT);
         double dt = time_since_last_tick();
         total_time += dt;
-=======
-        double dt = fmax(fmin(time_since_last_tick(), MAX_DT), MIN_DT);
-        //double dt = time_since_last_tick();
->>>>>>> f463f0c0519d1b313e3acaf075edfe578e405a71
         time_since_last_enemy += dt;
         distance_since_last_frame += dt*(-(scroll_speed->x));
         time_since_last_powerup += dt;
