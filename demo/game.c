@@ -3,6 +3,7 @@
 #include <string.h>
 #include <assert.h>
 #include <time.h>
+#include <stdio.h>
 
 #include "body.h"
 #include "polygon.h"
@@ -79,16 +80,16 @@ double basic_score_calculation(double dt) {
 double advanced_score_calculation(double dt) {
     assert(dt >= 0);
     if (dt <= 10) {
-        return dt * 10;
+        return 10;
     }
     if (dt > 10 && dt <= 20) {
-        return dt * 20;
+        return 20;
     }
     if (dt > 20 && dt <= 30) {
-        return dt * 30;
+        return 30;
     }
     if (dt > 30) {
-        return dt * 50;
+        return 50;
     } 
 }
 
@@ -326,8 +327,9 @@ void menu_play_game() {
     //Every tick inside "Play Game":
     while (!sdl_is_done(scene)) {
 
-        double dt = fmax(fmin(time_since_last_tick(), MAX_DT), MIN_DT);
-        //double dt = time_since_last_tick();
+        //double dt = fmax(fmin(time_since_last_tick(), MAX_DT), MIN_DT);
+        double dt = time_since_last_tick();
+        total_time += dt;
         time_since_last_enemy += dt;
         distance_since_last_frame += dt*(-(scroll_speed->x));
         time_since_last_powerup += dt;
@@ -356,7 +358,7 @@ void menu_play_game() {
             }
         }
         *score = *score + advanced_score_calculation(total_time);
-        printf("%f\n", *score);
+        //printf("%f\n", *score);
 
         sidescroll(scene, scroll_speed, dt);
         scene_tick(scene, dt);
@@ -495,6 +497,16 @@ void menu_mouse_handler(char key, mouse_event_type_t type, double held_time,
 }
 
 int main(int argc, char *argv[]) {
+    FILE *fp;
+    double highscore;
+    char *filename = "scores/highscore.txt";
+    fp = fopen(filename, "w+");
+    if (fp == NULL) {
+        printf("Unable to open %s", filename);
+    }
+    fscanf(fp, "%f", highscore);
+    printf("%f\n", highscore);
+
     time_t t;
     srand((unsigned) time(&t));
     Mix_OpenAudio( 44100, MIX_DEFAULT_FORMAT, 2, 2048 );
