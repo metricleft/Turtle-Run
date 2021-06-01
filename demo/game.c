@@ -386,10 +386,10 @@ void menu_play_game() {
     }
     printf("%lf\n", highscore);
     FILE *fp2;
-    fp2 = fopen(filename, "w+");
+    fp2 = fopen(filename, "w");
     fprintf(fp2, "%lf", highscore);
-    close(fp2);
-    close(fp);
+    fclose(fp2);
+    fclose(fp);
     sdl_on_key(NULL);
     sdl_on_click(NULL);
     free(scene);
