@@ -299,17 +299,16 @@ void display_main_menu(SDL_Window *window) {
 }
 
 void menu_play_game() {
-    double total_score;
-    FILE *fp;
+    //double total_score;
     char *filename = "scores/highscore.txt";
-    fp = fopen(filename, "r");
+    FILE *fp = fopen(filename, "r");
     if (fp == NULL) {
         printf("Unable to open %s", filename);
     }
-    double highscore;
+    double *highscore = malloc(sizeof(double));
     for (int i = 0; i < 1; i++) {
-        fscanf(fp, "%lf", &highscore);
-        printf("%lf\n", highscore);
+        fscanf(fp, "%lf", &*highscore);
+        printf("%lf\n", *highscore);
     }
     SDL_Window *window = sdl_init(MIN, MAX);
     sdl_on_key((event_handler_t) player_move);
@@ -376,18 +375,17 @@ void menu_play_game() {
         scene_tick(scene, dt);
         sdl_render_scene(scene);
         if (check_game_end(scene)) {
-            total_score = *score;
-            if (total_score > highscore) {
+            //total_score = *score;
+            if (*score > *highscore) {
                 printf("I am in this loop\n");
-                highscore = total_score;
+                *highscore = *score;
             }
             break;
         }
     }
-    printf("%lf\n", highscore);
-    FILE *fp2;
-    fp2 = fopen(filename, "w");
-    fprintf(fp2, "%lf", highscore);
+    printf("%lf\n", *highscore);
+    FILE *fp2 = fopen(filename, "w");
+    fprintf(fp2, "%lf", *highscore);
     fclose(fp2);
     fclose(fp);
     sdl_on_key(NULL);
@@ -395,6 +393,7 @@ void menu_play_game() {
     free(scene);
     free(scroll_speed);
     free(score);
+    free(highscore);
     SDL_DestroyWindow(window);
 }
 
