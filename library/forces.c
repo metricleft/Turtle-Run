@@ -243,10 +243,14 @@ void normal_handler(normal_param_t *param){
                     vector_t terrain_vel = body_get_velocity(param->body2);
                     body_set_velocity(param->body1, (vector_t) {
                             terrain_vel.x, old_velocity.y});
+                } else {
+                    body_translate(param->body1,
+                        vec_multiply(collision.overlap, collision.axis));
+                    vector_t old_velocity = body_get_velocity(param->body1);
+                    body_set_velocity(param->body1, (vector_t) {
+                            old_velocity.x, 0});
                 }
-                
             }
-            
         }
     }
     free(shape1);
