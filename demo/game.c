@@ -300,13 +300,13 @@ void display_main_menu(SDL_Window *window) {
 
 void menu_play_game() {
     double total_score;
-    double highscore;
     FILE *fp;
     char *filename = "scores/highscore.txt";
-    fp = fopen(filename, "w+");
+    fp = fopen(filename, "r");
     if (fp == NULL) {
         printf("Unable to open %s", filename);
     }
+    double highscore;
     for (int i = 0; i < 1; i++) {
         fscanf(fp, "%lf", &highscore);
         printf("%lf\n", highscore);
