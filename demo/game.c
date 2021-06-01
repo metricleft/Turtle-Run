@@ -498,14 +498,24 @@ void menu_mouse_handler(char key, mouse_event_type_t type, double held_time,
 
 int main(int argc, char *argv[]) {
     FILE *fp;
+    FILE *fp2;
     double highscore;
     char *filename = "scores/highscore.txt";
-    fp = fopen(filename, "w+");
+    fp = fopen(filename, "r+");
     if (fp == NULL) {
         printf("Unable to open %s", filename);
     }
-    fscanf(fp, "%f", highscore);
-    printf("%f\n", highscore);
+    for (int i = 0; i < 1; i++) {
+        fscanf(fp, "%lf", &highscore);
+        printf("%lf\n", highscore);
+    }
+    double newscore = 293857629346;
+    if (newscore > highscore) {
+        highscore = newscore;
+    }
+    fp2 = fopen(filename, "w");
+    fprintf(fp2, "%lf", highscore);
+    
 
     time_t t;
     srand((unsigned) time(&t));
@@ -523,5 +533,6 @@ int main(int argc, char *argv[]) {
     while (!sdl_is_done(window)) {
     }
 
+    close(fp);
     return 0;
 }
