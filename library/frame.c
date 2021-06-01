@@ -130,11 +130,54 @@ void frame_4(scene_t *scene, vector_t frame, double frame_start, double *score){
     create_terrain_rect(scene, wall_center, 0.25*frame.x, 0.25*frame.y);
 }
 
+/**
+ * Pitfall with platform in the middle
+ * @param scene the scene to add the frame to
+ * @param frame a vector_t describing the size of the frame
+ * @param frame_start the x coordinate starting point of the frame
+ */
+void frame_5(scene_t *scene, vector_t frame, double frame_start, double *score){
+    vector_t floor1_center = {0.125*frame.x+frame_start, TERRAIN_PAD};
+    create_terrain_rect(scene, floor1_center, 0.25*frame.x, TERRAIN_HEIGHT);
+
+    vector_t floor2_center = {0.875*frame.x+frame_start, TERRAIN_PAD};
+    create_terrain_rect(scene, floor2_center, 0.25*frame.x, TERRAIN_HEIGHT);
+
+    vector_t platform_center = {0.5*frame.x+frame_start, TERRAIN_PAD};
+    create_platform(scene, platform_center, 0.125*frame.x, PLATFORM_HEIGHT);
+
+    vector_t wall_center = {0.5*frame.x+frame_start, 0.625*frame.y};
+    create_terrain_rect(scene, wall_center, frame.x/32., 0.75*frame.y);
+}
+
+/**
+ * 2 tunnels with a pitfall and platform in the middle
+ * @param scene the scene to add the frame to
+ * @param frame a vector_t describing the size of the frame
+ * @param frame_start the x coordinate starting point of the frame
+ */
+void frame_6(scene_t *scene, vector_t frame, double frame_start, double *score){
+    vector_t tunnel1_bottom_center = {0.125*frame.x+frame_start, 0.15*frame.y};
+    create_terrain_rect(scene, tunnel1_bottom_center, 0.25*frame.x, 0.3*frame.y);
+
+    vector_t tunnel2_bottom_center = {0.875*frame.x+frame_start, 0.15*frame.y};
+    create_terrain_rect(scene, tunnel2_bottom_center, 0.25*frame.x, 0.3*frame.y);
+    
+    vector_t tunnel1_top_center = {0.125*frame.x+frame_start, 0.8*frame.y};
+    create_terrain_rect(scene, tunnel1_top_center, 0.25*frame.x, 0.4*frame.y);
+
+    vector_t tunnel2_top_center = {0.875*frame.x+frame_start, 0.8*frame.y};
+    create_terrain_rect(scene, tunnel2_top_center, 0.25*frame.x, 0.4*frame.y);
+
+    vector_t platform_center = {0.5*frame.x+frame_start, TERRAIN_PAD};
+    create_platform(scene, platform_center, frame.x/8., PLATFORM_HEIGHT);
+}
+
 void frame_spawn_random(scene_t *scene, vector_t frame, double frame_start,
                         double *score) {
     int frame_num;
 
-    frame_num = rand() % 5;
+    frame_num = rand() % 7;
     /* //Stuff for debugging frames
     printf("%d\n",frame_num);
 
@@ -148,7 +191,7 @@ void frame_spawn_random(scene_t *scene, vector_t frame, double frame_start,
     scene_add_body(scene, debug_body);
     create_terrain_collisions(scene,debug_body);
     */
-    //frame_4(scene,frame,frame_start,score);
+    //frame_6(scene,frame,frame_start,score);
     
     if (frame_num == 0) {
         frame_0(scene, frame, frame_start, score);
@@ -164,6 +207,12 @@ void frame_spawn_random(scene_t *scene, vector_t frame, double frame_start,
     }
     if (frame_num == 4) {
         frame_4(scene, frame, frame_start, score);
+    }
+    if (frame_num == 5) {
+        frame_5(scene, frame, frame_start, score);
+    }
+    if (frame_num == 6) {
+        frame_6(scene, frame, frame_start, score);
     }
     
 }
