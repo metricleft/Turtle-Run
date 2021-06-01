@@ -78,6 +78,22 @@ double basic_score_calculation(double dt) {
     return dt * 10.0;
 }
 
+list_t *get_high_scores() {
+    list_t *high_scores = list_init(5, list_free);
+    FILE *fp = fopen("scores/highscore.txt", "r");
+    if (fp == NULL) {
+        printf("Unable to open scores/highscore.txt");
+    }
+    double **highscore = malloc(sizeof(double) * 5);
+    for (int i = 0; i < 5; i++) {
+        fscanf(fp, "%lf", &highscore[i]);
+    }
+    for (int j = 0; j < 5; j++) {
+        list_add(high_scores, highscore[j]);
+    }
+    return high_scores;
+}
+
 double advanced_score_calculation(double dt) {
     assert(dt >= 0);
     if (dt <= 10) {
@@ -531,6 +547,13 @@ void menu_mouse_handler(char key, mouse_event_type_t type, double held_time,
 
 int main(int argc, char *argv[]) {
     //double newscore = 293857629346;
+    list_t *hi = get_high_scores();
+    printf("%lf\n", list_get(hi, 0));
+    printf("%lf\n", list_get(hi, 1));
+    printf("%lf\n", list_get(hi, 2));
+    printf("%lf\n", list_get(hi, 3));
+    printf("%lf\n", list_get(hi, 4));
+
 
     time_t t;
     srand((unsigned) time(&t));
