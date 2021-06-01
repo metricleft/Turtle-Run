@@ -91,6 +91,7 @@ list_t *get_high_scores() {
     for (int j = 0; j < 5; j++) {
         list_add(high_scores, highscore[j]);
     }
+    fclose(fp);
     return high_scores;
 }
 
