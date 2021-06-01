@@ -117,7 +117,15 @@ typedef struct {
     body_t *body2;
     void *aux;
     bool collided;
+    free_func_t aux_freer;
 } collision_param_t;
+
+void collision_param_free(collision_param_t *param) {
+    // if (param->aux != NULL) {
+    //     param->aux_freer(param->aux);
+    // }
+    free(param);
+}
 
 void collision_force_creator(collision_param_t *param) {
     list_t *shape1 = body_get_shape(param->body1);
@@ -139,9 +147,10 @@ void create_collision(scene_t *scene, body_t *body1, body_t *body2,
     list_add(bodies, body1);
     list_add(bodies, body2);
     collision_param_t *force_param = malloc(sizeof(collision_param_t));
-    *force_param = (collision_param_t) {handler, body1, body2, aux, false};
+    *force_param = (collision_param_t) {handler, body1, body2, aux, false,
+                                        freer};
     scene_add_bodies_force_creator(scene, collision_force_creator, force_param,
-                                        bodies, freer);
+                                        bodies, collision_param_free);
 }
 
 
@@ -169,7 +178,13 @@ typedef struct normal_param {
     body_t *body2;
     void *aux;
     bool collided;
+    free_func_t aux_freer;
 } normal_param_t;
+
+void normal_param_free(normal_param_t *param) {
+    param->aux_freer(param->aux);
+    free(param);
+}
 
 void normal_handler(normal_param_t *param){
     list_t *shape1 = body_get_shape(param->body1);
@@ -213,23 +228,7 @@ void normal_handler(normal_param_t *param){
             collision_info_t collision = find_collision(shape1,shape2);
             if (collision.collided) {
                 if (fabs(collision.axis.y) < SMALL_VALUE){
-                    /*
-                    double reduced_mass = 
-                        calculate_reduced_mass(param->body1, param->body2);
-                    vector_t impulse = 
-                        vec_multiply(
-                            reduced_mass * 
-                            (vec_dot(body_get_velocity(param->body2),collision.axis)-
-                            vec_dot(body_get_velocity(param->body1),collision.axis)),
-                            collision.axis);
-                    if (body_get_centroid(param->body1).x <
-                            body_get_centroid(param->body2).x) {
-                                impulse.x = -fabs(impulse.x);
-                    } else {
-                        impulse.x = fabs(impulse.x);
-                    }
-                    //body_add_impulse(param->body1, impulse);
-                    */
+                
                     if (body_get_centroid(param->body1).x <
                             body_get_centroid(param->body2).x) {
                                 body_translate(param->body1,
@@ -250,41 +249,6 @@ void normal_handler(normal_param_t *param){
             
         }
     }
-    /*
-    collision_info_t collision = find_collision(shape1, shape2);
-    if (collision.collided) {
-        player_entity_t *entity1 = body_get_info(param->body1); //This must be the player.
-        entity_set_colliding(entity1, true);
-        if (!(param->collided)){
-            // body_set_velocity(param->body1, VEC_ZERO);
-            param->collided = true; 
-        }
-        if (fabs(collision.axis.x) < SMALL_DISTANCE && collision.axis.y < 0) {
-            vector_t force = vec_multiply(body_get_mass(param->body1),
-                                          *(vector_t *) param->aux);
-            body_add_force(param->body1, force);
-            vector_t offset_centroid = vec_add(body_get_centroid(param->body1),
-                    vec_negate(vec_multiply(collision.overlap, collision.axis)));
-            offset_centroid.y = offset_centroid.y + SMALL_DISTANCE;
-            body_set_centroid(param->body1,offset_centroid);
-            printf("%f\n",offset_centroid.y);
-        } else {
-            double reduced_mass = calculate_reduced_mass(param->body1, param->body2);
-            vector_t impulse = 
-                vec_multiply(
-                    reduced_mass * 
-                    (vec_dot(body_get_velocity(param->body2),collision.axis)-
-                    vec_dot(body_get_velocity(param->body1),collision.axis)),
-                    collision.axis);
-            body_add_impulse(param->body1, impulse);
-        }
-    }
-    else if (!collision.collided) {
-        param->collided = false;
-        player_entity_t *entity1 = body_get_info(param->body1); //This must be the player.
-        entity_set_colliding(entity1, false);
-    }
-    */
     free(shape1);
     free(shape2);
 }
@@ -331,8 +295,8 @@ void create_normal_collision(scene_t *scene, vector_t grav,
     list_add(bodies, body2);
     normal_param_t *force_param = malloc(sizeof(normal_param_t));
     *force_param = (normal_param_t) {normal_handler, body1,
-                                        body2, grav_param, false};
+                                        body2, grav_param, false, free};
     scene_add_bodies_force_creator(scene, normal_handler, force_param,
-                                        bodies, free);
+                                        bodies, normal_param_free);
 
 }

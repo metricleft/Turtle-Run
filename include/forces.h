@@ -24,6 +24,7 @@ typedef void (*collision_handler_t)
     (body_t *body1, body_t *body2, vector_t axis, void *aux);
 
 typedef void (*normal_handler_t) (void *aux);
+
 /**
  * Adds a force creator to a scene that applies gravity between two bodies.
  * The force creator will be called each tick

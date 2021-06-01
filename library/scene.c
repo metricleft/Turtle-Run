@@ -22,6 +22,7 @@ void force_free(force_t *force) {
     if (force->info_freer != NULL){
         force->info_freer(force->info);
     }
+    free(force->force_bodies);
     free(force);
 }
 
