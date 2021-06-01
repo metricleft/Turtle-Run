@@ -27,14 +27,14 @@ Mix_Chunk *shot = NULL;
 const int ARC_RESOLUTION = 10;
 
 const double MAX_DT = 0.01;
-const double MIN_DT = 0.002;
+const double MIN_DT = 1e-6;
 
 const double BULLET_RADIUS = 6;
 const double BULLET_MASS = 0.2;
 const char *BULLET_SPRITE = "static/bullet.png";
 
 const int POWERUP_INTERVAL = 15;
-const int ENEMY_INTERVAL = 5;
+const int ENEMY_INTERVAL = 10;
 const int SPEEDUP_INTERVAL = 5;
 
 const double DEFAULT_SPEEDUP = -50;
@@ -326,9 +326,14 @@ void menu_play_game() {
     //Every tick inside "Play Game":
     while (!sdl_is_done(scene)) {
 
+<<<<<<< HEAD
         //double dt = fmax(fmin(time_since_last_tick(), MAX_DT), MIN_DT);
         double dt = time_since_last_tick();
         total_time += dt;
+=======
+        double dt = fmax(fmin(time_since_last_tick(), MAX_DT), MIN_DT);
+        //double dt = time_since_last_tick();
+>>>>>>> f463f0c0519d1b313e3acaf075edfe578e405a71
         time_since_last_enemy += dt;
         distance_since_last_frame += dt*(-(scroll_speed->x));
         time_since_last_powerup += dt;

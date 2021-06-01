@@ -132,6 +132,14 @@ void body_set_draw(body_t *body, draw_func_t drawer, void *draw_info,
 void body_set_centroid(body_t *body, vector_t x);
 
 /**
+ * Translates a body by a vector.
+ * 
+ * @param body a pointer to a body returned from body_init()
+ * @param v the vector to translate the body by
+ */
+void body_translate(body_t *body, vector_t v);
+
+/**
  * Changes a body's velocity (the time-derivative of its position).
  *
  * @param body a pointer to a body returned from body_init()
