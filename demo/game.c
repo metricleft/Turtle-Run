@@ -25,6 +25,7 @@ Mix_Chunk *jump = NULL;
 Mix_Chunk *slide = NULL;
 Mix_Chunk *shot = NULL;
 
+
 const int ARC_RESOLUTION = 10;
 
 const double MAX_DT = 0.01;
@@ -298,6 +299,18 @@ void display_main_menu(SDL_Window *window) {
 }
 
 void menu_play_game() {
+    double total_score;
+    double highscore;
+    FILE *fp;
+    char *filename = "scores/highscore.txt";
+    fp = fopen(filename, "w+");
+    if (fp == NULL) {
+        printf("Unable to open %s", filename);
+    }
+    for (int i = 0; i < 1; i++) {
+        fscanf(fp, "%lf", &highscore);
+        printf("%lf\n", highscore);
+    }
     SDL_Window *window = sdl_init(MIN, MAX);
     sdl_on_key((event_handler_t) player_move);
     sdl_on_click((event_handler_t) player_shoot);
@@ -358,15 +371,25 @@ void menu_play_game() {
             }
         }
         *score = *score + advanced_score_calculation(total_time);
-        //printf("%f\n", *score);
-
+        
         sidescroll(scene, scroll_speed, dt);
         scene_tick(scene, dt);
         sdl_render_scene(scene);
         if (check_game_end(scene)) {
+            total_score = *score;
+            if (total_score > highscore) {
+                printf("I am in this loop\n");
+                highscore = total_score;
+            }
             break;
         }
     }
+    printf("%lf\n", highscore);
+    FILE *fp2;
+    fp2 = fopen(filename, "w+");
+    fprintf(fp2, "%lf", highscore);
+    close(fp2);
+    close(fp);
     sdl_on_key(NULL);
     sdl_on_click(NULL);
     free(scene);
@@ -497,25 +520,7 @@ void menu_mouse_handler(char key, mouse_event_type_t type, double held_time,
 }
 
 int main(int argc, char *argv[]) {
-    FILE *fp;
-    FILE *fp2;
-    double highscore;
-    char *filename = "scores/highscore.txt";
-    fp = fopen(filename, "r+");
-    if (fp == NULL) {
-        printf("Unable to open %s", filename);
-    }
-    for (int i = 0; i < 1; i++) {
-        fscanf(fp, "%lf", &highscore);
-        printf("%lf\n", highscore);
-    }
-    double newscore = 293857629346;
-    if (newscore > highscore) {
-        highscore = newscore;
-    }
-    fp2 = fopen(filename, "w");
-    fprintf(fp2, "%lf", highscore);
-    
+    //double newscore = 293857629346;
 
     time_t t;
     srand((unsigned) time(&t));
@@ -532,7 +537,5 @@ int main(int argc, char *argv[]) {
 
     while (!sdl_is_done(window)) {
     }
-
-    close(fp);
     return 0;
 }
