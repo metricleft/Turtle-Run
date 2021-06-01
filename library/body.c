@@ -106,6 +106,11 @@ void body_set_centroid(body_t *body, vector_t x){
     body->centroid = x;
 }
 
+void body_translate(body_t *body, vector_t v) {
+    polygon_translate(body->shape, v);
+    body->centroid = vec_add(v,body->centroid);
+}
+
 void body_set_velocity(body_t *body, vector_t v){
     body->velocity = v;
 }

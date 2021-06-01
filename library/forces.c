@@ -200,20 +200,45 @@ void normal_handler(collision_param_t *param){
                                           *(vector_t *) param->aux);
         body_add_force(param->body1, force);
     } else {
-        collision_info_t collision = find_collision(shape1,shape2);
-
-        if (collision.collided) {
-            if (fabs(collision.axis.y) < SMALL_VALUE){
-
-                double reduced_mass = calculate_reduced_mass(param->body1, param->body2);
-                vector_t impulse = 
-                    vec_multiply(
-                        reduced_mass * 
-                        (vec_dot(body_get_velocity(param->body2),collision.axis)-
-                        vec_dot(body_get_velocity(param->body1),collision.axis)),
-                        collision.axis);
-                body_add_impulse(param->body1, impulse);
+        if (!strcmp(entity_get_type(body_get_info(param->body2)),"TERRAIN")){
+            collision_info_t collision = find_collision(shape1,shape2);
+            if (collision.collided) {
+                if (fabs(collision.axis.y) < SMALL_VALUE){
+                    /*
+                    double reduced_mass = 
+                        calculate_reduced_mass(param->body1, param->body2);
+                    vector_t impulse = 
+                        vec_multiply(
+                            reduced_mass * 
+                            (vec_dot(body_get_velocity(param->body2),collision.axis)-
+                            vec_dot(body_get_velocity(param->body1),collision.axis)),
+                            collision.axis);
+                    if (body_get_centroid(param->body1).x <
+                            body_get_centroid(param->body2).x) {
+                                impulse.x = -fabs(impulse.x);
+                    } else {
+                        impulse.x = fabs(impulse.x);
+                    }
+                    //body_add_impulse(param->body1, impulse);
+                    */
+                    if (body_get_centroid(param->body1).x <
+                            body_get_centroid(param->body2).x) {
+                                body_translate(param->body1,
+                                        vec_multiply(collision.overlap,
+                                            vec_negate(collision.axis)));
+                    } else {
+                            body_translate(param->body1,
+                                    vec_multiply(collision.overlap,
+                                        (collision.axis)));
+                    }
+                    vector_t old_velocity = body_get_velocity(param->body1);
+                    vector_t terrain_vel = body_get_velocity(param->body2);
+                    body_set_velocity(param->body1, (vector_t) {
+                            terrain_vel.x, old_velocity.y});
+                }
+                
             }
+            
         }
     }
     /*

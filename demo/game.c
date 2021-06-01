@@ -27,14 +27,14 @@ Mix_Chunk *shot = NULL;
 const int ARC_RESOLUTION = 10;
 
 const double MAX_DT = 0.01;
-const double MIN_DT = 0.002;
+const double MIN_DT = 1e-6;
 
 const double BULLET_RADIUS = 6;
 const double BULLET_MASS = 0.2;
 const char *BULLET_SPRITE = "static/bullet.png";
 
 const int POWERUP_INTERVAL = 15;
-const int ENEMY_INTERVAL = 5;
+const int ENEMY_INTERVAL = 100;
 const int SPEEDUP_INTERVAL = 5;
 
 const double DEFAULT_SPEEDUP = -50;
@@ -66,7 +66,7 @@ const char *BACKGROUND_IMG = "static/background.png";
 const SDL_Rect BACKGROUND_FRAME = {0,0, 256, 128};
 
 const vector_t DEFAULT_GRAVITY = {0, -800};
-const vector_t DEFAULT_SCROLL_SPEED = {-200, 0};
+const vector_t DEFAULT_SCROLL_SPEED = {-20, 0};
 
 const double ELASTIC_COLLISION = 1;
 const double INELASTIC_COLLISION = 0;
