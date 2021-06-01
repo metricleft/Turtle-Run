@@ -317,6 +317,7 @@ void menu_play_game() {
     player_entity_t *player_entity = body_get_info(player);
     create_bounds_collisions(scene, player, PLAYER_RADIUS);
 
+    double total_time = 0.0;
     double time_since_last_enemy = 0;
     double time_since_last_powerup = 0;
     double time_since_last_speedup = 0;
@@ -325,8 +326,14 @@ void menu_play_game() {
     //Every tick inside "Play Game":
     while (!sdl_is_done(scene)) {
 
+<<<<<<< HEAD
+        //double dt = fmax(fmin(time_since_last_tick(), MAX_DT), MIN_DT);
+        double dt = time_since_last_tick();
+        total_time += dt;
+=======
         double dt = fmax(fmin(time_since_last_tick(), MAX_DT), MIN_DT);
         //double dt = time_since_last_tick();
+>>>>>>> f463f0c0519d1b313e3acaf075edfe578e405a71
         time_since_last_enemy += dt;
         distance_since_last_frame += dt*(-(scroll_speed->x));
         time_since_last_powerup += dt;
@@ -354,8 +361,8 @@ void menu_play_game() {
                 sprite_set_dt(sprite, 0);
             }
         }
-        *score = *score + advanced_score_calculation(dt);
-        //printf("%f\n", *score);
+        *score = *score + advanced_score_calculation(total_time);
+        printf("%f\n", *score);
 
         sidescroll(scene, scroll_speed, dt);
         scene_tick(scene, dt);
