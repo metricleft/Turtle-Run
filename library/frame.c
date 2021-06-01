@@ -148,8 +148,8 @@ void frame_spawn_random(scene_t *scene, vector_t frame, double frame_start,
     scene_add_body(scene, debug_body);
     create_terrain_collisions(scene,debug_body);
     */
-    frame_4(scene,frame,frame_start,score);
-    /*
+    //frame_4(scene,frame,frame_start,score);
+    
     if (frame_num == 0) {
         frame_0(scene, frame, frame_start, score);
     }
@@ -165,5 +165,5 @@ void frame_spawn_random(scene_t *scene, vector_t frame, double frame_start,
     if (frame_num == 4) {
         frame_4(scene, frame, frame_start, score);
     }
-    */
+    
 }
