@@ -3,6 +3,7 @@
 #include <string.h>
 #include <assert.h>
 #include <time.h>
+#include <stdio.h>
 
 #include "body.h"
 #include "polygon.h"
@@ -357,7 +358,7 @@ void menu_play_game() {
             }
         }
         *score = *score + advanced_score_calculation(total_time);
-        printf("%f\n", *score);
+        //printf("%f\n", *score);
 
         sidescroll(scene, scroll_speed, dt);
         scene_tick(scene, dt);
@@ -496,6 +497,16 @@ void menu_mouse_handler(char key, mouse_event_type_t type, double held_time,
 }
 
 int main(int argc, char *argv[]) {
+    FILE *fp;
+    double highscore;
+    char *filename = "scores/highscore.txt";
+    fp = fopen(filename, "w+");
+    if (fp == NULL) {
+        printf("Unable to open %s", filename);
+    }
+    fscanf(fp, "%f", highscore);
+    printf("%f\n", highscore);
+
     time_t t;
     srand((unsigned) time(&t));
     Mix_OpenAudio( 44100, MIX_DEFAULT_FORMAT, 2, 2048 );
