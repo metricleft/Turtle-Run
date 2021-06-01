@@ -92,6 +92,7 @@ list_t *get_high_scores() {
         list_add(high_scores, highscore[j]);
     }
     fclose(fp);
+    free(highscore);
     return high_scores;
 }
 
