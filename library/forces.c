@@ -20,6 +20,7 @@ typedef struct param {
     free_func_t const_freer;
 } param_t;
 
+
 void param_free(param_t *param) {
     param->const_freer(param->constant);
     free(param);
@@ -162,7 +163,15 @@ void physics_collision_handler(body_t *body1, body_t *body2,
     }
 }
 
-void normal_handler(collision_param_t *param){
+typedef struct normal_param {
+    normal_handler_t handler;
+    body_t *body1;
+    body_t *body2;
+    void *aux;
+    bool collided;
+} normal_param_t;
+
+void normal_handler(normal_param_t *param){
     list_t *shape1 = body_get_shape(param->body1);
     list_t *shape2 = body_get_shape(param->body2);
 
@@ -320,8 +329,8 @@ void create_normal_collision(scene_t *scene, vector_t grav,
     list_t *bodies = list_init(2, body_free);
     list_add(bodies, body1);
     list_add(bodies, body2);
-    collision_param_t *force_param = malloc(sizeof(collision_param_t));
-    *force_param = (collision_param_t) {normal_handler, body1,
+    normal_param_t *force_param = malloc(sizeof(normal_param_t));
+    *force_param = (normal_param_t) {normal_handler, body1,
                                         body2, grav_param, false};
     scene_add_bodies_force_creator(scene, normal_handler, force_param,
                                         bodies, free);
