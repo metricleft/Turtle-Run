@@ -21,15 +21,10 @@
 const vector_t MIN = {.x = 0, .y = 0};
 const vector_t MAX = {.x = 1000, .y = 500};
 
-//Mix_Chunk *jump = NULL;
-//Mix_Chunk *slide = NULL;
-//Mix_Chunk *shot = NULL;
-
 const char *JUMP_ADD = "sounds/jump1.wav";
 const char *SLIDE_ADD = "sounds/sliding.wav";
 const char *SOUNDTRACK_ADD = "sounds/synth.wav";
 const char *SHOOT_ADD = "sounds/shoot.wav";
-
 
 const int ARC_RESOLUTION = 10;
 
@@ -330,9 +325,6 @@ void display_main_menu(SDL_Window *window) {
 
 void menu_play_game() {
     //double total_score;
-    Mix_OpenAudio( 44100, MIX_DEFAULT_FORMAT, 2, 2048 );
-    Mix_Music *soundtrack = loadMedia(SOUNDTRACK_ADD);
-    Mix_PlayMusic(soundtrack, -1);
 
     char *filename = "scores/highscore.txt";
     FILE *fp = fopen(filename, "r");
@@ -570,7 +562,9 @@ int main(int argc, char *argv[]) {
     printf("%lf\n", *(double *)list_get(hi, 3));
     printf("%lf\n", *(double *)list_get(hi, 4));
 
-    //double newscore = 293857629346;
+    Mix_OpenAudio( 44100, MIX_DEFAULT_FORMAT, 2, 2048 );
+    Mix_Music *soundtrack = loadMedia(SOUNDTRACK_ADD);
+    Mix_PlayMusic(soundtrack, -1);
 
     time_t t;
     srand((unsigned) time(&t));
