@@ -322,6 +322,13 @@ void display_main_menu(SDL_Window *window) {
 
 void menu_play_game() {
     //double total_score;
+    Mix_OpenAudio( 44100, MIX_DEFAULT_FORMAT, 2, 2048 );
+    Mix_Music *soundtrack = loadMedia("sounds/synth.wav");
+    jump = loadEffects("sounds/jump1.wav");
+    slide = loadEffects("sounds/sliding.wav");
+    shot = loadEffects("sounds/shoot.wav");
+    Mix_PlayMusic(soundtrack, -1);
+
     char *filename = "scores/highscore.txt";
     FILE *fp = fopen(filename, "r");
     if (fp == NULL) {
@@ -562,15 +569,8 @@ int main(int argc, char *argv[]) {
 
     time_t t;
     srand((unsigned) time(&t));
-    Mix_OpenAudio( 44100, MIX_DEFAULT_FORMAT, 2, 2048 );
-    Mix_Music *soundtrack = loadMedia("sounds/synth.wav");
-    jump = loadEffects("sounds/jump1.wav");
-    slide = loadEffects("sounds/sliding.wav");
-    shot = loadEffects("sounds/shoot.wav");
-
     SDL_Window *window = sdl_init(MIN,MAX);
     display_main_menu(window);
-    Mix_PlayMusic(soundtrack, -1);
     sdl_on_click((event_handler_t) menu_mouse_handler);
 
     while (!sdl_is_done(window)) {
