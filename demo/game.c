@@ -216,21 +216,23 @@ void player_move (char key, key_event_type_t type, double held_time, void *scene
     if (type == KEY_PRESSED) {
         switch (key) {
             case 'a':
-            case LEFT_ARROW:
+            case LEFT_ARROW: {
                 new_velocity.x = -PLAYER_SPEED;
                 if (held_time < 0.2) {
                     Mix_PlayChannel(-1, slide, 0);
                 }
                 break;
+            }
             case 'd':
-            case RIGHT_ARROW:
+            case RIGHT_ARROW: {
                 new_velocity.x = PLAYER_SPEED;
                 if (held_time < 0.2) {
                     Mix_PlayChannel(-1, slide, 0);
                 }
                 break;
+            }
             case 'w':
-            case UP_ARROW:
+            case UP_ARROW: {
                 if (held_time < 0.2 && (entity_get_colliding(entity) ||
                                         !strcmp(entity_get_powerup(entity), "JUMP"))) {
                     new_velocity.y = 0.8 * PLAYER_SPEED;
@@ -238,6 +240,7 @@ void player_move (char key, key_event_type_t type, double held_time, void *scene
                     entity_set_colliding(entity, false);
                 }
                 break;
+            }
         }
     }
     body_set_velocity(player, new_velocity);
@@ -248,7 +251,7 @@ void player_shoot(char key, mouse_event_type_t type, double held_time, void *sce
     vector_t new_velocity = {0, 0};
     if (type == BUTTON_PRESSED) {
         switch (key) {
-            case LEFT_CLICK:
+            case LEFT_CLICK: {
                 vector_t mouse = sdl_mouse_pos();
                 vector_t center = body_get_centroid(player);
                 vector_t shoot = vec_unit(vec_subtract(mouse, center));
@@ -256,6 +259,7 @@ void player_shoot(char key, mouse_event_type_t type, double held_time, void *sce
                 Mix_PlayChannel(-1, shot, 0);
                 add_bullet(scene, center, vec_multiply(200, shoot), entity, "ENEMY");
                 break;
+            }
         }
     }
 }
@@ -271,12 +275,13 @@ void click_to_continue(char key, mouse_event_type_t type, double held_time,
                         void *window){
     if (type == BUTTON_PRESSED) {
         switch (key) {
-            case LEFT_CLICK:
+            case LEFT_CLICK: {
                 SDL_DestroyWindow(window);
                 SDL_Event *event = malloc(sizeof(event));
                 event->type = SDL_QUIT;
                 SDL_PushEvent(event);
                 break;
+            }
         }
     }
 }
@@ -517,7 +522,7 @@ void menu_mouse_handler(char key, mouse_event_type_t type, double held_time,
 
     if (type == BUTTON_PRESSED) {
         switch (key) {
-            case LEFT_CLICK:
+            case LEFT_CLICK: {
                 vector_t mouse_coords = sdl_mouse_pos();
                 double x = mouse_coords.x;
                 double y = mouse_coords.y;
@@ -541,6 +546,7 @@ void menu_mouse_handler(char key, mouse_event_type_t type, double held_time,
                     exit(0);
                 }
                 break;
+            }
         }
     }
 }
