@@ -79,14 +79,15 @@ double basic_score_calculation(double dt) {
 }
 
 list_t *get_high_scores() {
-    list_t *high_scores = list_init(5, list_free);
+    list_t *high_scores = list_init(5, free);
     FILE *fp = fopen("scores/highscore.txt", "r");
     if (fp == NULL) {
         printf("Unable to open scores/highscore.txt");
     }
-    double **highscore = malloc(sizeof(double) * 5);
+    double **highscore = malloc(sizeof(double *) * 5);
     for (int i = 0; i < 5; i++) {
-        fscanf(fp, "%lf", &highscore[i]);
+        highscore[i] = malloc(sizeof(double));
+        fscanf(fp, "%lf", highscore[i]);
     }
     for (int j = 0; j < 5; j++) {
         list_add(high_scores, highscore[j]);
@@ -101,15 +102,13 @@ double advanced_score_calculation(double dt) {
     if (dt <= 10) {
         return 10;
     }
-    if (dt > 10 && dt <= 20) {
+    else if (dt <= 20) {
         return 20;
     }
-    if (dt > 20 && dt <= 30) {
+    else if (dt <= 30) {
         return 30;
     }
-    if (dt > 30) {
-        return 50;
-    } 
+    return 50;
 }
 
 bool check_game_end(scene_t *scene) {
@@ -330,8 +329,8 @@ void menu_play_game() {
     }
     double *highscore = malloc(sizeof(double) * 5);
     for (int i = 0; i < 5; i++) {
-        fscanf(fp, "%lf", &highscore[i]);
-        printf("%lf\n", highscore[i]);
+        fscanf(fp, "%lf", highscore + i);
+        //printf("%lf\n", highscore[i]);
     }
     SDL_Window *window = sdl_init(MIN, MAX);
     sdl_on_key((event_handler_t) player_move);
@@ -552,8 +551,14 @@ void menu_mouse_handler(char key, mouse_event_type_t type, double held_time,
 }
 
 int main(int argc, char *argv[]) {
-    //double newscore = 293857629346;
     list_t *hi = get_high_scores();
+    printf("%lf\n", *(double *)list_get(hi, 0));
+    printf("%lf\n", *(double *)list_get(hi, 1));
+    printf("%lf\n", *(double *)list_get(hi, 2));
+    printf("%lf\n", *(double *)list_get(hi, 3));
+    printf("%lf\n", *(double *)list_get(hi, 4));
+
+    //double newscore = 293857629346;
 
     time_t t;
     srand((unsigned) time(&t));
