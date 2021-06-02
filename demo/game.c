@@ -21,9 +21,14 @@
 const vector_t MIN = {.x = 0, .y = 0};
 const vector_t MAX = {.x = 1000, .y = 500};
 
-Mix_Chunk *jump = NULL;
-Mix_Chunk *slide = NULL;
-Mix_Chunk *shot = NULL;
+//Mix_Chunk *jump = NULL;
+//Mix_Chunk *slide = NULL;
+//Mix_Chunk *shot = NULL;
+
+const char *JUMP_ADD = "sounds/jump1.wav";
+const char *SLIDE_ADD = "sounds/sliding.wav";
+const char *SOUNDTRACK_ADD = "sounds/synth.wav";
+const char *SHOOT_ADD = "sounds/shoot.wav";
 
 
 const int ARC_RESOLUTION = 10;
@@ -209,6 +214,8 @@ void sidescroll(scene_t *scene, vector_t *scroll_speed, double dt) {
 }
 
 void player_move (char key, key_event_type_t type, double held_time, void *scene) {
+    Mix_Chunk *jump = loadEffects(JUMP_ADD);
+    Mix_Chunk *slide = loadEffects(SLIDE_ADD);
     body_t *player = scene_get_body(scene, 3);
     player_entity_t *entity = body_get_info(player);
     vector_t new_velocity = {0, body_get_velocity(player).y};
@@ -246,6 +253,7 @@ void player_move (char key, key_event_type_t type, double held_time, void *scene
 }
 
 void player_shoot(char key, mouse_event_type_t type, double held_time, void *scene){
+    Mix_Chunk *shot = loadEffects(SHOOT_ADD);
     body_t *player = scene_get_body(scene, 3);
     vector_t new_velocity = {0, 0};
     if (type == BUTTON_PRESSED) {
@@ -323,10 +331,7 @@ void display_main_menu(SDL_Window *window) {
 void menu_play_game() {
     //double total_score;
     Mix_OpenAudio( 44100, MIX_DEFAULT_FORMAT, 2, 2048 );
-    Mix_Music *soundtrack = loadMedia("sounds/synth.wav");
-    jump = loadEffects("sounds/jump1.wav");
-    slide = loadEffects("sounds/sliding.wav");
-    shot = loadEffects("sounds/shoot.wav");
+    Mix_Music *soundtrack = loadMedia(SOUNDTRACK_ADD);
     Mix_PlayMusic(soundtrack, -1);
 
     char *filename = "scores/highscore.txt";
