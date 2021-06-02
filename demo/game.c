@@ -357,8 +357,8 @@ void menu_play_game() {
     //Every tick inside "Play Game":
     while (!sdl_is_done(scene)) {
 
-        //double dt = fmax(fmin(time_since_last_tick(), MAX_DT), MIN_DT);
-        double dt = time_since_last_tick();
+        double dt = fmax(fmin(time_since_last_tick(), MAX_DT), MIN_DT);
+        //double dt = time_since_last_tick();
         total_time += dt;
         time_since_last_enemy += dt;
         distance_since_last_frame += dt*(-(scroll_speed->x));
@@ -395,13 +395,11 @@ void menu_play_game() {
         if (check_game_end(scene)) {
             //total_score = *score;
             if (*score > highscore[4]) {
-                printf("I am in this loop\n");
                 highscore[4] = *score;
             }
             break;
         }
     }
-    printf("%lf\n", highscore[4]);
     for (int k = 0; k < 5; k++) {
         for (int h = k + 1; h < 5; h++) {
             if (highscore[k] < highscore[h]) {
@@ -550,12 +548,6 @@ void menu_mouse_handler(char key, mouse_event_type_t type, double held_time,
 int main(int argc, char *argv[]) {
     //double newscore = 293857629346;
     list_t *hi = get_high_scores();
-    printf("%lf\n", list_get(hi, 0));
-    printf("%lf\n", list_get(hi, 1));
-    printf("%lf\n", list_get(hi, 2));
-    printf("%lf\n", list_get(hi, 3));
-    printf("%lf\n", list_get(hi, 4));
-
 
     time_t t;
     srand((unsigned) time(&t));

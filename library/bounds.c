@@ -42,7 +42,7 @@ void create_bounds(scene_t *scene, vector_t min, vector_t max, double radius) {
     scene_add_body(scene, bounds);
 
     //Right:
-    center = (vector_t){max.x + radius*2 + BOUNDS_THICKNESS/2, (max.y-min.y)/2};
+    center = (vector_t){max.x + radius*4 + BOUNDS_THICKNESS/2, (max.y-min.y)/2};
     entity = entity_init("BOUNDS", false, false);
     coords = compute_rect_points(center, BOUNDS_THICKNESS, max.y - min.y);
     bounds = body_init_with_info(coords, INFINITY, entity, entity_free);
