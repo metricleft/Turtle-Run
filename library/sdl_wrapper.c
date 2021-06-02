@@ -10,7 +10,7 @@ const int WINDOW_HEIGHT = 500;
 const double MS_PER_S = 1e3;
 const rgb_color_t BACKGROUND = {255, 255, 255};
 
-Mix_Music *loadMedia(char *music_name){
+Mix_Music *loadMedia(const char *music_name){
     Mix_Music *music = Mix_LoadMUS(music_name);
     if (music == NULL) {
         printf("Failed %s", Mix_GetError());
@@ -19,7 +19,7 @@ Mix_Music *loadMedia(char *music_name){
     return music;
 }
 
-Mix_Chunk *loadEffects(char *effect_name){
+Mix_Chunk *loadEffects(const char *effect_name){
     Mix_Chunk *effect = Mix_LoadWAV(effect_name);
     if (effect == NULL) {
         printf("Failed %s", Mix_GetError());
@@ -136,6 +136,7 @@ char get_mousecode(SDL_MouseButtonEvent mouse) {
         case SDL_BUTTON_RIGHT:  return RIGHT_CLICK;
         case SDL_BUTTON_MIDDLE: return SCROLL_CLICK;
     }
+    return '\0';
 }
 
 sprite_t *sprite_image(const char *image, double scale, SDL_Rect *in){

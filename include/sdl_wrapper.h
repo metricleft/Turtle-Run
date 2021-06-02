@@ -69,8 +69,9 @@ void sprite_set_speed(sprite_t *sprite, int speed);
 
 void sprite_set_dt(sprite_t *sprite, double dt);
 
-Mix_Music *loadMedia(char *music_name);
-Mix_Chunk *loadEffects(char *effect_name);
+Mix_Music *loadMedia(const char *music_name);
+
+Mix_Chunk *loadEffects(const char *effect_name);
 
 // Values passed to a key handler when the given arrow key is pressed
 typedef enum {

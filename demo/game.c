@@ -39,14 +39,14 @@ const int POWERUP_INTERVAL = 15;
 const int ENEMY_INTERVAL = 10;
 const int SPEEDUP_INTERVAL = 5;
 
+const vector_t DEFAULT_GRAVITY = {0, -800};
+const vector_t DEFAULT_SCROLL_SPEED = {-200, 0};
 const double DEFAULT_SPEEDUP = -50;
 const double MAX_SPEED = 700;
 
-//const rgb_color_t PLAYER_BULLET_COLOR = {0, 1, 0};
 const double PLAYER_SPEED = 600;
 const double PLAYER_RADIUS = 30;
 const double PLAYER_MASS = 10;
-//const rgb_color_t PLAYER_COLOR = {0, 1, 0};
 const char *PLAYER_SPRITE = "static/turtle_spritesheet2.png";
 const double PLAYER_SCALE = 2;
 const int PLAYER_FRAMES = 8;
@@ -61,14 +61,14 @@ const int TEXT_SPACING = 80;
 const int SMALL_TEXT_SPACING = 50;
 const int TEXT_OFFSET = 10;
 
+const int NUM_HIGHSCORES = 5;
+const int LEN_HIGHSCORES = 15;
+
 const char *SKY_IMG = "static/background_sky.png";
 const char *GRASS_IMG = "static/background_grass.png";
 const char *WATER_IMG = "static/background_water.png";
 const char *BACKGROUND_IMG = "static/background.png";
 const SDL_Rect BACKGROUND_FRAME = {0,0, 256, 128};
-
-const vector_t DEFAULT_GRAVITY = {0, -800};
-const vector_t DEFAULT_SCROLL_SPEED = {-200, 0};
 
 const double ELASTIC_COLLISION = 1;
 const double INELASTIC_COLLISION = 0;
@@ -79,17 +79,17 @@ double basic_score_calculation(double dt) {
 }
 
 list_t *get_high_scores() {
-    list_t *high_scores = list_init(5, free);
+    list_t *high_scores = list_init(NUM_HIGHSCORES, free);
     FILE *fp = fopen("scores/highscore.txt", "r");
     if (fp == NULL) {
         printf("Unable to open scores/highscore.txt");
     }
-    double **highscore = malloc(sizeof(double *) * 5);
-    for (int i = 0; i < 5; i++) {
+    double **highscore = malloc(sizeof(double *) * NUM_HIGHSCORES);
+    for (int i = 0; i < NUM_HIGHSCORES; i++) {
         highscore[i] = malloc(sizeof(double));
         fscanf(fp, "%lf", highscore[i]);
     }
-    for (int j = 0; j < 5; j++) {
+    for (int j = 0; j < NUM_HIGHSCORES; j++) {
         list_add(high_scores, highscore[j]);
     }
     fclose(fp);
@@ -336,8 +336,8 @@ void menu_play_game() {
         printf("Unable to open achievements/lifetime.txt");
     }
     double *lifetime_score = malloc(sizeof(double));
-    double *highscore = malloc(sizeof(double) * 5);
-    for (int i = 0; i < 5; i++) {
+    double *highscore = malloc(sizeof(double) * NUM_HIGHSCORES);
+    for (int i = 0; i < NUM_HIGHSCORES; i++) {
         fscanf(fp, "%lf", highscore + i);
         //printf("%lf\n", highscore[i]);
     }
@@ -429,7 +429,7 @@ void menu_play_game() {
     FILE *lifetime2 = fopen("achievements/lifetime.txt", "w");
     FILE *fp2 = fopen(filename, "w");
     fprintf(lifetime2, "%lf\n", *lifetime_score);
-    for (int j = 0; j < 5; j++) {
+    for (int j = 0; j < NUM_HIGHSCORES; j++) {
         fprintf(fp2, "%lf\n", highscore[j]);
     }
     fclose(fp2);
@@ -507,6 +507,38 @@ void menu_instructions() {
     }
 }
 
+void menu_highscores() {
+    SDL_Window *window = sdl_init(MIN, MAX);
+    sdl_on_click((event_handler_t)click_to_continue);
+    draw_background();
+
+    vector_t center = (vector_t){
+        sdl_text_center(MIN, MAX, "HIGH SCORES", DEFAULT_FONT, TEXT_HEIGHT), MIN.y};
+    sdl_draw_outlined_text(window, "HIGH SCORES", DEFAULT_FONT, LIME, INDIGO,TEXT_HEIGHT,
+                           THICK_OUTLINE, center);
+    
+    list_t *scores = get_high_scores();
+    for (int i = 0; i < NUM_HIGHSCORES; i++) {
+        char *message = malloc(sizeof(char)*LEN_HIGHSCORES);
+        snprintf(message, sizeof(char)*LEN_HIGHSCORES,
+                 "%d. %.0f", i+1, *(double *)list_get(scores, i));
+
+        center = (vector_t){
+                    sdl_text_center(MIN, MAX, message, DEFAULT_FONT, SMALL_TEXT_HEIGHT),
+                    SMALL_TEXT_SPACING*(i+2)};
+        sdl_draw_outlined_text(window, message, DEFAULT_FONT, LIME, INDIGO,
+                               SMALL_TEXT_HEIGHT, THIN_OUTLINE, center);
+        free(message);
+    }
+    char *message = "Left-click anywhere to continue...";
+    center = (vector_t){MIN.x+TEXT_OFFSET, SMALL_TEXT_SPACING*9};
+    sdl_draw_outlined_text(window, message, DEFAULT_FONT, LIME, INDIGO, SMALL_TEXT_HEIGHT,
+                           THIN_OUTLINE, center);
+
+    while (!sdl_is_done(window)) {
+    }
+}
+
 int is_in_button_bounds(double x, double y, vector_t box, int width) {
     return x > box.x && x < box.x+width &&
            y > box.y-TEXT_SPACING+TEXT_OFFSET && y < box.y-TEXT_OFFSET;
@@ -554,8 +586,9 @@ void menu_mouse_handler(char key, mouse_event_type_t type, double held_time,
                     show_window(window);
                 }
                 else if (is_in_button_bounds(x, y, box3, width3)) {
-                    printf("HIGH SCORES\n");
-                    //TODO
+                    SDL_HideWindow(window);
+                    menu_highscores();
+                    show_window(window);
                 }
                 else if (is_in_button_bounds(x, y, box4, width4)) {
                     SDL_DestroyWindow(window);
