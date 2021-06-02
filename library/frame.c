@@ -82,8 +82,6 @@ void frame_1(scene_t *scene, vector_t frame, double frame_start, double *score) 
 void frame_2(scene_t *scene, vector_t frame, double frame_start, double *score) {
     vector_t floor_center = (vector_t) {0.5*frame.x+frame_start, TERRAIN_PAD};
     create_terrain_rect(scene, floor_center, frame.x, TERRAIN_HEIGHT);
-    powerup_spawn_coin(scene, (vector_t){frame.x+frame_start, 2*TERRAIN_HEIGHT},
-                       score);
 
     vector_t platform1_center = (vector_t){0.25*frame.x+frame_start,
                                            0.25*frame.y+TERRAIN_PAD};
@@ -100,6 +98,8 @@ void frame_2(scene_t *scene, vector_t frame, double frame_start, double *score) 
     vector_t platform3_center = (vector_t){0.75*frame.x + frame_start,
                                             0.75*frame.y - TERRAIN_PAD};
     create_platform(scene, platform3_center, frame.x/6., PLATFORM_HEIGHT);
+    powerup_spawn_coin(scene, (vector_t){0.75*frame.x+frame_start,
+                                         0.75*frame.y-TERRAIN_PAD+TERRAIN_HEIGHT}, score);
 }
 
 /**
@@ -114,6 +114,8 @@ void frame_3(scene_t *scene, vector_t frame, double frame_start, double *score){
 
     vector_t platform2_center = {0.75*frame.x+frame_start, 0.5*frame.y};
     create_platform(scene, platform2_center, 0.5*frame.x, PLATFORM_HEIGHT);
+    powerup_spawn_coin(scene, (vector_t){0.75*frame.x+frame_start,
+                                         0.5*frame.y + TERRAIN_HEIGHT}, score);
 }
 
 /**
@@ -162,8 +164,8 @@ void frame_6(scene_t *scene, vector_t frame, double frame_start, double *score){
 
     vector_t tunnel2_bottom_center = {0.875*frame.x+frame_start, 0.15*frame.y};
     create_terrain_rect(scene, tunnel2_bottom_center, 0.25*frame.x, 0.3*frame.y);
-    
-    vector_t tunnel1_top_center = {0.125*frame.x+frame_start, 0.8*frame.y};
+
+    vector_t tunnel1_top_center = {0.125*frame.x+frame_start, 0.9*frame.y};
     create_terrain_rect(scene, tunnel1_top_center, 0.25*frame.x, 0.4*frame.y);
 
     vector_t tunnel2_top_center = {0.875*frame.x+frame_start, 0.8*frame.y};
@@ -171,6 +173,8 @@ void frame_6(scene_t *scene, vector_t frame, double frame_start, double *score){
 
     vector_t platform_center = {0.5*frame.x+frame_start, TERRAIN_PAD};
     create_platform(scene, platform_center, frame.x/8., PLATFORM_HEIGHT);
+    powerup_spawn_coin(scene, (vector_t){0.5*frame.x+frame_start,
+                                         TERRAIN_PAD+TERRAIN_HEIGHT}, score);
 }
 
 void frame_spawn_random(scene_t *scene, vector_t frame, double frame_start,
