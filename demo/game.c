@@ -327,14 +327,22 @@ void menu_play_game() {
     //double total_score;
 
     char *filename = "scores/highscore.txt";
+    FILE *lifetime = fopen("achievements/lifetime.txt", "r");
     FILE *fp = fopen(filename, "r");
     if (fp == NULL) {
         printf("Unable to open %s", filename);
     }
+    if (lifetime == NULL) {
+        printf("Unable to open achievements/lifetime.txt");
+    }
+    double *lifetime_score = malloc(sizeof(double));
     double *highscore = malloc(sizeof(double) * 5);
     for (int i = 0; i < 5; i++) {
         fscanf(fp, "%lf", highscore + i);
         //printf("%lf\n", highscore[i]);
+    }
+    for (int l = 0; l < 1; l++) {
+        fscanf(lifetime, "%lf", lifetime_score + l);
     }
     SDL_Window *window = sdl_init(MIN, MAX);
     sdl_on_key((event_handler_t) player_move);
@@ -402,6 +410,7 @@ void menu_play_game() {
         sdl_render_scene(scene);
         if (check_game_end(scene)) {
             //total_score = *score;
+            *lifetime_score += *score;
             if (*score > highscore[4]) {
                 highscore[4] = *score;
             }
@@ -417,18 +426,23 @@ void menu_play_game() {
             }
         }
     }
+    FILE *lifetime2 = fopen("achievements/lifetime.txt", "w");
     FILE *fp2 = fopen(filename, "w");
+    fprintf(lifetime2, "%lf\n", *lifetime_score);
     for (int j = 0; j < 5; j++) {
         fprintf(fp2, "%lf\n", highscore[j]);
     }
     fclose(fp2);
+    fclose(lifetime2);
     fclose(fp);
+    fclose(lifetime);
     sdl_on_key(NULL);
     sdl_on_click(NULL);
     free(scene);
     free(scroll_speed);
     free(score);
     free(highscore);
+    free(lifetime_score);
     SDL_DestroyWindow(window);
 }
 
