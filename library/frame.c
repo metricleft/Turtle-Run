@@ -55,7 +55,8 @@ void create_platform(scene_t *scene, vector_t center,
  * @param frame a vector_t describing the size of the frame.
  * @param frame_start the x coordinate starting point of the frame
  */
-void frame_0(scene_t *scene, vector_t frame, double frame_start, double *score) {
+void frame_0(scene_t *scene, vector_t frame, double frame_start, double *score,
+             list_t *achievements){
     vector_t floor_center = (vector_t){0.5*frame.x+frame_start, TERRAIN_PAD};
     create_terrain_rect(scene, floor_center, frame.x, TERRAIN_HEIGHT);
 }
@@ -66,11 +67,12 @@ void frame_0(scene_t *scene, vector_t frame, double frame_start, double *score) 
  * @param frame a vector_t describing the size of the frame.
  * @param frame_start the x coordinate starting point of the frame
  */
-void frame_1(scene_t *scene, vector_t frame, double frame_start, double *score) {
+void frame_1(scene_t *scene, vector_t frame, double frame_start, double *score,
+             list_t *achievements){
     vector_t floor_center = (vector_t) {0.7*frame.x+frame_start, TERRAIN_PAD};
     create_terrain_rect(scene, floor_center, 0.6*frame.x, TERRAIN_HEIGHT);
     powerup_spawn_coin(scene, (vector_t){0.625*frame.x+frame_start, 2*TERRAIN_HEIGHT},
-                       score);
+                       score, achievements);
 }
 
 /**
@@ -79,27 +81,28 @@ void frame_1(scene_t *scene, vector_t frame, double frame_start, double *score) 
  * @param frame a vector_t describing the size of the frame.
  * @param frame_start the x coordinate starting point of the frame
  */
-void frame_2(scene_t *scene, vector_t frame, double frame_start, double *score) {
+void frame_2(scene_t *scene, vector_t frame, double frame_start, double *score,
+             list_t *achievements){
     vector_t floor_center = (vector_t) {0.5*frame.x+frame_start, TERRAIN_PAD};
     create_terrain_rect(scene, floor_center, frame.x, TERRAIN_HEIGHT);
 
     vector_t platform1_center = (vector_t){0.25*frame.x+frame_start,
                                            0.25*frame.y+TERRAIN_PAD};
     create_platform(scene, platform1_center, frame.x/6., PLATFORM_HEIGHT);
-    powerup_spawn_coin(scene,
-                       (vector_t){0.25*frame.x+frame_start,
-                                  0.25*frame.y+TERRAIN_PAD+TERRAIN_HEIGHT}, score);
+    powerup_spawn_coin(scene, (vector_t){0.25*frame.x+frame_start,
+                                         0.25*frame.y+TERRAIN_PAD+TERRAIN_HEIGHT},
+                        score, achievements);
     
     vector_t platform2_center = (vector_t){0.5*frame.x + frame_start, 0.5*frame.y};
     create_platform(scene, platform2_center, frame.x/6., PLATFORM_HEIGHT);
     powerup_spawn_coin(scene, (vector_t){0.5*frame.x+frame_start,
-                                         0.5*frame.y+TERRAIN_HEIGHT}, score);
+                                         0.5*frame.y+TERRAIN_HEIGHT}, score, achievements);
 
     vector_t platform3_center = (vector_t){0.75*frame.x + frame_start,
                                             0.75*frame.y - TERRAIN_PAD};
     create_platform(scene, platform3_center, frame.x/6., PLATFORM_HEIGHT);
     powerup_spawn_coin(scene, (vector_t){0.75*frame.x+frame_start,
-                                         0.75*frame.y-TERRAIN_PAD+TERRAIN_HEIGHT}, score);
+                                         0.75*frame.y-TERRAIN_PAD+TERRAIN_HEIGHT}, score, achievements);
 }
 
 /**
@@ -108,14 +111,15 @@ void frame_2(scene_t *scene, vector_t frame, double frame_start, double *score) 
  * @param frame a vector_t describing the size of the frame.
  * @param frame_start the x coordinate starting point of the frame
  */
-void frame_3(scene_t *scene, vector_t frame, double frame_start, double *score){
+void frame_3(scene_t *scene, vector_t frame, double frame_start, double *score,
+             list_t *achievements){
     vector_t platform1_center = {0.25*frame.x+frame_start, 0.25*frame.y};
     create_platform(scene, platform1_center, 0.5*frame.x, PLATFORM_HEIGHT);
 
     vector_t platform2_center = {0.75*frame.x+frame_start, 0.5*frame.y};
     create_platform(scene, platform2_center, 0.5*frame.x, PLATFORM_HEIGHT);
     powerup_spawn_coin(scene, (vector_t){0.75*frame.x+frame_start,
-                                         0.5*frame.y + TERRAIN_HEIGHT}, score);
+                                         0.5*frame.y + TERRAIN_HEIGHT}, score, achievements);
 }
 
 /**
@@ -124,7 +128,8 @@ void frame_3(scene_t *scene, vector_t frame, double frame_start, double *score){
  * @param frame a vector_t describing the size of the frame.
  * @param frame_start the x coordinate starting point of the frame
  */
-void frame_4(scene_t *scene, vector_t frame, double frame_start, double *score){
+void frame_4(scene_t *scene, vector_t frame, double frame_start, double *score,
+             list_t *achievements){
     vector_t floor_center = {0.625*frame.x+frame_start, TERRAIN_PAD};
     create_terrain_rect(scene, floor_center, 0.75*frame.x, TERRAIN_HEIGHT);
 
@@ -138,7 +143,8 @@ void frame_4(scene_t *scene, vector_t frame, double frame_start, double *score){
  * @param frame a vector_t describing the size of the frame
  * @param frame_start the x coordinate starting point of the frame
  */
-void frame_5(scene_t *scene, vector_t frame, double frame_start, double *score){
+void frame_5(scene_t *scene, vector_t frame, double frame_start, double *score,
+             list_t *achievements){
     vector_t floor1_center = {0.125*frame.x+frame_start, TERRAIN_PAD};
     create_terrain_rect(scene, floor1_center, 0.25*frame.x, TERRAIN_HEIGHT);
 
@@ -158,7 +164,8 @@ void frame_5(scene_t *scene, vector_t frame, double frame_start, double *score){
  * @param frame a vector_t describing the size of the frame
  * @param frame_start the x coordinate starting point of the frame
  */
-void frame_6(scene_t *scene, vector_t frame, double frame_start, double *score){
+void frame_6(scene_t *scene, vector_t frame, double frame_start, double *score,
+             list_t *achievements){
     vector_t tunnel1_bottom_center = {0.125*frame.x+frame_start, 0.15*frame.y};
     create_terrain_rect(scene, tunnel1_bottom_center, 0.25*frame.x, 0.3*frame.y);
 
@@ -174,11 +181,11 @@ void frame_6(scene_t *scene, vector_t frame, double frame_start, double *score){
     vector_t platform_center = {0.5*frame.x+frame_start, TERRAIN_PAD};
     create_platform(scene, platform_center, frame.x/8., PLATFORM_HEIGHT);
     powerup_spawn_coin(scene, (vector_t){0.5*frame.x+frame_start,
-                                         TERRAIN_PAD+TERRAIN_HEIGHT}, score);
+                                         TERRAIN_PAD+TERRAIN_HEIGHT}, score, achievements);
 }
 
 void frame_spawn_random(scene_t *scene, vector_t frame, double frame_start,
-                        double *score) {
+                        double *score, list_t *achievements) {
     int frame_num;
 
     frame_num = rand() % 7;
@@ -198,25 +205,25 @@ void frame_spawn_random(scene_t *scene, vector_t frame, double frame_start,
     //frame_6(scene,frame,frame_start,score);
     
     if (frame_num == 0) {
-        frame_0(scene, frame, frame_start, score);
+        frame_0(scene, frame, frame_start, score, achievements);
     }
     if (frame_num == 1) {
-        frame_1(scene,frame,frame_start, score);
+        frame_1(scene,frame,frame_start, score, achievements);
     }
     if (frame_num == 2) {
-        frame_2(scene, frame, frame_start, score);
+        frame_2(scene, frame, frame_start, score, achievements);
     }
     if (frame_num == 3) {
-        frame_3(scene, frame, frame_start, score);
+        frame_3(scene, frame, frame_start, score, achievements);
     }
     if (frame_num == 4) {
-        frame_4(scene, frame, frame_start, score);
+        frame_4(scene, frame, frame_start, score, achievements);
     }
     if (frame_num == 5) {
-        frame_5(scene, frame, frame_start, score);
+        frame_5(scene, frame, frame_start, score, achievements);
     }
     if (frame_num == 6) {
-        frame_6(scene, frame, frame_start, score);
+        frame_6(scene, frame, frame_start, score, achievements);
     }
     
 }

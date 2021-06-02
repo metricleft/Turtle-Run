@@ -17,8 +17,9 @@
  * @param frame_width the width of the frame to be spawned
  * @param frame_start the start point of the frame
  * @param score a pointer to the score of the game
+ * @param achievements the achievements for the current game
  */
 void frame_spawn_random(scene_t *scene, vector_t frame, double frame_start,
-                        double *score);
+                        double *score, list_t *achievements);
 
 #endif

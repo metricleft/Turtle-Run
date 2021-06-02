@@ -28,7 +28,9 @@ void remove_old_powerup(char *powerup, vector_t *scroll_speed) {
 
 typedef struct powerup_info {
     scene_t *scene;
+    double *score;
     vector_t *scroll_speed;
+    list_t *achievements;
 } powerup_info_t;
 
 typedef struct param {
@@ -59,6 +61,8 @@ void create_magnet_gravity(scene_t *scene, double G, body_t *body1, body_t *body
 
 void magnet_handler(body_t *player, body_t *powerup, vector_t axis, void *aux) {
     powerup_info_t *info = aux;
+    *(double *)list_get(info->achievements, 4) =
+        *(double *)list_get(info->achievements, 4) + 1;
     scene_t *scene = info->scene;
     player_entity_t *entity = body_get_info(player);
     if (strcmp(entity_get_powerup(entity), "MAGNET")) {
@@ -76,6 +80,8 @@ void magnet_handler(body_t *player, body_t *powerup, vector_t axis, void *aux) {
 
 void slow_handler(body_t *player, body_t *powerup, vector_t axis, void *aux) {
     powerup_info_t *info = aux;
+    *(double *)list_get(info->achievements, 3) =
+        *(double *)list_get(info->achievements, 3) + 1;
     vector_t *scroll_speed = info->scroll_speed;
     player_entity_t *entity = body_get_info(player);
     if (strcmp(entity_get_powerup(entity), "SLOW")) {
@@ -88,6 +94,8 @@ void slow_handler(body_t *player, body_t *powerup, vector_t axis, void *aux) {
 
 void jump_handler(body_t *player, body_t *powerup, vector_t axis, void *aux) {
     powerup_info_t *info = aux;
+    *(double *)list_get(info->achievements, 4) =
+        *(double *)list_get(info->achievements, 4) + 1;
     player_entity_t *entity = body_get_info(player);
     if (strcmp(entity_get_powerup(entity), "JUMP")) {
         remove_old_powerup(entity_get_powerup(entity), info->scroll_speed);
@@ -97,8 +105,10 @@ void jump_handler(body_t *player, body_t *powerup, vector_t axis, void *aux) {
 }
 
 void coin_handler(body_t *player, body_t *coin, vector_t axis, void *aux) {
-    double *score = aux;
-    *score = *score + COIN_SCORE;
+    powerup_info_t *info = aux;
+    *(info->score) = *(info->score) + COIN_SCORE;
+    *(double *)list_get(info->achievements, 2) =
+        *(double *)list_get(info->achievements, 2) + 1;
     body_remove(coin);
 }
 
@@ -115,10 +125,11 @@ body_t *spawn_powerup(scene_t *scene, vector_t MIN, vector_t MAX, powerup_info_t
 }
 
 void powerup_spawn_random(scene_t *scene, vector_t MIN, vector_t MAX,
-                          vector_t *scroll_speed) {
+                          vector_t *scroll_speed, list_t *achievements) {
     powerup_info_t *info = malloc(sizeof(powerup_info_t));
     info->scene = scene;
     info->scroll_speed = scroll_speed;
+    info->achievements = achievements;
     int percent_max = 100;
     int percent_magnet = 10;
     int percent_slow = 60;
@@ -144,8 +155,12 @@ void powerup_spawn_random(scene_t *scene, vector_t MIN, vector_t MAX,
     }
 }
 
-void powerup_spawn_coin(scene_t *scene, vector_t center, double *score) {
+void powerup_spawn_coin(scene_t *scene, vector_t center, double *score,
+                        list_t *achievements) {
     body_t *player = scene_get_body(scene, 3);
+    powerup_info_t *info = malloc(sizeof(powerup_info_t));
+    info->score = score;
+    info->achievements = achievements;
     entity_t *entity = entity_init("COIN", true, false);
     list_t *coin_coords = compute_rect_points(center, 2*POWERUP_RADIUS,
                                                  2*POWERUP_RADIUS);
@@ -154,7 +169,7 @@ void powerup_spawn_coin(scene_t *scene, vector_t center, double *score) {
     scene_add_body(scene, coin);
     sprite_t *coin_info = sprite_animated(COIN, 1, 6, 6);
     body_set_draw(coin, (draw_func_t) sdl_draw_animated, coin_info, sprite_free);
-    create_collision(scene, player, coin, coin_handler, score, free);
+    create_collision(scene, player, coin, coin_handler, info, free);
     if (!strcmp(entity_get_powerup(body_get_info(player)), "MAGNET")) {
         create_magnet_gravity(scene, GRAVITY_CONST, coin, player);
     }

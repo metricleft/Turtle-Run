@@ -62,7 +62,7 @@ const int SMALL_TEXT_SPACING = 50;
 const int TEXT_OFFSET = 10;
 
 const int NUM_HIGHSCORES = 5;
-const int NUM_ACHIEVEMENTS = 5;
+const int NUM_ACHIEVEMENTS = 4;
 const int LEN_HIGHSCORES = 15;
 
 const char *SKY_IMG = "static/background_sky.png";
@@ -425,7 +425,7 @@ void menu_play_game() {
     initialize_player(scene);
     initialize_bounds(scene, MIN, MAX);
     initialize_terrain(scene);
-    frame_spawn_random(scene, MAX, MAX.x, score);
+    frame_spawn_random(scene, MAX, MAX.x, score, totals);
 
     body_t *player = scene_get_body(scene, 3);
     player_entity_t *player_entity = body_get_info(player);
@@ -452,11 +452,11 @@ void menu_play_game() {
             time_since_last_enemy = 0;
         }
         if (distance_since_last_frame >= MAX.x) {
-            frame_spawn_random(scene, MAX, MAX.x, score);
+            frame_spawn_random(scene, MAX, MAX.x, score, totals);
             distance_since_last_frame = 0;
         }
         if (time_since_last_powerup > POWERUP_INTERVAL) {
-            powerup_spawn_random(scene, MIN, MAX, scroll_speed);
+            powerup_spawn_random(scene, MIN, MAX, scroll_speed, totals);
             time_since_last_powerup = 0;
         }
         if (time_since_last_speedup > SPEEDUP_INTERVAL) {
@@ -497,6 +497,8 @@ void menu_play_game() {
     FILE *lifetime2 = fopen("achievements/lifetime.txt", "w");
     FILE *fp2 = fopen(filename, "w");
     for (int i = 0; i < NUM_ACHIEVEMENTS; i++){
+        *(double *)list_get(global_totals, i) = *(double *)list_get(global_totals, i) +
+                                                *(double *)list_get(totals, i);
         fprintf(lifetime2, "%lf\n", *(double *)list_get(global_totals, i));
     }
     
