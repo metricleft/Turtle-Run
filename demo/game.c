@@ -63,7 +63,7 @@ const int TEXT_OFFSET = 10;
 
 const int NUM_HIGHSCORES = 5;
 const int NUM_ACHIEVEMENTS = 4;
-const int LEN_HIGHSCORES = 15;
+const int LEN_NUMS = 15; //Max number of digits of a number
 
 const char *SKY_IMG = "static/background_sky.png";
 const char *GRASS_IMG = "static/background_grass.png";
@@ -344,7 +344,7 @@ void display_main_menu(SDL_Window *window) {
                            THIN_OUTLINE, center);
 }
 
-void display_score(double *score) {
+void display_score(list_t *achievements, double *score) {
     SDL_Window *window = sdl_init(MIN, MAX);
     sdl_on_click((event_handler_t)click_to_continue);
     draw_background();
@@ -361,8 +361,8 @@ void display_score(double *score) {
     sdl_draw_outlined_text(window, message, DEFAULT_FONT, LIME, INDIGO, SMALL_TEXT_HEIGHT,
                            THIN_OUTLINE, center);
     
-    message = malloc(sizeof(char)*(strlen("Your final score is: ") + LEN_HIGHSCORES + 1));
-    snprintf(message, strlen("Your final score is: ") + LEN_HIGHSCORES + 1,
+    message = malloc(sizeof(char)*(strlen("Your final score is: ") + LEN_NUMS + 1));
+    snprintf(message, strlen("Your final score is: ") + LEN_NUMS + 1,
              "Your final score is: %.0f", *score);
     center = (vector_t){
                     sdl_text_center(MIN, MAX, message, DEFAULT_FONT, SMALL_TEXT_HEIGHT),
@@ -372,16 +372,26 @@ void display_score(double *score) {
     free(message);
     free(score);
 
-    message = malloc(sizeof(char)*(strlen("You are a POWERFUL turtle!") + 1));
-    //TODO: achievements
-    snprintf(message, strlen("You are a POWERFUL turtle!") + 1,
-             "You are a POWERFUL turtle!");
+    message = malloc(sizeof(char)*(strlen("You collected  coins") + LEN_NUMS + 1));
+    snprintf(message, strlen("You collected  coins") + LEN_NUMS + 1,
+             "You collected %.0f coins", *(double *)list_get(achievements, 2));
     center = (vector_t){
                     sdl_text_center(MIN, MAX, message, DEFAULT_FONT, SMALL_TEXT_HEIGHT),
                     SMALL_TEXT_SPACING*4};
     sdl_draw_outlined_text(window, message, DEFAULT_FONT, LIME, INDIGO, SMALL_TEXT_HEIGHT,
                            THIN_OUTLINE, center);
     free(message);
+
+    message = malloc(sizeof(char)*(strlen("You collected  powerups") + LEN_NUMS+1));
+    snprintf(message, strlen("You collected  powerups") + LEN_NUMS + 1,
+             "You collected %.0f powerups", *(double *)list_get(achievements, 3));
+    center = (vector_t){
+                    sdl_text_center(MIN, MAX, message, DEFAULT_FONT, SMALL_TEXT_HEIGHT),
+                    SMALL_TEXT_SPACING*5};
+    sdl_draw_outlined_text(window, message, DEFAULT_FONT, LIME, INDIGO, SMALL_TEXT_HEIGHT,
+                           THIN_OUTLINE, center);
+    free(message);
+    list_free(achievements);
 
     message = "Left-click anywhere to continue...";
     center = (vector_t){MIN.x+TEXT_OFFSET, SMALL_TEXT_SPACING*9};
@@ -513,9 +523,10 @@ void menu_play_game() {
     free(scene);
     free(scroll_speed);
     free(highscore);
+    list_free(global_totals);
     SDL_DestroyWindow(window);
 
-    display_score(score);
+    display_score(totals, score);
 }
 
 void menu_instructions() {
@@ -591,8 +602,8 @@ void menu_highscores() {
     
     list_t *scores = get_high_scores();
     for (int i = 0; i < NUM_HIGHSCORES; i++) {
-        char *message = malloc(sizeof(char)*LEN_HIGHSCORES + 1);
-        snprintf(message, LEN_HIGHSCORES + 1, "%d. %.0f", i+1,
+        char *message = malloc(sizeof(char)*LEN_NUMS + 1);
+        snprintf(message, LEN_NUMS + 1, "%d. %.0f", i+1,
                  *(double *)list_get(scores, i));
 
         center = (vector_t){
