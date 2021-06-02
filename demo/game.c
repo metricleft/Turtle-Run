@@ -62,6 +62,7 @@ const int SMALL_TEXT_SPACING = 50;
 const int TEXT_OFFSET = 10;
 
 const int NUM_HIGHSCORES = 5;
+const int NUM_ACHIEVEMENTS = 5;
 const int LEN_HIGHSCORES = 15;
 
 const char *SKY_IMG = "static/background_sky.png";
@@ -77,6 +78,26 @@ double basic_score_calculation(double dt) {
     assert(dt >= 0);
     return dt * 10.0;
 }
+
+list_t *get_global_achievements() {
+    list_t *global_totals = list_init(NUM_ACHIEVEMENTS, free);
+    FILE *fp = fopen("achievements/lifetime.txt", "r");
+    if (fp == NULL) {
+        printf("Unable to open achievements/lifetime.txt");
+    }
+    double **achievement = malloc(sizeof(double *) * NUM_ACHIEVEMENTS);
+    for (int i = 0; i < NUM_ACHIEVEMENTS; i++) {
+        achievement[i] = malloc(sizeof(double));
+        fscanf(fp, "%lf", achievement[i]);
+    }
+    for (int j = 0; j < NUM_ACHIEVEMENTS; j++) {
+        list_add(global_totals, achievement[j]);
+    }
+    fclose(fp);
+    free(achievement);
+    return global_totals;
+}
+
 
 list_t *get_high_scores() {
     list_t *high_scores = list_init(NUM_HIGHSCORES, free);
@@ -372,25 +393,23 @@ void display_score(double *score) {
 }
 
 void menu_play_game() {
-    //double total_score;
-
+    list_t *global_totals = get_global_achievements();
+    list_t *totals = list_init(NUM_ACHIEVEMENTS, free);
+    for (int i = 0; i < 5; i++) {
+        double *temp = malloc(sizeof(double));
+        *temp = 0.0;
+        list_add(totals, temp);
+    }
+    
     char *filename = "scores/highscore.txt";
-    FILE *lifetime = fopen("achievements/lifetime.txt", "r");
     FILE *fp = fopen(filename, "r");
     if (fp == NULL) {
         printf("Unable to open %s", filename);
     }
-    if (lifetime == NULL) {
-        printf("Unable to open achievements/lifetime.txt");
-    }
-    double *lifetime_score = malloc(sizeof(double));
     double *highscore = malloc(sizeof(double) * NUM_HIGHSCORES);
     for (int i = 0; i < NUM_HIGHSCORES; i++) {
         fscanf(fp, "%lf", highscore + i);
         //printf("%lf\n", highscore[i]);
-    }
-    for (int l = 0; l < 1; l++) {
-        fscanf(lifetime, "%lf", lifetime_score + l);
     }
     SDL_Window *window = sdl_init(MIN, MAX);
     sdl_on_key((event_handler_t) player_move);
@@ -417,6 +436,8 @@ void menu_play_game() {
     double time_since_last_powerup = 0;
     double time_since_last_speedup = 0;
     double distance_since_last_frame = 0;
+    *(double *)list_get(global_totals, 1) = *(double *)list_get(global_totals, 1) + 1;
+    *(double *)list_get(totals, 1) = 1;
 
     //Every tick inside "Play Game":
     while (!sdl_is_done(scene)) {
@@ -455,14 +476,15 @@ void menu_play_game() {
         scene_tick(scene, dt);
         sdl_render_scene(scene);
         if (check_game_end(scene)) {
-            //total_score = *score;
-            *lifetime_score += *score;
-            if (*score > highscore[4]) {
-                highscore[4] = *score;
-            }
             break;
         }
     }
+    *(double *)list_get(global_totals, 0) = *(double *)list_get(global_totals, 0) + *score;
+    *(double *)list_get(totals, 0) = *score;
+    if (*score > highscore[4]) {
+            highscore[4] = *score;
+    }
+
     for (int k = 0; k < 5; k++) {
         for (int h = k + 1; h < 5; h++) {
             if (highscore[k] < highscore[h]) {
@@ -474,21 +496,21 @@ void menu_play_game() {
     }
     FILE *lifetime2 = fopen("achievements/lifetime.txt", "w");
     FILE *fp2 = fopen(filename, "w");
-    fprintf(lifetime2, "%lf\n", *lifetime_score);
+    for (int i = 0; i < NUM_ACHIEVEMENTS; i++){
+        fprintf(lifetime2, "%lf\n", *(double *)list_get(global_totals, i));
+    }
+    
     for (int j = 0; j < NUM_HIGHSCORES; j++) {
         fprintf(fp2, "%lf\n", highscore[j]);
     }
     fclose(fp2);
     fclose(lifetime2);
     fclose(fp);
-    fclose(lifetime);
     sdl_on_key(NULL);
     sdl_on_click(NULL);
     free(scene);
     free(scroll_speed);
-    //free(score);
     free(highscore);
-    free(lifetime_score);
     SDL_DestroyWindow(window);
 
     display_score(score);
