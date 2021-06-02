@@ -136,7 +136,6 @@ char get_mousecode(SDL_MouseButtonEvent mouse) {
         case SDL_BUTTON_RIGHT:  return RIGHT_CLICK;
         case SDL_BUTTON_MIDDLE: return SCROLL_CLICK;
     }
-    return '\0';
 }
 
 sprite_t *sprite_image(const char *image, double scale, SDL_Rect *in){

@@ -323,6 +323,54 @@ void display_main_menu(SDL_Window *window) {
                            THIN_OUTLINE, center);
 }
 
+void display_score(double *score) {
+    SDL_Window *window = sdl_init(MIN, MAX);
+    sdl_on_click((event_handler_t)click_to_continue);
+    draw_background();
+
+    vector_t center = (vector_t){
+        sdl_text_center(MIN, MAX, "FINAL SCORE", DEFAULT_FONT, TEXT_HEIGHT), MIN.y};
+    sdl_draw_outlined_text(window, "FINAL SCORE", DEFAULT_FONT, LIME, INDIGO,TEXT_HEIGHT,
+                           THICK_OUTLINE, center);
+    
+    char *message = "Congratulations!";
+    center = (vector_t){
+                    sdl_text_center(MIN, MAX, message, DEFAULT_FONT, SMALL_TEXT_HEIGHT),
+                    SMALL_TEXT_SPACING*2};
+    sdl_draw_outlined_text(window, message, DEFAULT_FONT, LIME, INDIGO, SMALL_TEXT_HEIGHT,
+                           THIN_OUTLINE, center);
+    
+    message = malloc(sizeof(char)*(strlen("Your final score is: ") + LEN_HIGHSCORES + 1));
+    snprintf(message, strlen("Your final score is: ") + LEN_HIGHSCORES + 1,
+             "Your final score is: %.0f", *score);
+    center = (vector_t){
+                    sdl_text_center(MIN, MAX, message, DEFAULT_FONT, SMALL_TEXT_HEIGHT),
+                    SMALL_TEXT_SPACING*3};
+    sdl_draw_outlined_text(window, message, DEFAULT_FONT, LIME, INDIGO, SMALL_TEXT_HEIGHT,
+                           THIN_OUTLINE, center);
+    free(message);
+    free(score);
+
+    message = malloc(sizeof(char)*(strlen("You are a POWERFUL turtle!") + 1));
+    //TODO: achievements
+    snprintf(message, strlen("You are a POWERFUL turtle!") + 1,
+             "You are a POWERFUL turtle!");
+    center = (vector_t){
+                    sdl_text_center(MIN, MAX, message, DEFAULT_FONT, SMALL_TEXT_HEIGHT),
+                    SMALL_TEXT_SPACING*4};
+    sdl_draw_outlined_text(window, message, DEFAULT_FONT, LIME, INDIGO, SMALL_TEXT_HEIGHT,
+                           THIN_OUTLINE, center);
+    free(message);
+
+    message = "Left-click anywhere to continue...";
+    center = (vector_t){MIN.x+TEXT_OFFSET, SMALL_TEXT_SPACING*9};
+    sdl_draw_outlined_text(window, message, DEFAULT_FONT, LIME, INDIGO, SMALL_TEXT_HEIGHT,
+                           THIN_OUTLINE, center);
+
+    while (!sdl_is_done(window)) {
+    }
+}
+
 void menu_play_game() {
     //double total_score;
 
@@ -440,10 +488,12 @@ void menu_play_game() {
     sdl_on_click(NULL);
     free(scene);
     free(scroll_speed);
-    free(score);
+    //free(score);
     free(highscore);
     free(lifetime_score);
     SDL_DestroyWindow(window);
+
+    display_score(score);
 }
 
 void menu_instructions() {
@@ -519,9 +569,9 @@ void menu_highscores() {
     
     list_t *scores = get_high_scores();
     for (int i = 0; i < NUM_HIGHSCORES; i++) {
-        char *message = malloc(sizeof(char)*LEN_HIGHSCORES);
-        snprintf(message, sizeof(char)*LEN_HIGHSCORES,
-                 "%d. %.0f", i+1, *(double *)list_get(scores, i));
+        char *message = malloc(sizeof(char)*LEN_HIGHSCORES + 1);
+        snprintf(message, LEN_HIGHSCORES + 1, "%d. %.0f", i+1,
+                 *(double *)list_get(scores, i));
 
         center = (vector_t){
                     sdl_text_center(MIN, MAX, message, DEFAULT_FONT, SMALL_TEXT_HEIGHT),
@@ -602,19 +652,13 @@ void menu_mouse_handler(char key, mouse_event_type_t type, double held_time,
 }
 
 int main(int argc, char *argv[]) {
-    list_t *hi = get_high_scores();
-    printf("%lf\n", *(double *)list_get(hi, 0));
-    printf("%lf\n", *(double *)list_get(hi, 1));
-    printf("%lf\n", *(double *)list_get(hi, 2));
-    printf("%lf\n", *(double *)list_get(hi, 3));
-    printf("%lf\n", *(double *)list_get(hi, 4));
-
     Mix_OpenAudio( 44100, MIX_DEFAULT_FORMAT, 2, 2048 );
     Mix_Music *soundtrack = loadMedia(SOUNDTRACK_ADD);
     Mix_PlayMusic(soundtrack, -1);
 
     time_t t;
     srand((unsigned) time(&t));
+
     SDL_Window *window = sdl_init(MIN,MAX);
     display_main_menu(window);
     sdl_on_click((event_handler_t) menu_mouse_handler);
