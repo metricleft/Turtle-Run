@@ -61,8 +61,8 @@ void create_magnet_gravity(scene_t *scene, double G, body_t *body1, body_t *body
 
 void magnet_handler(body_t *player, body_t *powerup, vector_t axis, void *aux) {
     powerup_info_t *info = aux;
-    *(double *)list_get(info->achievements, 4) =
-        *(double *)list_get(info->achievements, 4) + 1;
+    *(double *)list_get(info->achievements, 3) =
+        *(double *)list_get(info->achievements, 3) + 1;
     scene_t *scene = info->scene;
     player_entity_t *entity = body_get_info(player);
     if (strcmp(entity_get_powerup(entity), "MAGNET")) {
@@ -94,8 +94,8 @@ void slow_handler(body_t *player, body_t *powerup, vector_t axis, void *aux) {
 
 void jump_handler(body_t *player, body_t *powerup, vector_t axis, void *aux) {
     powerup_info_t *info = aux;
-    *(double *)list_get(info->achievements, 4) =
-        *(double *)list_get(info->achievements, 4) + 1;
+    *(double *)list_get(info->achievements, 3) =
+        *(double *)list_get(info->achievements, 3) + 1;
     player_entity_t *entity = body_get_info(player);
     if (strcmp(entity_get_powerup(entity), "JUMP")) {
         remove_old_powerup(entity_get_powerup(entity), info->scroll_speed);
@@ -131,7 +131,7 @@ void powerup_spawn_random(scene_t *scene, vector_t MIN, vector_t MAX,
     info->scroll_speed = scroll_speed;
     info->achievements = achievements;
     int percent_max = 100;
-    int percent_magnet = 10;
+    int percent_magnet = 20;
     int percent_slow = 60;
     int percent_jump = 100;
     int random_powerup = rand()%percent_max;

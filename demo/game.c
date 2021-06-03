@@ -40,7 +40,7 @@ const int POWERUP_INTERVAL = 15;
 const int ENEMY_INTERVAL = 10;
 const int SPEEDUP_INTERVAL = 5;
 
-const vector_t DEFAULT_GRAVITY = {0, -800};
+const vector_t DEFAULT_GRAVITY = {0, -1000};
 const vector_t DEFAULT_SCROLL_SPEED = {-200, 0};
 const double DEFAULT_SPEEDUP = -50;
 const double MAX_SPEED = 700;
@@ -53,13 +53,13 @@ const double PLAYER_SCALE = 2;
 const int PLAYER_FRAMES = 8;
 const int PLAYER_FPS = 6;
 
-const char *DEFAULT_FONT = "static/Sans.ttf";
-const int TEXT_HEIGHT = 50;
-const int SMALL_TEXT_HEIGHT = 30;
+const char *DEFAULT_FONT = "static/Arcade.ttf";
+const int TEXT_HEIGHT = 40;
+const int SMALL_TEXT_HEIGHT = 20;
 const int THICK_OUTLINE = 4;
 const int THIN_OUTLINE = 2;
 const int TEXT_SPACING = 80;
-const int SMALL_TEXT_SPACING = 50;
+const int SMALL_TEXT_SPACING = 45;
 const int TEXT_OFFSET = 10;
 
 const int NUM_HIGHSCORES = 5;
@@ -282,7 +282,7 @@ void player_move (char key, key_event_type_t type, double held_time, void *scene
             case UP_ARROW: {
                 if (held_time < 0.2 && (entity_get_colliding(entity) ||
                                         !strcmp(entity_get_powerup(entity), "JUMP"))) {
-                    new_velocity.y = 0.8 * PLAYER_SPEED;
+                    new_velocity.y = PLAYER_SPEED;
                     Mix_PlayChannel(-1, jump, 0);
                     entity_set_colliding(entity, false);
                 }
@@ -317,7 +317,6 @@ void click_to_continue(char key, mouse_event_type_t type, double held_time,
     if (type == BUTTON_PRESSED) {
         switch (key) {
             case LEFT_CLICK: {
-                SDL_DestroyWindow(window);
                 SDL_Event *event = malloc(sizeof(event));
                 event->type = SDL_QUIT;
                 SDL_PushEvent(event);
@@ -332,7 +331,8 @@ void display_main_menu(SDL_Window *window) {
     add_background(scene, BACKGROUND_IMG, 0);
 
     char *text = "TURTLE RUN";
-    vector_t center = {sdl_text_center(MIN, MAX, text, DEFAULT_FONT, TEXT_HEIGHT), MIN.y};
+    vector_t center = {sdl_text_center(MIN, MAX, text, DEFAULT_FONT, TEXT_HEIGHT),
+                       TEXT_HEIGHT};
     add_text(scene, center, text, true, false);
 
     text = "Play Game";
@@ -368,19 +368,19 @@ void display_score(list_t *achievements, double *score) {
 
     char *text = "FINAL SCORE";
     vector_t center = (vector_t){
-        sdl_text_center(MIN, MAX, text, DEFAULT_FONT, TEXT_HEIGHT), MIN.y};
+        sdl_text_center(MIN, MAX, text, DEFAULT_FONT, TEXT_HEIGHT), TEXT_HEIGHT};
     add_text(scene, center, text, true, false);
 
     text = "Congratulations!";
     center = (vector_t){sdl_text_center(MIN, MAX, text, DEFAULT_FONT, SMALL_TEXT_HEIGHT),
-                        SMALL_TEXT_SPACING*2};
+                        SMALL_TEXT_SPACING*3};
     add_text(scene, center, text, true, true);
     
     text = malloc(sizeof(char)*(strlen("Your final score is: ") + DBL_DIG + 1));
     snprintf(text, strlen("Your final score is: ") + DBL_DIG + 1,
              "Your final score is: %.0f", *score);
     center = (vector_t){sdl_text_center(MIN, MAX, text, DEFAULT_FONT, SMALL_TEXT_HEIGHT),
-                        SMALL_TEXT_SPACING*3};
+                        SMALL_TEXT_SPACING*4};
     add_text(scene, center, text, true, true);
     free(text);
     free(score);
@@ -395,7 +395,7 @@ void display_score(list_t *achievements, double *score) {
             "You collected %.0f coins", fmax(0, *(double *)list_get(achievements, 2)));
     }
     center = (vector_t){sdl_text_center(MIN, MAX, text, DEFAULT_FONT, SMALL_TEXT_HEIGHT),
-                        SMALL_TEXT_SPACING*4};
+                        SMALL_TEXT_SPACING*5};
     add_text(scene, center, text, true, true);
     free(text);
 
@@ -409,13 +409,13 @@ void display_score(list_t *achievements, double *score) {
             "You collected %.0f powerups", fmax(0, *(double *)list_get(achievements, 3)));
     }
     center = (vector_t){sdl_text_center(MIN, MAX, text, DEFAULT_FONT, SMALL_TEXT_HEIGHT),
-                        SMALL_TEXT_SPACING*5};
+                        SMALL_TEXT_SPACING*6};
     add_text(scene, center, text, true, true);
     free(text);
     list_free(achievements);
 
     text = "Left-click anywhere to continue...";
-    center = (vector_t){MIN.x+TEXT_OFFSET, SMALL_TEXT_SPACING*9};
+    center = (vector_t){MIN.x+TEXT_OFFSET, SMALL_TEXT_SPACING*10};
     add_text(scene, center, text, true, true);
 
     sdl_render_scene(scene);
@@ -423,6 +423,7 @@ void display_score(list_t *achievements, double *score) {
 
     while (!sdl_is_done(window)) {
     }
+    SDL_DestroyWindow(window);
 }
 
 void menu_play_game() {
@@ -436,7 +437,7 @@ void menu_play_game() {
     double *score = malloc(sizeof(double));
     *score = 0;
     list_t *achievements = list_init(NUM_ACHIEVEMENTS, free);
-    for (int i = 0; i < 5; i++) {
+    for (int i = 0; i < NUM_ACHIEVEMENTS; i++) {
         double *temp = malloc(sizeof(double));
         *temp = 0.0;
         list_add(achievements, temp);
@@ -458,15 +459,15 @@ void menu_play_game() {
     double time_since_last_speedup = 0;
     double distance_since_last_frame = 0;
 
-    char *score_text = malloc(sizeof(char)*50);
+    char *score_text = malloc(sizeof(char)*(DBL_DIG) + 1);
     sprintf(score_text, "%.0f", *score);
-    vector_t score_coords = {TEXT_OFFSET, 0};
+    vector_t score_coords = {TEXT_OFFSET, TEXT_OFFSET};
     text_info_t *score_text_info = text_info_init(score_text, DEFAULT_FONT,
             RED, TEXT_HEIGHT, score_coords);
     
-    char *coins_text = malloc(sizeof(char)*50);
-    sprintf(coins_text, "%.0f", *(double *) list_get(achievements, 1));
-    vector_t coins_coords = {TEXT_OFFSET, TEXT_HEIGHT};
+    char *coins_text = malloc(sizeof(char)*(DBL_DIG) + 1);
+    sprintf(coins_text, "%.0f", *(double *) list_get(achievements, 2));
+    vector_t coins_coords = {TEXT_OFFSET, TEXT_HEIGHT + TEXT_OFFSET};
     text_info_t *coins_text_info = text_info_init(
         coins_text,
         DEFAULT_FONT,
@@ -475,9 +476,9 @@ void menu_play_game() {
         coins_coords
     );
 
-    char *powerup_text = malloc(sizeof(char)*50);
+    char *powerup_text = malloc(sizeof(char)*(DBL_DIG) + 1);
     sprintf(powerup_text, "%s", entity_get_powerup(player_entity));
-    vector_t powerup_coords = {TEXT_OFFSET, TEXT_HEIGHT+SMALL_TEXT_HEIGHT};
+    vector_t powerup_coords = {TEXT_OFFSET, TEXT_HEIGHT+SMALL_TEXT_HEIGHT+TEXT_OFFSET};
     text_info_t *powerup_text_info = text_info_init(
         powerup_text,
         DEFAULT_FONT,
@@ -519,9 +520,9 @@ void menu_play_game() {
         }
         *score = *score + advanced_score_calculation(total_time);
         sprintf(score_text, "%.0f", *score);
-        sprintf(coins_text, "%.0f", *(double *) list_get(achievements,2));
+        sprintf(coins_text, "%.0f", *(double *) list_get(achievements, 2));
         sprintf(powerup_text, "%s", entity_get_powerup(player_entity));
-        
+
         sidescroll(scene, scroll_speed, dt);
         scene_tick(scene, dt);
         sdl_render_scene_with_score(scene, score_text_info, coins_text_info,
@@ -536,8 +537,9 @@ void menu_play_game() {
     FILE *lifetime_file = fopen(ACHIEVEMENTS_FILE, "w");
     list_t *global_achievements = get_global_achievements();
     for (int i = 0; i < NUM_ACHIEVEMENTS; i++){
-        *(double *)list_get(global_achievements, i) = *(double *)list_get(global_achievements, i) +
-                                                *(double *)list_get(achievements, i);
+        *(double *)list_get(global_achievements, i) =
+                                        *(double *)list_get(global_achievements, i) +
+                                        *(double *)list_get(achievements, i);
         fprintf(lifetime_file, "%lf\n", *(double *)list_get(global_achievements, i));
     }
     fclose(lifetime_file);
@@ -581,41 +583,41 @@ void menu_instructions() {
 
     char *text = "INSTRUCTIONS";
     vector_t center = (vector_t){
-        sdl_text_center(MIN, MAX, text, DEFAULT_FONT, TEXT_HEIGHT), MIN.y};
+        sdl_text_center(MIN, MAX, text, DEFAULT_FONT, TEXT_HEIGHT), TEXT_HEIGHT};
     add_text(scene, center, text, true, false);
 
     text = "Press AD or arrow keys to move left and right.";
     center = (vector_t){sdl_text_center(MIN, MAX, text, DEFAULT_FONT, SMALL_TEXT_HEIGHT),
-                        SMALL_TEXT_SPACING*2};
+                        SMALL_TEXT_SPACING*3};
     add_text(scene, center, text, true, true);
     
     text = "Press W or the up arrow to jump.";
     center = (vector_t){sdl_text_center(MIN, MAX, text, DEFAULT_FONT, SMALL_TEXT_HEIGHT),
-                        SMALL_TEXT_SPACING*3};
+                        SMALL_TEXT_SPACING*4};
     add_text(scene, center, text, true, true);
 
     text = "Dodge enemies and avoid going off-screen.";
     center = (vector_t){sdl_text_center(MIN, MAX, text, DEFAULT_FONT, SMALL_TEXT_HEIGHT),
-                        SMALL_TEXT_SPACING*4};
+                        SMALL_TEXT_SPACING*5};
     add_text(scene, center, text, true, true);
     
     text = "Left-click to shoot water drops at enemies.";
     center = (vector_t){sdl_text_center(MIN, MAX, text, DEFAULT_FONT, SMALL_TEXT_HEIGHT),
-                        SMALL_TEXT_SPACING*5};
+                        SMALL_TEXT_SPACING*6};
     add_text(scene, center, text, true, true);
 
     text = "Collect powerups to gain special powers.";
     center = (vector_t){sdl_text_center(MIN, MAX, text, DEFAULT_FONT, SMALL_TEXT_HEIGHT),
-                        SMALL_TEXT_SPACING*6};
+                        SMALL_TEXT_SPACING*7};
     add_text(scene, center, text, true, true);
 
     text = "Collect coins and survive to gain points.";
     center = (vector_t){sdl_text_center(MIN, MAX, text, DEFAULT_FONT, SMALL_TEXT_HEIGHT),
-                        SMALL_TEXT_SPACING*7};
+                        SMALL_TEXT_SPACING*8};
     add_text(scene, center, text, true, true);
     
     text = "Left-click anywhere to continue...";
-    center = (vector_t){MIN.x + TEXT_OFFSET, SMALL_TEXT_SPACING*9};
+    center = (vector_t){MIN.x + TEXT_OFFSET, SMALL_TEXT_SPACING*10};
     add_text(scene, center, text, true, true);
 
     sdl_render_scene(scene);
@@ -623,6 +625,7 @@ void menu_instructions() {
 
     while (!sdl_is_done(window)) {
     }
+    SDL_DestroyWindow(window);
 }
 
 void menu_highscores() {
@@ -636,7 +639,7 @@ void menu_highscores() {
 
     char *text = "HIGH SCORES";
     vector_t center = (vector_t){
-        sdl_text_center(MIN, MAX, text, DEFAULT_FONT, TEXT_HEIGHT), MIN.y};
+        sdl_text_center(MIN, MAX, text, DEFAULT_FONT, TEXT_HEIGHT), TEXT_HEIGHT};
     add_text(scene, center, text, true, false);
 
     list_t *scores = get_high_scores();
@@ -647,7 +650,7 @@ void menu_highscores() {
 
         center = (vector_t){
                     sdl_text_center(MIN, MAX, text, DEFAULT_FONT, SMALL_TEXT_HEIGHT),
-                    SMALL_TEXT_SPACING*(i*0.8+2)};
+                    SMALL_TEXT_SPACING*(i*0.8+2.5)};
         add_text(scene, center, text, true, true);
         free(text);
     }
@@ -681,7 +684,7 @@ void menu_highscores() {
     free(text);
 
     text = "Left-click anywhere to continue...";
-    center = (vector_t){MIN.x+TEXT_OFFSET, SMALL_TEXT_SPACING*9};
+    center = (vector_t){MIN.x+TEXT_OFFSET, SMALL_TEXT_SPACING*10};
     add_text(scene, center, text, true, true);
 
     sdl_render_scene(scene);
@@ -689,11 +692,12 @@ void menu_highscores() {
 
     while (!sdl_is_done(window)) {
     }
+    SDL_DestroyWindow(window);
 }
 
 int is_in_button_bounds(double x, double y, vector_t box, int width) {
     return x > box.x && x < box.x+width &&
-           y > box.y-TEXT_SPACING+TEXT_OFFSET && y < box.y-TEXT_OFFSET;
+           y > box.y-TEXT_HEIGHT && y < box.y;
 }
 
 void menu_mouse_handler(char key, mouse_event_type_t type, double held_time,
@@ -713,13 +717,13 @@ void menu_mouse_handler(char key, mouse_event_type_t type, double held_time,
     int width1 = sdl_text_width("Play Game", DEFAULT_FONT, TEXT_HEIGHT);
     vector_t box2 = {sdl_text_center(MIN, MAX, "Instructions", DEFAULT_FONT, TEXT_HEIGHT),
                      MAX.y - TEXT_SPACING*3};
-    int width2 = sdl_text_width("Play Game", DEFAULT_FONT, TEXT_HEIGHT);
+    int width2 = sdl_text_width("Instructions", DEFAULT_FONT, TEXT_HEIGHT);
     vector_t box3 = {sdl_text_center(MIN, MAX, "High Scores", DEFAULT_FONT, TEXT_HEIGHT),
                      MAX.y - TEXT_SPACING*4};
-    int width3 = sdl_text_width("Play Game", DEFAULT_FONT, TEXT_HEIGHT);
+    int width3 = sdl_text_width("High Scores", DEFAULT_FONT, TEXT_HEIGHT);
     vector_t box4 = {sdl_text_center(MIN, MAX, "Quit Game", DEFAULT_FONT, TEXT_HEIGHT),
                      MAX.y - TEXT_SPACING*5};
-    int width4 = sdl_text_width("Play Game", DEFAULT_FONT, TEXT_HEIGHT);
+    int width4 = sdl_text_width("Quit Game", DEFAULT_FONT, TEXT_HEIGHT);
 
     if (type == BUTTON_PRESSED) {
         switch (key) {
@@ -743,9 +747,9 @@ void menu_mouse_handler(char key, mouse_event_type_t type, double held_time,
                     show_window(window);
                 }
                 else if (is_in_button_bounds(x, y, box4, width4)) {
-                    SDL_DestroyWindow(window);
-                    Mix_HaltMusic();
-                    exit(0);
+                    SDL_Event *event = malloc(sizeof(event));
+                    event->type = SDL_QUIT;
+                    SDL_PushEvent(event);
                 }
                 break;
             }
@@ -767,5 +771,8 @@ int main(int argc, char *argv[]) {
 
     while (!sdl_is_done(window)) {
     }
+    SDL_DestroyWindow(window);
+    Mix_HaltMusic();
+    exit(0);
     return 0;
 }
