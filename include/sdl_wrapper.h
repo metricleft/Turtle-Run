@@ -50,11 +50,11 @@ sprite_t *sprite_animated(const char *image, double scale, int frames, int fps);
 sprite_t *sprite_image(const char *image, double scale, SDL_Rect *in);
 
 /**
- * Creates the info of unanimated sprite .
+ * Creates the info of scrolling sprite .
  * 
  * @param image file link of image used to create texture 
  * @param scroll speed of scrolling
- * @param in initial frame of scroll
+ * @param in initial frame to start scroll from
  * @return a pointer to info for a sprite
  */
 sprite_t *sprite_scroll(const char *image, int scroll, SDL_Rect *in);
@@ -62,17 +62,23 @@ sprite_t *sprite_scroll(const char *image, int scroll, SDL_Rect *in);
 /**
  * Releases the memory allocated for sprite.
  *
- * @param body a pointer to a sprite
+ * @param sprite a pointer to a sprite
  */
 void sprite_free(sprite_t *sprite);
 
 /**
  * Sets the speed for a sprite.
+ * 
+ * @param sprite a pointer to a sprite
+ * @param sprite a speed of the sprite
  */
 void sprite_set_speed(sprite_t *sprite, int speed);
 
 /**
  * Sets the dt (time passed since last tick) for a sprite.
+ * 
+ * @param sprite a pointer to a sprite
+ * @param dt time since last tick of a sprite
  */
 void sprite_set_dt(sprite_t *sprite, double dt);
 
