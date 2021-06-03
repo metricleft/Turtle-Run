@@ -64,6 +64,8 @@ const int TEXT_OFFSET = 10;
 
 const int NUM_HIGHSCORES = 5;
 const int NUM_ACHIEVEMENTS = 4;
+const char *HIGHSCORES_FILE = "saves/highscore.txt";
+const char *ACHIEVEMENTS_FILE = "saves/lifetime.txt";
 
 const char *SKY_IMG = "static/background_sky.png";
 const char *GRASS_IMG = "static/background_grass.png";
@@ -80,10 +82,10 @@ double basic_score_calculation(double dt) {
 }
 
 list_t *get_global_achievements() {
-    list_t *global_totals = list_init(NUM_ACHIEVEMENTS, free);
-    FILE *fp = fopen("achievements/lifetime.txt", "r");
+    list_t *global_achievements = list_init(NUM_ACHIEVEMENTS, free);
+    FILE *fp = fopen(ACHIEVEMENTS_FILE, "r");
     if (fp == NULL) {
-        printf("Unable to open achievements/lifetime.txt");
+        printf("Unable to open %s\n", ACHIEVEMENTS_FILE);
     }
     double **achievement = malloc(sizeof(double *) * NUM_ACHIEVEMENTS);
     for (int i = 0; i < NUM_ACHIEVEMENTS; i++) {
@@ -91,19 +93,19 @@ list_t *get_global_achievements() {
         fscanf(fp, "%lf", achievement[i]);
     }
     for (int j = 0; j < NUM_ACHIEVEMENTS; j++) {
-        list_add(global_totals, achievement[j]);
+        list_add(global_achievements, achievement[j]);
     }
     fclose(fp);
     free(achievement);
-    return global_totals;
+    return global_achievements;
 }
 
 
 list_t *get_high_scores() {
     list_t *high_scores = list_init(NUM_HIGHSCORES, free);
-    FILE *fp = fopen("scores/highscore.txt", "r");
+    FILE *fp = fopen(HIGHSCORES_FILE, "r");
     if (fp == NULL) {
-        printf("Unable to open scores/highscore.txt");
+        printf("Unable to open %s\n", HIGHSCORES_FILE);
     }
     double **highscore = malloc(sizeof(double *) * NUM_HIGHSCORES);
     for (int i = 0; i < NUM_HIGHSCORES; i++) {
@@ -390,7 +392,7 @@ void display_score(list_t *achievements, double *score) {
     }
     else {
         snprintf(text, strlen("You collected  coins") + DBL_DIG + 1,
-                 "You collected %.0f coins", *(double *)list_get(achievements, 2));
+            "You collected %.0f coins", fmax(0, *(double *)list_get(achievements, 2)));
     }
     center = (vector_t){sdl_text_center(MIN, MAX, text, DEFAULT_FONT, SMALL_TEXT_HEIGHT),
                         SMALL_TEXT_SPACING*4};
@@ -404,7 +406,7 @@ void display_score(list_t *achievements, double *score) {
     }
     else {
         snprintf(text, strlen("You collected  powerups") + DBL_DIG + 1,
-                 "You collected %.0f powerups", *(double *)list_get(achievements, 3));
+            "You collected %.0f powerups", fmax(0, *(double *)list_get(achievements, 3)));
     }
     center = (vector_t){sdl_text_center(MIN, MAX, text, DEFAULT_FONT, SMALL_TEXT_HEIGHT),
                         SMALL_TEXT_SPACING*5};
@@ -424,24 +426,6 @@ void display_score(list_t *achievements, double *score) {
 }
 
 void menu_play_game() {
-    list_t *global_totals = get_global_achievements();
-    list_t *totals = list_init(NUM_ACHIEVEMENTS, free);
-    for (int i = 0; i < 5; i++) {
-        double *temp = malloc(sizeof(double));
-        *temp = 0.0;
-        list_add(totals, temp);
-    }
-    
-    char *filename = "scores/highscore.txt";
-    FILE *fp = fopen(filename, "r");
-    if (fp == NULL) {
-        printf("Unable to open %s", filename);
-    }
-    double *highscore = malloc(sizeof(double) * NUM_HIGHSCORES);
-    for (int i = 0; i < NUM_HIGHSCORES; i++) {
-        fscanf(fp, "%lf", highscore + i);
-        //printf("%lf\n", highscore[i]);
-    }
     SDL_Window *window = sdl_init(MIN, MAX);
     sdl_on_key((event_handler_t) player_move);
     sdl_on_click((event_handler_t) player_shoot);
@@ -451,12 +435,18 @@ void menu_play_game() {
     *scroll_speed = DEFAULT_SCROLL_SPEED;
     double *score = malloc(sizeof(double));
     *score = 0;
+    list_t *achievements = list_init(NUM_ACHIEVEMENTS, free);
+    for (int i = 0; i < 5; i++) {
+        double *temp = malloc(sizeof(double));
+        *temp = 0.0;
+        list_add(achievements, temp);
+    }
 
     initialize_background(scene);
     initialize_player(scene);
     initialize_bounds(scene, MIN, MAX);
     initialize_terrain(scene);
-    frame_spawn_random(scene, MAX, MAX.x, score, totals);
+    frame_spawn_random(scene, MAX, MAX.x, score, achievements);
 
     body_t *player = scene_get_body(scene, 3);
     player_entity_t *player_entity = body_get_info(player);
@@ -467,8 +457,6 @@ void menu_play_game() {
     double time_since_last_powerup = 0;
     double time_since_last_speedup = 0;
     double distance_since_last_frame = 0;
-    *(double *)list_get(global_totals, 1) = *(double *)list_get(global_totals, 1) + 1;
-    *(double *)list_get(totals, 1) = 1;
 
     //Every tick inside "Play Game":
     while (!sdl_is_done(scene)) {
@@ -483,11 +471,11 @@ void menu_play_game() {
             time_since_last_enemy = 0;
         }
         if (distance_since_last_frame >= MAX.x) {
-            frame_spawn_random(scene, MAX, MAX.x, score, totals);
+            frame_spawn_random(scene, MAX, MAX.x, score, achievements);
             distance_since_last_frame = 0;
         }
         if (time_since_last_powerup > POWERUP_INTERVAL) {
-            powerup_spawn_random(scene, MIN, MAX, scroll_speed, totals);
+            powerup_spawn_random(scene, MIN, MAX, scroll_speed, achievements);
             time_since_last_powerup = 0;
         }
         if (time_since_last_speedup > SPEEDUP_INTERVAL) {
@@ -510,44 +498,46 @@ void menu_play_game() {
             break;
         }
     }
-    *(double *)list_get(global_totals, 0) = *(double *)list_get(global_totals, 0) + *score;
-    *(double *)list_get(totals, 0) = *score;
-    if (*score > highscore[4]) {
-            highscore[4] = *score;
-    }
+    *(double *)list_get(achievements, 1) = 1;
+    *(double *)list_get(achievements, 0) = *score;
 
-    for (int k = 0; k < 5; k++) {
-        for (int h = k + 1; h < 5; h++) {
-            if (highscore[k] < highscore[h]) {
-                double temp = highscore[k];
-                highscore[k] = highscore[h];
-                highscore[h] = temp;
+    FILE *lifetime_file = fopen(ACHIEVEMENTS_FILE, "w");
+    list_t *global_achievements = get_global_achievements();
+    for (int i = 0; i < NUM_ACHIEVEMENTS; i++){
+        *(double *)list_get(global_achievements, i) = *(double *)list_get(global_achievements, i) +
+                                                *(double *)list_get(achievements, i);
+        fprintf(lifetime_file, "%lf\n", *(double *)list_get(global_achievements, i));
+    }
+    fclose(lifetime_file);
+    list_free(global_achievements);
+
+    FILE *highscores_file = fopen(HIGHSCORES_FILE, "w");
+    list_t *highscores = get_high_scores();
+    if (*score > *(double *)list_get(highscores, 4)) {
+            *(double *)list_get(highscores, 4) = *score;
+    }
+    for (int k = 0; k < NUM_HIGHSCORES; k++) {
+        for (int h = k + 1; h < NUM_HIGHSCORES; h++) {
+            if (*(double *)list_get(highscores, k) < *(double *)list_get(highscores, h)) {
+                double temp = *(double *)list_get(highscores, k);
+                *(double *)list_get(highscores, k) = *(double *)list_get(highscores, h);
+                *(double *)list_get(highscores, h) = temp;
             }
         }
     }
-    FILE *lifetime2 = fopen("achievements/lifetime.txt", "w");
-    FILE *fp2 = fopen(filename, "w");
-    for (int i = 0; i < NUM_ACHIEVEMENTS; i++){
-        *(double *)list_get(global_totals, i) = *(double *)list_get(global_totals, i) +
-                                                *(double *)list_get(totals, i);
-        fprintf(lifetime2, "%lf\n", *(double *)list_get(global_totals, i));
-    }
-    
     for (int j = 0; j < NUM_HIGHSCORES; j++) {
-        fprintf(fp2, "%lf\n", highscore[j]);
+        fprintf(highscores_file, "%lf\n", *(double *)list_get(highscores, j));
     }
-    fclose(fp2);
-    fclose(lifetime2);
-    fclose(fp);
+    fclose(highscores_file);
+    list_free(highscores);
+
     sdl_on_key(NULL);
     sdl_on_click(NULL);
-    free(scene);
+    scene_free(scene);
     free(scroll_speed);
-    free(highscore);
-    list_free(global_totals);
     SDL_DestroyWindow(window);
 
-    display_score(totals, score);
+    display_score(achievements, score);
 }
 
 void menu_instructions() {
@@ -619,8 +609,9 @@ void menu_highscores() {
 
     list_t *scores = get_high_scores();
     for (int i = 0; i < NUM_HIGHSCORES; i++) {
-        text = malloc(sizeof(char)*DBL_DIG + 1);
-        snprintf(text, DBL_DIG + 1, "%d. %.0f", i+1, *(double *)list_get(scores, i));
+        text = malloc(sizeof(char)*(DBL_DIG+strlen("1. ")) + 1);
+        snprintf(text, DBL_DIG + strlen("1. ") + 1, "%d. %.0f", i+1,
+                 fmax(0, *(double *)list_get(scores, i)));
 
         center = (vector_t){
                     sdl_text_center(MIN, MAX, text, DEFAULT_FONT, SMALL_TEXT_HEIGHT),
@@ -631,28 +622,28 @@ void menu_highscores() {
 
     text = malloc(sizeof(char)*(strlen("Lifetime score: ") + DBL_DIG+1));
     snprintf(text, strlen("Lifetime score: ") + DBL_DIG + 1,
-             "Lifetime score: %.0f", *(double *)list_get(achievements, 0));
+             "Lifetime score: %.0f", fmax(0, *(double *)list_get(achievements, 0)));
     center = (vector_t){MIN.x+TEXT_OFFSET, SMALL_TEXT_SPACING*7};
     add_text(scene, center, text, true, true);
     free(text);
 
     text = malloc(sizeof(char)*(strlen("Lifetime games: ") + DBL_DIG+1));
     snprintf(text, strlen("Lifetime games: ") + DBL_DIG + 1,
-             "Lifetime games: %.0f", *(double *)list_get(achievements, 1));
+             "Lifetime games: %.0f", fmax(0, *(double *)list_get(achievements, 1)));
     center = (vector_t){MIN.x+TEXT_OFFSET, SMALL_TEXT_SPACING*8};
     add_text(scene, center, text, true, true);
     free(text);
 
     text = malloc(sizeof(char)*(strlen("Lifetime coins: ") + DBL_DIG+1));
     snprintf(text, strlen("Lifetime coins: ") + DBL_DIG + 1,
-             "Lifetime coins: %.0f", *(double *)list_get(achievements, 2));
+             "Lifetime coins: %.0f", fmax(0, *(double *)list_get(achievements, 2)));
     center = (vector_t){(MAX.x-MIN.x)/2+TEXT_OFFSET, SMALL_TEXT_SPACING*7};
     add_text(scene, center, text, true, true);
     free(text);
 
     text = malloc(sizeof(char)*(strlen("Lifetime powerups: ") + DBL_DIG+1));
     snprintf(text, strlen("Lifetime powerups: ") + DBL_DIG + 1,
-             "Lifetime powerups: %.0f", *(double *)list_get(achievements, 2));
+             "Lifetime powerups: %.0f", fmax(0, *(double *)list_get(achievements, 2)));
     center = (vector_t){(MAX.x-MIN.x)/2+TEXT_OFFSET, SMALL_TEXT_SPACING*8};
     add_text(scene, center, text, true, true);
     free(text);
