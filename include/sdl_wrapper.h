@@ -66,8 +66,14 @@ sprite_t *sprite_scroll(const char *image, int scroll, SDL_Rect *in);
  */
 void sprite_free(sprite_t *sprite);
 
+/**
+ * Sets the speed for a sprite.
+ */
 void sprite_set_speed(sprite_t *sprite, int speed);
 
+/**
+ * Sets the dt (time passed since last tick) for a sprite.
+ */
 void sprite_set_dt(sprite_t *sprite, double dt);
 
 /**
@@ -139,9 +145,9 @@ typedef void (*event_handler_t)(char event, void *type, double held_time,
 SDL_Window *sdl_init(vector_t min, vector_t max);
 
 /**
- * Sets the focused renderer.
+ * Sets the focused window.
  * 
- * @param renderer the new renderer.
+ * @param window the new window.
  */
 void sdl_set_window(SDL_Window *window);
 
@@ -182,7 +188,12 @@ void sdl_draw_image(body_t *body, sprite_t *sprite);
  */
 void sdl_draw_animated( body_t *body, sprite_t *sprite);
 
-
+/**
+ * Draws an image that scrolls across the screen.
+ * 
+ * @param body body associated with the sprite
+ * @param sprite info needed to draw the animation
+ */
 void sdl_draw_scroll(body_t *body, sprite_t *sprite);
 
 /**
@@ -297,28 +308,17 @@ text_info_t *outlined_text_info_init(char *text, const char *font,
 /**
  * Draws text.
  * 
- * @param text the text to be drawn
- * @param font the font type
- * @param color the color of the text in RGB
- * @param size the font size of the text
- * @param coords the coordinates of the top-left corner of the text
+ * @param body an unused body
+ * @param info a pointer returned from text_info_init or outlined_text_info_init
  */
 void sdl_draw_text(body_t *body, text_info_t *info);
 
 /**
  * Draws text with an outline.
  * 
- * @param text the text to be drawn
- * @param font the font type
- * @param color the color of the text in RGB
- * @param outline_color the color of the outline in RGB
- * @param size the font size of the text
- * @param thickness the thickness of the outline
- * @param coords the coordinates of the top-left corner of the text
+ * @param body an unused body
+ * @param info a pointer returned from outlined_text_info_init
  */
-/*void sdl_draw_outlined_text(char *text, char  *font,
-                            rgb_color_t color, rgb_color_t outline_color,
-                            int size, int thickness, vector_t coords);*/
                             
 void sdl_draw_outlined_text(body_t *body, text_info_t *info);
 
