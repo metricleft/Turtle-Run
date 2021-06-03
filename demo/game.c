@@ -534,8 +534,8 @@ void menu_play_game() {
     *(double *)list_get(achievements, 1) = 1;
     *(double *)list_get(achievements, 0) = *score;
 
-    FILE *lifetime_file = fopen(ACHIEVEMENTS_FILE, "w");
     list_t *global_achievements = get_global_achievements();
+    FILE *lifetime_file = fopen(ACHIEVEMENTS_FILE, "w");
     for (int i = 0; i < NUM_ACHIEVEMENTS; i++){
         *(double *)list_get(global_achievements, i) =
                                         *(double *)list_get(global_achievements, i) +
@@ -545,8 +545,8 @@ void menu_play_game() {
     fclose(lifetime_file);
     list_free(global_achievements);
 
-    FILE *highscores_file = fopen(HIGHSCORES_FILE, "w");
     list_t *highscores = get_high_scores();
+    FILE *highscores_file = fopen(HIGHSCORES_FILE, "w");
     if (*score > *(double *)list_get(highscores, 4)) {
             *(double *)list_get(highscores, 4) = *score;
     }
