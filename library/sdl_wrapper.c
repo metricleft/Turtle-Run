@@ -2,6 +2,7 @@
 #include <math.h>
 #include <stdlib.h>
 #include <time.h>
+#include <string.h>
 #include "sdl_wrapper.h"
 
 const char WINDOW_TITLE[] = "CS 3";
@@ -9,28 +10,6 @@ const int WINDOW_WIDTH = 1000;
 const int WINDOW_HEIGHT = 500;
 const double MS_PER_S = 1e3;
 const rgb_color_t BACKGROUND = {255, 255, 255};
-
-Mix_Music *loadMedia(const char *music_name){
-    Mix_Music *music = Mix_LoadMUS(music_name);
-    if (music == NULL) {
-        printf("Failed %s", Mix_GetError());
-    }
-    //printf("Music loaded");
-    return music;
-}
-
-Mix_Chunk *loadEffects(const char *effect_name){
-    Mix_Chunk *effect = Mix_LoadWAV(effect_name);
-    if (effect == NULL) {
-        printf("Failed %s", Mix_GetError());
-    }
-    return effect;
-}
-
-
-
-
-
 
 /**
  * The coordinate at the center of the screen.
@@ -68,6 +47,43 @@ uint32_t key_start_timestamp;
  * Initially 0.
  */
 clock_t last_clock = 0;
+
+typedef struct sprite{
+    SDL_Texture *texture;
+    double scale;
+    int frames;
+    int speed;
+    double dt;
+    double clock;
+    SDL_Rect *section;
+}sprite_t;
+
+typedef struct text_info{
+    char *text;
+    char *font;
+    rgb_color_t color;
+    rgb_color_t outline_color;
+    int size;
+    int thickness;
+    vector_t coords;
+}text_info_t;
+
+Mix_Music *loadMedia(const char *music_name){
+    Mix_Music *music = Mix_LoadMUS(music_name);
+    if (music == NULL) {
+        printf("Failed %s", Mix_GetError());
+    }
+    //printf("Music loaded");
+    return music;
+}
+
+Mix_Chunk *loadEffects(const char *effect_name){
+    Mix_Chunk *effect = Mix_LoadWAV(effect_name);
+    if (effect == NULL) {
+        printf("Failed %s", Mix_GetError());
+    }
+    return effect;
+}
 
 /** Computes the center of the window in pixel coordinates */
 vector_t get_window_center(void) {
@@ -405,7 +421,6 @@ vector_t sdl_mouse_pos(){
     free(mouse_x);
     free(mouse_y);
     return get_window_position(mouse, window_center);
-
 }
 
 double time_since_last_tick(void) {
@@ -417,21 +432,40 @@ double time_since_last_tick(void) {
     return difference;
 }
 
-void sdl_draw_text(SDL_Window *window, char *text, const char *font, rgb_color_t color,
-                   int size, vector_t coords) {
-    TTF_Font *ttf_font = TTF_OpenFont(font, size);
+text_info_t *text_info_init(char *text, char *font,
+                            rgb_color_t color, int size, vector_t coords) {
+    text_info_t *info = malloc(sizeof(text_info_t));
+    info->text = text;
+    info->font = font;
+    info->color = color;
+    info->size = size;
+    info->coords = coords;
+    return info;
+}
 
-    SDL_Renderer *renderer = SDL_GetRenderer(window);
-    SDL_Color sdl_color = {(Uint8)(color.r*255), (Uint8)(color.g*255),
-                           (Uint8)(color.b*255)};
-    SDL_Surface *text_surface = TTF_RenderText_Solid(ttf_font, text, sdl_color);
+text_info_t *outlined_text_info_init(char *text, char *font,
+                            rgb_color_t color, rgb_color_t outline_color,
+                            int size, int thickness, vector_t coords) {
+    text_info_t *info = text_info_init(text, font, color, size, coords);
+    info->outline_color = outline_color;
+    info->thickness = thickness;
+    return info;
+}
+
+void sdl_draw_text(body_t *body, text_info_t *info) {
+    printf("%s\n", info->text);
+    TTF_Font *ttf_font = TTF_OpenFont(info->font, info->size);
+
+    SDL_Color sdl_color = {(Uint8)(info->color.r*255), (Uint8)(info->color.g*255),
+                           (Uint8)(info->color.b*255)};
+    SDL_Surface *text_surface = TTF_RenderText_Solid(ttf_font, info->text, sdl_color);
     SDL_Texture *text_texture = SDL_CreateTextureFromSurface(renderer, text_surface);
 
     int *width = malloc(sizeof(int));
     int *height = malloc(sizeof(int));
-    TTF_SizeText(ttf_font, text, width, height);
+    TTF_SizeText(ttf_font, info->text, width, height);
     SDL_Rect *text_rect = malloc(sizeof(SDL_Rect));
-    *text_rect = (SDL_Rect){(int)coords.x, (int)coords.y, *width, *height};
+    *text_rect = (SDL_Rect){(int)info->coords.x, (int)info->coords.y, *width, *height};
     SDL_RenderCopy(renderer, text_texture, NULL, text_rect);
     sdl_show();
 
@@ -443,19 +477,20 @@ void sdl_draw_text(SDL_Window *window, char *text, const char *font, rgb_color_t
     TTF_CloseFont(ttf_font);
 }
 
-void sdl_draw_outlined_text(SDL_Window *window, char *text, const char *font,
-                            rgb_color_t color, rgb_color_t outline_color,
-                            int size, int thickness, vector_t coords) {
-    double x = coords.x;
-    double y = coords.y;
-    sdl_draw_text(window, text, font, outline_color, size, (vector_t){x-thickness, y});
-    sdl_draw_text(window, text, font, outline_color, size, (vector_t){x+thickness, y});
-    sdl_draw_text(window, text, font, outline_color, size, (vector_t){x, y-thickness});
-    sdl_draw_text(window, text, font, outline_color, size, (vector_t){x, y+thickness});
-    sdl_draw_text(window, text, font, color, size, (vector_t){x, y});
+void sdl_draw_outlined_text(body_t *body, text_info_t *info) {
+    sdl_draw_text(info->text, info->font, info->outline_color, info->size,
+        (vector_t){info->coords.x-info->thickness, info->coords.y});
+    sdl_draw_text(info->text, info->font, info->outline_color, info->size,
+        (vector_t){info->coords.x+info->thickness, info->coords.y});
+    sdl_draw_text(info->text, info->font, info->outline_color, info->size,
+        (vector_t){info->coords.x, info->coords.y-info->thickness});
+    sdl_draw_text(info->text, info->font, info->outline_color, info->size,
+        (vector_t){info->coords.x, info->coords.y+info->thickness});
+    sdl_draw_text(info->text, info->font, info->color, info->size,
+        (vector_t){info->coords.x, info->coords.y});
 }
 
-int sdl_text_width(char *text, const char *font, int size) {
+int sdl_text_width(char *text, char *font, int size) {
     TTF_Font *ttf_font = TTF_OpenFont(font, size);
     int *width = malloc(sizeof(int));
     TTF_SizeText(ttf_font, text, width, NULL);
@@ -465,7 +500,7 @@ int sdl_text_width(char *text, const char *font, int size) {
     return text_width;
 }
 
-int sdl_text_center(vector_t min, vector_t max, char *text, const char *font, int size) {
+int sdl_text_center(vector_t min, vector_t max, char *text, char *font, int size) {
     int mid = (int)(max.x - min.x - sdl_text_width(text, font, size))/2;
     return mid;
 }

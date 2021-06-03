@@ -4,6 +4,7 @@
 #include <assert.h>
 #include <time.h>
 #include <stdio.h>
+#include <float.h>
 
 #include "body.h"
 #include "polygon.h"
@@ -63,7 +64,6 @@ const int TEXT_OFFSET = 10;
 
 const int NUM_HIGHSCORES = 5;
 const int NUM_ACHIEVEMENTS = 4;
-const int LEN_NUMS = 15; //Max number of digits of a number
 
 const char *SKY_IMG = "static/background_sky.png";
 const char *GRASS_IMG = "static/background_grass.png";
@@ -287,13 +287,6 @@ void player_shoot(char key, mouse_event_type_t type, double held_time, void *sce
     }
 }
 
-void draw_background() {
-    scene_t *menu = scene_init();
-    add_background(menu, BACKGROUND_IMG, 0);
-    sdl_render_scene(menu);
-    free(menu);
-}
-
 void click_to_continue(char key, mouse_event_type_t type, double held_time,
                         void *window){
     if (type == BUTTON_PRESSED) {
@@ -310,92 +303,112 @@ void click_to_continue(char key, mouse_event_type_t type, double held_time,
 }
 
 void display_main_menu(SDL_Window *window) {
-    draw_background();
+    scene_t *scene = scene_init();
+    add_background(scene, BACKGROUND_IMG, 0);
 
     //Draw title:
-    vector_t center = {(MAX.x - MIN.x)/2, MAX.y};
-    center = (vector_t){
+    vector_t center = (vector_t){
         sdl_text_center(MIN, MAX, "TURTLE RUN", DEFAULT_FONT, TEXT_HEIGHT), MIN.y};
-    sdl_draw_outlined_text(window, "TURTLE RUN", DEFAULT_FONT, LIME, INDIGO, TEXT_HEIGHT,
-                           THICK_OUTLINE, center);
-    
+    text_info_t *text_info = outlined_text_info_init("TURTLE RUN", DEFAULT_FONT, LIME,
+                                INDIGO, TEXT_HEIGHT, THICK_OUTLINE, center);
+    body_t *text_body = body_init(compute_rect_points(center,
+                            sdl_text_width("TURTLE RUN", DEFAULT_FONT, TEXT_HEIGHT),
+                            TEXT_HEIGHT),INFINITY);
+    body_set_draw(text_body, sdl_draw_outlined_text, text_info, free);
+    scene_add_body(scene, text_body);
+    /*sdl_draw_outlined_text(window, "TURTLE RUN", DEFAULT_FONT, LIME, INDIGO, TEXT_HEIGHT,
+                           THICK_OUTLINE, center);*/
+
     //Draw options:
-    center = (vector_t){
+    /*center = (vector_t){
                     sdl_text_center(MIN, MAX, "Play Game", DEFAULT_FONT, TEXT_HEIGHT),
                                     TEXT_SPACING*2};
-    sdl_draw_outlined_text(window, "Play Game", DEFAULT_FONT, LIME, INDIGO, TEXT_HEIGHT,
+    sdl_draw_outlined_text("Play Game", DEFAULT_FONT, LIME, INDIGO, TEXT_HEIGHT,
                            THIN_OUTLINE, center);
     center = (vector_t){
                     sdl_text_center(MIN, MAX, "Instructions", DEFAULT_FONT, TEXT_HEIGHT),
                                     TEXT_SPACING*3};
-    sdl_draw_outlined_text(window, "Instructions", DEFAULT_FONT, LIME, INDIGO,TEXT_HEIGHT,
+    sdl_draw_outlined_text("Instructions", DEFAULT_FONT, LIME, INDIGO,TEXT_HEIGHT,
                            THIN_OUTLINE, center);
 
     center = (vector_t){
                     sdl_text_center(MIN, MAX, "High Scores", DEFAULT_FONT, TEXT_HEIGHT),
                                     TEXT_SPACING*4};
-    sdl_draw_outlined_text(window, "High Scores", DEFAULT_FONT, LIME, INDIGO, TEXT_HEIGHT,
+    sdl_draw_outlined_text("High Scores", DEFAULT_FONT, LIME, INDIGO, TEXT_HEIGHT,
                            THIN_OUTLINE, center);
 
     center = (vector_t){
                     sdl_text_center(MIN, MAX, "Quit Game", DEFAULT_FONT, TEXT_HEIGHT),
                                     TEXT_SPACING*5};
-    sdl_draw_outlined_text(window, "Quit Game", DEFAULT_FONT, LIME, INDIGO, TEXT_HEIGHT,
-                           THIN_OUTLINE, center);
+    sdl_draw_outlined_text("Quit Game", DEFAULT_FONT, LIME, INDIGO, TEXT_HEIGHT,
+                           THIN_OUTLINE, center);*/
+    sdl_render_scene(scene);
 }
 
 void display_score(list_t *achievements, double *score) {
     SDL_Window *window = sdl_init(MIN, MAX);
     sdl_on_click((event_handler_t)click_to_continue);
-    draw_background();
+    //draw_background();
 
     vector_t center = (vector_t){
         sdl_text_center(MIN, MAX, "FINAL SCORE", DEFAULT_FONT, TEXT_HEIGHT), MIN.y};
-    sdl_draw_outlined_text(window, "FINAL SCORE", DEFAULT_FONT, LIME, INDIGO,TEXT_HEIGHT,
+    sdl_draw_outlined_text("FINAL SCORE", DEFAULT_FONT, LIME, INDIGO,TEXT_HEIGHT,
                            THICK_OUTLINE, center);
     
     char *message = "Congratulations!";
     center = (vector_t){
                     sdl_text_center(MIN, MAX, message, DEFAULT_FONT, SMALL_TEXT_HEIGHT),
                     SMALL_TEXT_SPACING*2};
-    sdl_draw_outlined_text(window, message, DEFAULT_FONT, LIME, INDIGO, SMALL_TEXT_HEIGHT,
+    sdl_draw_outlined_text(message, DEFAULT_FONT, LIME, INDIGO, SMALL_TEXT_HEIGHT,
                            THIN_OUTLINE, center);
     
-    message = malloc(sizeof(char)*(strlen("Your final score is: ") + LEN_NUMS + 1));
-    snprintf(message, strlen("Your final score is: ") + LEN_NUMS + 1,
+    message = malloc(sizeof(char)*(strlen("Your final score is: ") + DBL_DIG + 1));
+    snprintf(message, strlen("Your final score is: ") + DBL_DIG + 1,
              "Your final score is: %.0f", *score);
     center = (vector_t){
                     sdl_text_center(MIN, MAX, message, DEFAULT_FONT, SMALL_TEXT_HEIGHT),
                     SMALL_TEXT_SPACING*3};
-    sdl_draw_outlined_text(window, message, DEFAULT_FONT, LIME, INDIGO, SMALL_TEXT_HEIGHT,
+    sdl_draw_outlined_text(message, DEFAULT_FONT, LIME, INDIGO, SMALL_TEXT_HEIGHT,
                            THIN_OUTLINE, center);
     free(message);
     free(score);
 
-    message = malloc(sizeof(char)*(strlen("You collected  coins") + LEN_NUMS + 1));
-    snprintf(message, strlen("You collected  coins") + LEN_NUMS + 1,
+    message = malloc(sizeof(char)*(strlen("You collected  coins") + DBL_DIG + 1));
+    if (*(double *)list_get(achievements, 2)==1) {
+        snprintf(message, strlen("You collected 1 coin") + 1,
+                 "You collected 1 coin");
+    }
+    else {
+    snprintf(message, strlen("You collected  coins") + DBL_DIG + 1,
              "You collected %.0f coins", *(double *)list_get(achievements, 2));
+    }
     center = (vector_t){
                     sdl_text_center(MIN, MAX, message, DEFAULT_FONT, SMALL_TEXT_HEIGHT),
                     SMALL_TEXT_SPACING*4};
-    sdl_draw_outlined_text(window, message, DEFAULT_FONT, LIME, INDIGO, SMALL_TEXT_HEIGHT,
+    sdl_draw_outlined_text(message, DEFAULT_FONT, LIME, INDIGO, SMALL_TEXT_HEIGHT,
                            THIN_OUTLINE, center);
     free(message);
 
-    message = malloc(sizeof(char)*(strlen("You collected  powerups") + LEN_NUMS+1));
-    snprintf(message, strlen("You collected  powerups") + LEN_NUMS + 1,
-             "You collected %.0f powerups", *(double *)list_get(achievements, 3));
+    message = malloc(sizeof(char)*(strlen("You collected  powerups") + DBL_DIG+1));
+    if (*(double *)list_get(achievements, 3) == 1) {
+        snprintf(message, strlen("You collected 1 powerup") + 1,
+                 "You collected 1 powerup");
+    }
+    else {
+        snprintf(message, strlen("You collected  powerups") + DBL_DIG + 1,
+                "You collected %.0f powerups", *(double *)list_get(achievements, 3));
+    }
     center = (vector_t){
                     sdl_text_center(MIN, MAX, message, DEFAULT_FONT, SMALL_TEXT_HEIGHT),
                     SMALL_TEXT_SPACING*5};
-    sdl_draw_outlined_text(window, message, DEFAULT_FONT, LIME, INDIGO, SMALL_TEXT_HEIGHT,
+    sdl_draw_outlined_text(message, DEFAULT_FONT, LIME, INDIGO, SMALL_TEXT_HEIGHT,
                            THIN_OUTLINE, center);
     free(message);
     list_free(achievements);
 
     message = "Left-click anywhere to continue...";
     center = (vector_t){MIN.x+TEXT_OFFSET, SMALL_TEXT_SPACING*9};
-    sdl_draw_outlined_text(window, message, DEFAULT_FONT, LIME, INDIGO, SMALL_TEXT_HEIGHT,
+    sdl_draw_outlined_text(message, DEFAULT_FONT, LIME, INDIGO, SMALL_TEXT_HEIGHT,
                            THIN_OUTLINE, center);
 
     while (!sdl_is_done(window)) {
@@ -532,58 +545,58 @@ void menu_play_game() {
 void menu_instructions() {
     SDL_Window *window = sdl_init(MIN, MAX);
     sdl_on_click((event_handler_t)click_to_continue);
-    draw_background();
+    //draw_background();
 
     vector_t center = (vector_t){
         sdl_text_center(MIN, MAX, "INSTRUCTIONS", DEFAULT_FONT, TEXT_HEIGHT), MIN.y};
-    sdl_draw_outlined_text(window, "INSTRUCTIONS", DEFAULT_FONT, LIME, INDIGO,TEXT_HEIGHT,
+    sdl_draw_outlined_text("INSTRUCTIONS", DEFAULT_FONT, LIME, INDIGO,TEXT_HEIGHT,
                            THICK_OUTLINE, center);
     
     char *message = "Press AD or arrow keys to move left and right.";
     center = (vector_t){
                     sdl_text_center(MIN, MAX, message, DEFAULT_FONT, SMALL_TEXT_HEIGHT),
                     SMALL_TEXT_SPACING*2};
-    sdl_draw_outlined_text(window, message, DEFAULT_FONT, LIME, INDIGO, SMALL_TEXT_HEIGHT,
+    sdl_draw_outlined_text(message, DEFAULT_FONT, LIME, INDIGO, SMALL_TEXT_HEIGHT,
                            THIN_OUTLINE, center);
     
     message = "Press W or the up arrow to jump.";
     center = (vector_t){
                     sdl_text_center(MIN, MAX, message, DEFAULT_FONT, SMALL_TEXT_HEIGHT),
                     SMALL_TEXT_SPACING*3};
-    sdl_draw_outlined_text(window, message, DEFAULT_FONT, LIME, INDIGO, SMALL_TEXT_HEIGHT,
+    sdl_draw_outlined_text(message, DEFAULT_FONT, LIME, INDIGO, SMALL_TEXT_HEIGHT,
                            THIN_OUTLINE, center);
 
     message = "Dodge enemies and avoid going off-screen.";
     center = (vector_t){
                     sdl_text_center(MIN, MAX, message, DEFAULT_FONT, SMALL_TEXT_HEIGHT),
                     SMALL_TEXT_SPACING*4};
-    sdl_draw_outlined_text(window, message, DEFAULT_FONT, LIME, INDIGO, SMALL_TEXT_HEIGHT,
+    sdl_draw_outlined_text(message, DEFAULT_FONT, LIME, INDIGO, SMALL_TEXT_HEIGHT,
                            THIN_OUTLINE, center);
     
     message = "Left-click to shoot water drops at enemies.";
     center = (vector_t){
                     sdl_text_center(MIN, MAX, message, DEFAULT_FONT, SMALL_TEXT_HEIGHT),
                     SMALL_TEXT_SPACING*5};
-    sdl_draw_outlined_text(window, message, DEFAULT_FONT, LIME, INDIGO, SMALL_TEXT_HEIGHT,
+    sdl_draw_outlined_text(message, DEFAULT_FONT, LIME, INDIGO, SMALL_TEXT_HEIGHT,
                            THIN_OUTLINE, center);
 
     message = "Collect powerups to gain special powers.";
     center = (vector_t){
                     sdl_text_center(MIN, MAX, message, DEFAULT_FONT, SMALL_TEXT_HEIGHT),
                     SMALL_TEXT_SPACING*6};
-    sdl_draw_outlined_text(window, message, DEFAULT_FONT, LIME, INDIGO, SMALL_TEXT_HEIGHT,
+    sdl_draw_outlined_text(message, DEFAULT_FONT, LIME, INDIGO, SMALL_TEXT_HEIGHT,
                            THIN_OUTLINE, center);
 
     message = "Collect coins and survive to gain points.";
     center = (vector_t){
                     sdl_text_center(MIN, MAX, message, DEFAULT_FONT, SMALL_TEXT_HEIGHT),
                     SMALL_TEXT_SPACING*7};
-    sdl_draw_outlined_text(window, message, DEFAULT_FONT, LIME, INDIGO, SMALL_TEXT_HEIGHT,
+    sdl_draw_outlined_text(message, DEFAULT_FONT, LIME, INDIGO, SMALL_TEXT_HEIGHT,
                            THIN_OUTLINE, center);
     
     message = "Left-click anywhere to continue...";
     center = (vector_t){MIN.x+TEXT_OFFSET, SMALL_TEXT_SPACING*9};
-    sdl_draw_outlined_text(window, message, DEFAULT_FONT, LIME, INDIGO, SMALL_TEXT_HEIGHT,
+    sdl_draw_outlined_text(message, DEFAULT_FONT, LIME, INDIGO, SMALL_TEXT_HEIGHT,
                            THIN_OUTLINE, center);
 
     while (!sdl_is_done(window)) {
@@ -593,29 +606,64 @@ void menu_instructions() {
 void menu_highscores() {
     SDL_Window *window = sdl_init(MIN, MAX);
     sdl_on_click((event_handler_t)click_to_continue);
-    draw_background();
+    //draw_background();
+
+    list_t *achievements = get_global_achievements();
 
     vector_t center = (vector_t){
         sdl_text_center(MIN, MAX, "HIGH SCORES", DEFAULT_FONT, TEXT_HEIGHT), MIN.y};
-    sdl_draw_outlined_text(window, "HIGH SCORES", DEFAULT_FONT, LIME, INDIGO,TEXT_HEIGHT,
+    sdl_draw_outlined_text("HIGH SCORES", DEFAULT_FONT, LIME, INDIGO,TEXT_HEIGHT,
                            THICK_OUTLINE, center);
     
     list_t *scores = get_high_scores();
     for (int i = 0; i < NUM_HIGHSCORES; i++) {
-        char *message = malloc(sizeof(char)*LEN_NUMS + 1);
-        snprintf(message, LEN_NUMS + 1, "%d. %.0f", i+1,
+        char *message = malloc(sizeof(char)*DBL_DIG + 1);
+        snprintf(message, DBL_DIG + 1, "%d. %.0f", i+1,
                  *(double *)list_get(scores, i));
 
         center = (vector_t){
                     sdl_text_center(MIN, MAX, message, DEFAULT_FONT, SMALL_TEXT_HEIGHT),
-                    SMALL_TEXT_SPACING*(i+2)};
-        sdl_draw_outlined_text(window, message, DEFAULT_FONT, LIME, INDIGO,
+                    SMALL_TEXT_SPACING*(i*0.8+2)};
+        sdl_draw_outlined_text(message, DEFAULT_FONT, LIME, INDIGO,
                                SMALL_TEXT_HEIGHT, THIN_OUTLINE, center);
         free(message);
     }
-    char *message = "Left-click anywhere to continue...";
+
+    char *message = malloc(sizeof(char)*(strlen("Lifetime score: ") + DBL_DIG+1));
+    snprintf(message, strlen("Lifetime score: ") + DBL_DIG + 1,
+             "Lifetime score: %.0f", *(double *)list_get(achievements, 0));
+    center = (vector_t){MIN.x+TEXT_OFFSET, SMALL_TEXT_SPACING*7};
+    sdl_draw_outlined_text(message, DEFAULT_FONT, LIME, INDIGO, SMALL_TEXT_HEIGHT,
+                           THIN_OUTLINE, center);
+    free(message);
+
+    message = malloc(sizeof(char)*(strlen("Lifetime games: ") + DBL_DIG+1));
+    snprintf(message, strlen("Lifetime games: ") + DBL_DIG + 1,
+             "Lifetime games: %.0f", *(double *)list_get(achievements, 1));
+    center = (vector_t){MIN.x+TEXT_OFFSET, SMALL_TEXT_SPACING*8};
+    sdl_draw_outlined_text(message, DEFAULT_FONT, LIME, INDIGO, SMALL_TEXT_HEIGHT,
+                           THIN_OUTLINE, center);
+    free(message);
+
+    message = malloc(sizeof(char)*(strlen("Lifetime coins: ") + DBL_DIG+1));
+    snprintf(message, strlen("Lifetime coins: ") + DBL_DIG + 1,
+             "Lifetime coins: %.0f", *(double *)list_get(achievements, 2));
+    center = (vector_t){(MAX.x-MIN.x)/2+TEXT_OFFSET, SMALL_TEXT_SPACING*7};
+    sdl_draw_outlined_text(message, DEFAULT_FONT, LIME, INDIGO, SMALL_TEXT_HEIGHT,
+                           THIN_OUTLINE, center);
+    free(message);
+
+        message = malloc(sizeof(char)*(strlen("Lifetime powerups: ") + DBL_DIG+1));
+    snprintf(message, strlen("Lifetime powerups: ") + DBL_DIG + 1,
+             "Lifetime powerups: %.0f", *(double *)list_get(achievements, 2));
+    center = (vector_t){(MAX.x-MIN.x)/2+TEXT_OFFSET, SMALL_TEXT_SPACING*8};
+    sdl_draw_outlined_text(message, DEFAULT_FONT, LIME, INDIGO, SMALL_TEXT_HEIGHT,
+                           THIN_OUTLINE, center);
+    free(message);
+
+    message = "Left-click anywhere to continue...";
     center = (vector_t){MIN.x+TEXT_OFFSET, SMALL_TEXT_SPACING*9};
-    sdl_draw_outlined_text(window, message, DEFAULT_FONT, LIME, INDIGO, SMALL_TEXT_HEIGHT,
+    sdl_draw_outlined_text(message, DEFAULT_FONT, LIME, INDIGO, SMALL_TEXT_HEIGHT,
                            THIN_OUTLINE, center);
 
     while (!sdl_is_done(window)) {
