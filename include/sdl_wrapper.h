@@ -65,8 +65,17 @@ void sprite_set_speed(sprite_t *sprite, int speed);
 
 void sprite_set_dt(sprite_t *sprite, double dt);
 
+
+/**
+ * Loads the desired soundtrack
+ * @param music_name the path containing the music file (.wav or .mp3)
+ */
 Mix_Music *loadMedia(const char *music_name);
 
+/**
+ * Loads the desired sound effect
+ * @param effect_name the path containing the sound effect (must be .wav)
+ */
 Mix_Chunk *loadEffects(const char *effect_name);
 
 // Values passed to a key handler when the given arrow key is pressed
@@ -105,7 +114,7 @@ typedef enum {
 } mouse_event_type_t;
 
 /**
- * A event handler.
+ * An event handler.
  * When a key or button is pressed or released, the handler is passed its char value.
  * 
  * @param event a character indicating which key or button was pressed
