@@ -207,7 +207,8 @@ void sdl_render_scene(scene_t *scene);
  *
  * @param scene the scene to draw
  */
-void sdl_render_scene_with_score(scene_t *scene, text_info_t *score_text);
+void sdl_render_scene_with_score(scene_t *scene, text_info_t *score_text,
+    text_info_t *coins_text, text_info_t *powerup_text);
 
 /**
  * Registers a function to be called every time a key is pressed.

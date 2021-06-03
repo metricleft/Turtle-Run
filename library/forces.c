@@ -10,7 +10,7 @@
 
 #include <stdio.h>
 
-const double SMALL_DISTANCE = 5;
+const double SMALL_DISTANCE = 10;
 const double SMALL_VALUE = 1e-6;
 
 typedef struct param {

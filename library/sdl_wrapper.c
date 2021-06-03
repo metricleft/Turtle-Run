@@ -409,7 +409,8 @@ void sdl_render_scene(scene_t *scene) {
     sdl_show();
 }
 
-void sdl_render_scene_with_score(scene_t *scene, text_info_t *score_text) {
+void sdl_render_scene_with_score(scene_t *scene, text_info_t *score_text,
+    text_info_t *coins_text, text_info_t *powerup_text) {
     sdl_clear();
     size_t bodies = scene_bodies(scene);
     for (size_t i = 0; i < bodies; i++) {
@@ -417,6 +418,8 @@ void sdl_render_scene_with_score(scene_t *scene, text_info_t *score_text) {
         body_draw(body);
     }
     sdl_draw_text(NULL, score_text);
+    sdl_draw_text(NULL, coins_text);
+    sdl_draw_text(NULL, powerup_text);
     sdl_show();
 }
 

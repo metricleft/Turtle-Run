@@ -459,11 +459,32 @@ void menu_play_game() {
     double distance_since_last_frame = 0;
 
     char *score_text = malloc(sizeof(char)*50);
-    //char *score_text = "TESTTESTTEST";
     sprintf(score_text, "%.0f", *score);
     vector_t score_coords = {TEXT_OFFSET, 0};
     text_info_t *score_text_info = text_info_init(score_text, DEFAULT_FONT,
             RED, TEXT_HEIGHT, score_coords);
+    
+    char *coins_text = malloc(sizeof(char)*50);
+    sprintf(coins_text, "%.0f", *(double *) list_get(achievements, 1));
+    vector_t coins_coords = {TEXT_OFFSET, TEXT_HEIGHT};
+    text_info_t *coins_text_info = text_info_init(
+        coins_text,
+        DEFAULT_FONT,
+        YELLOW,
+        SMALL_TEXT_HEIGHT,
+        coins_coords
+    );
+
+    char *powerup_text = malloc(sizeof(char)*50);
+    sprintf(powerup_text, "%s", entity_get_powerup(player_entity));
+    vector_t powerup_coords = {TEXT_OFFSET, TEXT_HEIGHT+SMALL_TEXT_HEIGHT};
+    text_info_t *powerup_text_info = text_info_init(
+        powerup_text,
+        DEFAULT_FONT,
+        LIME,
+        SMALL_TEXT_HEIGHT,
+        powerup_coords
+    );
 
     //Every tick inside "Play Game":
     while (!sdl_is_done(scene)) {
@@ -498,10 +519,13 @@ void menu_play_game() {
         }
         *score = *score + advanced_score_calculation(total_time);
         sprintf(score_text, "%.0f", *score);
+        sprintf(coins_text, "%.0f", *(double *) list_get(achievements,2));
+        sprintf(powerup_text, "%s", entity_get_powerup(player_entity));
         
         sidescroll(scene, scroll_speed, dt);
         scene_tick(scene, dt);
-        sdl_render_scene_with_score(scene, score_text_info);
+        sdl_render_scene_with_score(scene, score_text_info, coins_text_info,
+                powerup_text_info);
         if (check_game_end(scene)) {
             break;
         }
