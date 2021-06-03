@@ -201,6 +201,15 @@ void sdl_show(void);
 void sdl_render_scene(scene_t *scene);
 
 /**
+ * Draws all bodies in a scene with a text overlay.
+ * This internally calls sdl_clear(), sdl_draw_polygon(), and sdl_show(),
+ * so those functions should not be called directly.
+ *
+ * @param scene the scene to draw
+ */
+void sdl_render_scene_with_score(scene_t *scene, text_info_t *score_text);
+
+/**
  * Registers a function to be called every time a key is pressed.
  * Overwrites any existing handler.
  *

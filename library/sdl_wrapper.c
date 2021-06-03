@@ -409,6 +409,17 @@ void sdl_render_scene(scene_t *scene) {
     sdl_show();
 }
 
+void sdl_render_scene_with_score(scene_t *scene, text_info_t *score_text) {
+    sdl_clear();
+    size_t bodies = scene_bodies(scene);
+    for (size_t i = 0; i < bodies; i++) {
+        body_t *body = scene_get_body(scene, i);
+        body_draw(body);
+    }
+    sdl_draw_text(NULL, score_text);
+    sdl_show();
+}
+
 void sdl_on_key(event_handler_t handler) {
     key_handler = handler;
 }

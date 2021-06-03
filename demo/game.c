@@ -461,20 +461,10 @@ void menu_play_game() {
     char *score_text = malloc(sizeof(char)*50);
     //char *score_text = "TESTTESTTEST";
     sprintf(score_text, "%.0f", *score);
-    vector_t score_coords = {0, 0};
+    vector_t score_coords = {TEXT_OFFSET, 0};
     text_info_t *score_text_info = text_info_init(score_text, DEFAULT_FONT,
-            LIME, TEXT_HEIGHT, score_coords);
+            RED, TEXT_HEIGHT, score_coords);
 
-    entity_t *score_entity = entity_init("TEXT", false, false);
-    body_t *score_body = body_init_with_info(
-            compute_rect_points(score_coords, 1, 1),
-            INFINITY,
-            score_entity,
-            entity_free
-    );
-    body_set_draw(score_body, sdl_draw_outlined_text, score_text_info, text_info_free);
-    scene_add_body(scene, score_body);
-    //add_text(scene, score_coords, score_text, false, false);
     //Every tick inside "Play Game":
     while (!sdl_is_done(scene)) {
         double dt = fmax(fmin(time_since_last_tick(), MAX_DT), MIN_DT);
@@ -511,7 +501,7 @@ void menu_play_game() {
         
         sidescroll(scene, scroll_speed, dt);
         scene_tick(scene, dt);
-        sdl_render_scene(scene);
+        sdl_render_scene_with_score(scene, score_text_info);
         if (check_game_end(scene)) {
             break;
         }
