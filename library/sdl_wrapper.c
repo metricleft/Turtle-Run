@@ -10,38 +10,6 @@ const int WINDOW_HEIGHT = 500;
 const double MS_PER_S = 1e3;
 const rgb_color_t BACKGROUND = {255, 255, 255};
 
-typedef struct sprite{
-    SDL_Texture *texture;
-    double scale;
-    int frames;
-    int speed;
-    double dt;
-    double clock;
-    SDL_Rect *section;
-}sprite_t;
-
-Mix_Music *loadMedia(const char *music_name){
-    Mix_Music *music = Mix_LoadMUS(music_name);
-    if (music == NULL) {
-        printf("Failed %s", Mix_GetError());
-    }
-    //printf("Music loaded");
-    return music;
-}
-
-Mix_Chunk *loadEffects(const char *effect_name){
-    Mix_Chunk *effect = Mix_LoadWAV(effect_name);
-    if (effect == NULL) {
-        printf("Failed %s", Mix_GetError());
-    }
-    return effect;
-}
-
-
-
-
-
-
 /**
  * The coordinate at the center of the screen.
  */
@@ -78,6 +46,37 @@ uint32_t key_start_timestamp;
  * Initially 0.
  */
 clock_t last_clock = 0;
+
+typedef struct sprite{
+    SDL_Texture *texture;
+    double scale;
+    int frames;
+    int speed;
+    double dt;
+    double clock;
+    SDL_Rect *section;
+}sprite_t;
+
+typedef struct text_info {
+    SDL_Texture *texture;
+} text_info_t;
+
+Mix_Music *loadMedia(const char *music_name){
+    Mix_Music *music = Mix_LoadMUS(music_name);
+    if (music == NULL) {
+        printf("Failed %s", Mix_GetError());
+    }
+    //printf("Music loaded");
+    return music;
+}
+
+Mix_Chunk *loadEffects(const char *effect_name){
+    Mix_Chunk *effect = Mix_LoadWAV(effect_name);
+    if (effect == NULL) {
+        printf("Failed %s", Mix_GetError());
+    }
+    return effect;
+}
 
 /** Computes the center of the window in pixel coordinates */
 vector_t get_window_center(void) {
@@ -200,7 +199,6 @@ void sprite_set_speed(sprite_t *sprite, int speed){
 void sprite_set_dt(sprite_t *sprite, double dt){
     sprite->dt = dt;
 }
-
 
 SDL_Window *sdl_init(vector_t min, vector_t max) {
     // Check parameters
@@ -431,11 +429,13 @@ double time_since_last_tick(void) {
     return difference;
 }
 
-void sdl_draw_text(SDL_Window *window, char *text, const char *font, rgb_color_t color,
-                   int size, vector_t coords) {
+/**
+ * Creates a texture from a given text. Used internally to create text_info_t.
+ */
+SDL_Texture *create_text_texture(char *text, char  *font,
+                            rgb_color_t color, int size, vector_t coords) {
     TTF_Font *ttf_font = TTF_OpenFont(font, size);
 
-    SDL_Renderer *renderer = SDL_GetRenderer(window);
     SDL_Color sdl_color = {(Uint8)(color.r*255), (Uint8)(color.g*255),
                            (Uint8)(color.b*255)};
     SDL_Surface *text_surface = TTF_RenderText_Solid(ttf_font, text, sdl_color);
@@ -446,26 +446,50 @@ void sdl_draw_text(SDL_Window *window, char *text, const char *font, rgb_color_t
     TTF_SizeText(ttf_font, text, width, height);
     SDL_Rect *text_rect = malloc(sizeof(SDL_Rect));
     *text_rect = (SDL_Rect){(int)coords.x, (int)coords.y, *width, *height};
-    SDL_RenderCopy(renderer, text_texture, NULL, text_rect);
 
     SDL_FreeSurface(text_surface);
-    SDL_DestroyTexture(text_texture);
     free(text_rect);
     free(width);
     free(height);
     TTF_CloseFont(ttf_font);
+    return text_texture;
 }
 
-void sdl_draw_outlined_text(SDL_Window *window, char *text, const char *font,
+SDL_Texture *text_info_init(char *text, char  *font,
+                            rgb_color_t color, int size, vector_t coords) {
+    return create_text_texture(text, font, color, size, coords);
+}
+
+SDL_Texture *outlined_text_info_init(char *text, char  *font,
                             rgb_color_t color, rgb_color_t outline_color,
                             int size, int thickness, vector_t coords) {
     double x = coords.x;
     double y = coords.y;
-    sdl_draw_text(window, text, font, outline_color, size, (vector_t){x-thickness, y});
-    sdl_draw_text(window, text, font, outline_color, size, (vector_t){x+thickness, y});
-    sdl_draw_text(window, text, font, outline_color, size, (vector_t){x, y-thickness});
-    sdl_draw_text(window, text, font, outline_color, size, (vector_t){x, y+thickness});
-    sdl_draw_text(window, text, font, color, size, (vector_t){x, y});
+    SDL_Texture *target_texture = create_text_texture(text, font, outline_color, size,
+                                                      (vector_t){x-thickness, y});
+    SDL_SetRenderTarget(renderer, target_texture);
+    SDL_Texture *temp_texture = create_text_texture(text, font, outline_color, size,
+                                                    (vector_t){x+thickness, y});
+    SDL_RenderCopy(renderer, temp_texture, NULL, NULL);
+    SDL_DestroyTexture(temp_texture);
+    temp_texture = create_text_texture(text, font, outline_color, size,
+                                       (vector_t){x, y-thickness});
+    SDL_RenderCopy(renderer, temp_texture, NULL, NULL);
+    SDL_DestroyTexture(temp_texture);
+    temp_texture = create_text_texture(text, font, outline_color, size,
+                                       (vector_t){x, y+thickness});
+    SDL_RenderCopy(renderer, temp_texture, NULL, NULL);
+    SDL_DestroyTexture(temp_texture);
+    temp_texture = create_text_texture(text, font, color, size, (vector_t){x, y});
+    SDL_RenderCopy(renderer, temp_texture, NULL, NULL);
+    SDL_DestroyTexture(temp_texture);
+
+    SDL_SetRenderTarget(renderer, NULL);
+    return target_texture;
+}
+
+void sdl_draw_text(body_t *body, SDL_Texture *texture) {
+    SDL_RenderCopy(renderer, texture, NULL, NULL);
 }
 
 int sdl_text_width(char *text, const char *font, int size) {

@@ -16,8 +16,12 @@
  * Contains all the info needed to draw a sprite, including the texture used
  * scaling of the image, and number of frames and fps animating
  */
-
 typedef struct sprite sprite_t;
+
+/**
+ * Contains all the info needed to draw text or outlined text.
+ */
+typedef struct text_info text_info_t;
 
 /**
  * Creates the info of animated sprite .
@@ -255,32 +259,41 @@ vector_t sdl_mouse_pos();
 double time_since_last_tick(void);
 
 /**
- * Draws text.
+ * Initializes an SDL_Texture that can be used to render text.
  * 
- * @param window a pointer to an SDL_Window that the text will be drawn in
  * @param text the text to be drawn
  * @param font the font type
  * @param color the color of the text in RGB
  * @param size the font size of the text
  * @param coords the coordinates of the top-left corner of the text
+ * @return a pointer to an SDL_Texture of the text that may be rendered
  */
-void sdl_draw_text(SDL_Window *window, char *text, const char *font, rgb_color_t color,
-                   int size, vector_t coords);
+SDL_Texture *text_info_init(char *text, char  *font,
+                            rgb_color_t color, int size, vector_t coords);
 
 /**
- * Draws text with an outline.
+ * Initializes an SDL_Texture that can be used to render outlined text.
  * 
- * @param window a pointer to an SDL_Window that the text will be drawn in
  * @param text the text to be drawn
  * @param font the font type
  * @param color the color of the text in RGB
+ * @param outline_color the color of the outline in RGB
  * @param size the font size of the text
  * @param thickness the thickness of the outline
  * @param coords the coordinates of the top-left corner of the text
+ * @return a pointer to an SDL_Texture of the text that may be rendered
  */
-void sdl_draw_outlined_text(SDL_Window *window, char *text, const char *font,
+SDL_Texture *outlined_text_info_init(char *text, char  *font,
                             rgb_color_t color, rgb_color_t outline_color,
                             int size, int thickness, vector_t coords);
+
+/**
+ * Draws text.
+ * 
+ * @param body the body with which the text is associated
+ * @param texture the texture that the text can be renderered from
+ */
+void sdl_draw_text(body_t *body, SDL_Texture *texture);
 
 /**
  * Gives the width of the text that would be drawn.
