@@ -26,6 +26,7 @@ extern rgb_color_t PINK;
 extern rgb_color_t MAGENTA;
 extern rgb_color_t BLACK;
 extern rgb_color_t WHITE;
+extern rgb_color_t BROWN;
 
 /**
  * Returns whether two colors have the same RGB color code.

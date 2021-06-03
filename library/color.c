@@ -21,6 +21,7 @@ rgb_color_t PINK = {1, 0, 1};
 rgb_color_t MAGENTA = {1, 0, 0.5};
 rgb_color_t BLACK = {0, 0, 0};
 rgb_color_t WHITE = {1, 1, 1};
+rgb_color_t BROWN = {0.361, 0.173, 0.024};
 
 const float INTENSITY_SCALING = 2.0;
 const float INTENSITY_RATIO = 3.5;
