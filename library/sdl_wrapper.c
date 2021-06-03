@@ -447,7 +447,6 @@ void sdl_draw_text(SDL_Window *window, char *text, const char *font, rgb_color_t
     SDL_Rect *text_rect = malloc(sizeof(SDL_Rect));
     *text_rect = (SDL_Rect){(int)coords.x, (int)coords.y, *width, *height};
     SDL_RenderCopy(renderer, text_texture, NULL, text_rect);
-    sdl_show();
 
     SDL_FreeSurface(text_surface);
     SDL_DestroyTexture(text_texture);

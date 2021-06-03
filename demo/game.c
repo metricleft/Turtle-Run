@@ -80,7 +80,7 @@ double basic_score_calculation(double dt) {
 }
 
 list_t *get_global_achievements() {
-    list_t *global_totals = list_init(NUM_ACHIEVEMENTS, free);
+    list_t *global_achievements = list_init(NUM_ACHIEVEMENTS, free);
     FILE *fp = fopen("achievements/lifetime.txt", "r");
     if (fp == NULL) {
         printf("Unable to open achievements/lifetime.txt");
@@ -91,11 +91,11 @@ list_t *get_global_achievements() {
         fscanf(fp, "%lf", achievement[i]);
     }
     for (int j = 0; j < NUM_ACHIEVEMENTS; j++) {
-        list_add(global_totals, achievement[j]);
+        list_add(global_achievements, achievement[j]);
     }
     fclose(fp);
     free(achievement);
-    return global_totals;
+    return global_achievements;
 }
 
 
@@ -419,12 +419,12 @@ void display_score(list_t *achievements, double *score) {
 }
 
 void menu_play_game() {
-    list_t *global_totals = get_global_achievements();
-    list_t *totals = list_init(NUM_ACHIEVEMENTS, free);
+    list_t *global_achievements = get_global_achievements();
+    list_t *achievements = list_init(NUM_ACHIEVEMENTS, free);
     for (int i = 0; i < 5; i++) {
         double *temp = malloc(sizeof(double));
         *temp = 0.0;
-        list_add(totals, temp);
+        list_add(achievements, temp);
     }
     
     char *filename = "scores/highscore.txt";
@@ -451,7 +451,7 @@ void menu_play_game() {
     initialize_player(scene);
     initialize_bounds(scene, MIN, MAX);
     initialize_terrain(scene);
-    frame_spawn_random(scene, MAX, MAX.x, score, totals);
+    frame_spawn_random(scene, MAX, MAX.x, score, achievements);
 
     body_t *player = scene_get_body(scene, 3);
     player_entity_t *player_entity = body_get_info(player);
@@ -462,8 +462,8 @@ void menu_play_game() {
     double time_since_last_powerup = 0;
     double time_since_last_speedup = 0;
     double distance_since_last_frame = 0;
-    *(double *)list_get(global_totals, 1) = *(double *)list_get(global_totals, 1) + 1;
-    *(double *)list_get(totals, 1) = 1;
+    *(double *)list_get(global_achievements, 1) = *(double *)list_get(global_achievements, 1) + 1;
+    *(double *)list_get(achievements, 1) = 1;
 
     //Every tick inside "Play Game":
     while (!sdl_is_done(scene)) {
@@ -478,11 +478,11 @@ void menu_play_game() {
             time_since_last_enemy = 0;
         }
         if (distance_since_last_frame >= MAX.x) {
-            frame_spawn_random(scene, MAX, MAX.x, score, totals);
+            frame_spawn_random(scene, MAX, MAX.x, score, achievements);
             distance_since_last_frame = 0;
         }
         if (time_since_last_powerup > POWERUP_INTERVAL) {
-            powerup_spawn_random(scene, MIN, MAX, scroll_speed, totals);
+            powerup_spawn_random(scene, MIN, MAX, scroll_speed, achievements);
             time_since_last_powerup = 0;
         }
         if (time_since_last_speedup > SPEEDUP_INTERVAL) {
@@ -505,8 +505,8 @@ void menu_play_game() {
             break;
         }
     }
-    *(double *)list_get(global_totals, 0) = *(double *)list_get(global_totals, 0) + *score;
-    *(double *)list_get(totals, 0) = *score;
+    *(double *)list_get(global_achievements, 0) = *(double *)list_get(global_achievements, 0) + *score;
+    *(double *)list_get(achievements, 0) = *score;
     if (*score > highscore[4]) {
             highscore[4] = *score;
     }
@@ -523,9 +523,9 @@ void menu_play_game() {
     FILE *lifetime2 = fopen("achievements/lifetime.txt", "w");
     FILE *fp2 = fopen(filename, "w");
     for (int i = 0; i < NUM_ACHIEVEMENTS; i++){
-        *(double *)list_get(global_totals, i) = *(double *)list_get(global_totals, i) +
-                                                *(double *)list_get(totals, i);
-        fprintf(lifetime2, "%lf\n", *(double *)list_get(global_totals, i));
+        *(double *)list_get(global_achievements, i) = *(double *)list_get(global_achievements, i) +
+                                                *(double *)list_get(achievements, i);
+        fprintf(lifetime2, "%lf\n", *(double *)list_get(global_achievements, i));
     }
     
     for (int j = 0; j < NUM_HIGHSCORES; j++) {
@@ -539,10 +539,10 @@ void menu_play_game() {
     free(scene);
     free(scroll_speed);
     free(highscore);
-    list_free(global_totals);
+    list_free(global_achievements);
     SDL_DestroyWindow(window);
 
-    display_score(totals, score);
+    display_score(achievements, score);
 }
 
 void menu_instructions() {
