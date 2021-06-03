@@ -160,8 +160,7 @@ void add_text(scene_t *scene, vector_t coords, char *text, bool outlined, bool s
     char *text_copy = malloc(sizeof(char)*strlen(text)+1);
     strcpy(text_copy, text);
     text_info_t *info;
-    if (outlined) {
-        info = outlined_text_info_init(text_copy, DEFAULT_FONT, LIME, INDIGO,
+    if (outlined) {a DEFAULT_FONT, ORANGE, BROWN,
                                        small? SMALL_TEXT_HEIGHT:TEXT_HEIGHT,
                                        small? THIN_OUTLINE:THICK_OUTLINE,
                                        coords);
