@@ -19,9 +19,14 @@
 typedef struct sprite sprite_t;
 
 /**
- * Contains all the info needed to draw text or outlined text.
+ * Contains all the info needed to draw text and/or outlined text.
  */
 typedef struct text_info text_info_t;
+
+/**
+ * Frees a text_info_t.
+ */
+void text_info_free(text_info_t *info);
 
 /**
  * Creates the info of animated sprite .
@@ -66,15 +71,13 @@ void sprite_set_speed(sprite_t *sprite, int speed);
 void sprite_set_dt(sprite_t *sprite, double dt);
 
 /**
- * Loads the desired soundtrack.
- * 
+ * Loads the desired soundtrack
  * @param music_name the path containing the music file (.wav or .mp3)
  */
 Mix_Music *loadMedia(const char *music_name);
 
 /**
- * Loads the desired sound effect.
- * 
+ * Loads the desired sound effect
  * @param effect_name the path containing the sound effect (must be .wav)
  */
 Mix_Chunk *loadEffects(const char *effect_name);
@@ -189,14 +192,7 @@ void sdl_draw_scroll(body_t *body, sprite_t *sprite);
 void sdl_show(void);
 
 /**
- * Draws all bodies in a scene but does not render them.
- *
- * @param scene the scene to draw
- */
-void sdl_draw_bodies(scene_t *scene);
-
-/**
- * Draws all bodies in a scene and renders them.
+ * Draws all bodies in a scene.
  * This internally calls sdl_clear(), sdl_draw_polygon(), and sdl_show(),
  * so those functions should not be called directly.
  *
@@ -259,20 +255,20 @@ vector_t sdl_mouse_pos();
 double time_since_last_tick(void);
 
 /**
- * Initializes an SDL_Texture that can be used to render text.
+ * Initializes a text_info_t of standard text with the given parameters.
  * 
  * @param text the text to be drawn
  * @param font the font type
  * @param color the color of the text in RGB
  * @param size the font size of the text
  * @param coords the coordinates of the top-left corner of the text
- * @return a pointer to an SDL_Texture of the text that may be rendered
+ * @return a pointer to a text_info_t representation of the given parameters
  */
-SDL_Texture *text_info_init(char *text, char  *font,
+text_info_t *text_info_init(char *text, const char *font,
                             rgb_color_t color, int size, vector_t coords);
 
 /**
- * Initializes an SDL_Texture that can be used to render outlined text.
+ * Initializes a text_info_t of outlined text with the given parameters.
  * 
  * @param text the text to be drawn
  * @param font the font type
@@ -281,19 +277,40 @@ SDL_Texture *text_info_init(char *text, char  *font,
  * @param size the font size of the text
  * @param thickness the thickness of the outline
  * @param coords the coordinates of the top-left corner of the text
- * @return a pointer to an SDL_Texture of the text that may be rendered
+ * @return a pointer to a text_info_t representation of the given parameters
+
  */
-SDL_Texture *outlined_text_info_init(char *text, char  *font,
+text_info_t *outlined_text_info_init(char *text, const char *font,
                             rgb_color_t color, rgb_color_t outline_color,
                             int size, int thickness, vector_t coords);
 
 /**
  * Draws text.
  * 
- * @param body the body with which the text is associated
- * @param texture the texture that the text can be renderered from
+ * @param text the text to be drawn
+ * @param font the font type
+ * @param color the color of the text in RGB
+ * @param size the font size of the text
+ * @param coords the coordinates of the top-left corner of the text
  */
-void sdl_draw_text(body_t *body, SDL_Texture *texture);
+void sdl_draw_text(body_t *body, text_info_t *info);
+
+/**
+ * Draws text with an outline.
+ * 
+ * @param text the text to be drawn
+ * @param font the font type
+ * @param color the color of the text in RGB
+ * @param outline_color the color of the outline in RGB
+ * @param size the font size of the text
+ * @param thickness the thickness of the outline
+ * @param coords the coordinates of the top-left corner of the text
+ */
+/*void sdl_draw_outlined_text(char *text, char  *font,
+                            rgb_color_t color, rgb_color_t outline_color,
+                            int size, int thickness, vector_t coords);*/
+                            
+void sdl_draw_outlined_text(body_t *body, text_info_t *info);
 
 /**
  * Gives the width of the text that would be drawn.

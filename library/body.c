@@ -51,7 +51,7 @@ body_t *body_init_with_info(list_t *shape,
 
 void body_free(body_t *body){
     list_free(body->shape);
-    if (body->draw_freer != NULL){
+    if (body->info_freer != NULL){
         body->info_freer(body->info);
     }
     if (body->draw_freer != NULL){
