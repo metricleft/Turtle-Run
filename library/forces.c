@@ -3,8 +3,6 @@
 #include <stdbool.h>
 #include <math.h>
 #include "forces.h"
-#include "test_util.h"
-#include "test_util.h"
 #include "collision.h"
 #include "entity.h"
 
