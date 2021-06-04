@@ -128,6 +128,7 @@ void create_destructive_collision(scene_t *scene, body_t *body1, body_t *body2);
  */
 void create_oneway_destructive_collision(scene_t *scene, double elasticity, 
                                             body_t *body1, body_t *body2);
+
 /**
  * Adds a force creator to a scene that applies impulses
  * to resolve collisions between two bodies in the scene.
@@ -151,6 +152,15 @@ void create_physics_collision(
     body_t *body1,
     body_t *body2
 );
+
+/**
+ * Applies a normal force between two bodies.
+ *
+ * @param scene the scene containing the bodies
+ * @param grav the gravity acting on body1
+ * @param body1 the first body
+ * @param body2 the second body
+ */
 
 void create_normal_collision(
     scene_t *scene,
