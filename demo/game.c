@@ -262,7 +262,6 @@ void player_move (char key, key_event_type_t type, double held_time, void *scene
     vector_t new_velocity = {0, body_get_velocity(player).y};
     if (type == KEY_PRESSED) {
         switch (key) {
-            case 'a':
             case LEFT_ARROW: {
                 new_velocity.x = -PLAYER_SPEED;
                 if (held_time < 0.2) {
@@ -270,7 +269,6 @@ void player_move (char key, key_event_type_t type, double held_time, void *scene
                 }
                 break;
             }
-            case 'd':
             case RIGHT_ARROW: {
                 new_velocity.x = PLAYER_SPEED;
                 if (held_time < 0.2) {
@@ -278,7 +276,6 @@ void player_move (char key, key_event_type_t type, double held_time, void *scene
                 }
                 break;
             }
-            case 'w':
             case UP_ARROW: {
                 if (held_time < 0.2 && (entity_get_colliding(entity) ||
                                         !strcmp(entity_get_powerup(entity), "JUMP"))) {
