@@ -13,6 +13,7 @@ const char* FROG = "static/frog_spritesheet.png";
 const char* FLY = "static/dragonfly_spritesheet.png";
 const char* GOOSE = "static/goose_spritesheet.png";
 
+//Creates the collisions between player bullets and the enemy.
 void create_bullet_collisions(scene_t *scene, body_t *enemy) {
     for (int i = 0; i < scene_bodies(scene); i++) {
         body_t *body = scene_get_body(scene, i);
@@ -23,8 +24,8 @@ void create_bullet_collisions(scene_t *scene, body_t *enemy) {
     }
 }
 
+//Spawns a goose that flies across the screen, speeding up.
 void spawn_goose(scene_t *scene, vector_t MIN, vector_t MAX) {
-    //Spawns a goose that flies across the screen, speeding up
     double *drag_const = malloc(sizeof(double));
     *drag_const = -(rand()%15+5);
 
@@ -43,8 +44,8 @@ void spawn_goose(scene_t *scene, vector_t MIN, vector_t MAX) {
     create_bounds_collisions(scene, goose, ENEMY_RADIUS);
 }
 
+//Spawns a frog that bounces up and down the screen.
 void spawn_frog(scene_t *scene, vector_t MIN, vector_t MAX) {
-    //Spawns a frog that bounces up and down the screen
     double *spring_const = malloc(sizeof(double));
     *spring_const = rand()%15+5;
 
@@ -71,12 +72,14 @@ void spawn_frog(scene_t *scene, vector_t MIN, vector_t MAX) {
     create_bounds_collisions(scene, anchor, ENEMY_RADIUS);
 }
 
+//Temporary param struct for the fly's gravity creator.
 typedef struct param {
     double constant;
     body_t *body1;
     body_t *body2;
 } param_t;
 
+//One-way gravity creator that attracts the fly to the player.
 void one_way_gravity_creator(param_t *aux){
     vector_t r = vec_subtract(body_get_centroid(aux->body1),
                               body_get_centroid(aux->body2));
@@ -86,7 +89,7 @@ void one_way_gravity_creator(param_t *aux){
     body_add_force(aux->body1, force);
 }
 
-//Only applies newtonian gravity to body1
+//Attracts the fly to a player by applying gravity only to body1 (the fly).
 void create_one_way_gravity(scene_t *scene, double G, body_t *body1, body_t *body2){
     param_t *force_param = malloc(sizeof(param_t));
     *force_param = (param_t){G, body1, body2};
@@ -97,8 +100,8 @@ void create_one_way_gravity(scene_t *scene, double G, body_t *body1, body_t *bod
                                    free);
 }
 
+//Spawns a fly that lazily follows the player and is attracted to the player.
 void spawn_fly(scene_t *scene, vector_t MIN, vector_t MAX) {
-    //Spawns a fly that lazily follows the player
     double gravity_const = rand()%500000+500000;
 
     body_t *player = scene_get_body(scene, 3);

@@ -18,6 +18,7 @@ const char* SLOW = "static/slow_powerup.png";
 const char* JUMP = "static/jump_powerup.png";
 const char *COIN = "static/coin_spritesheet.png";
 
+//Removes the functionality of the previous powerup.
 void remove_old_powerup(char *powerup, vector_t *scroll_speed) {
     if (!strcmp(powerup, "SLOW")) {
         scroll_speed->x = 2 * scroll_speed->x;
@@ -39,6 +40,7 @@ typedef struct param {
     body_t *body2;
 } param_t;
 
+//The gravity creator between a player with the magnet powerup and coins.
 void magnet_gravity_creator(param_t *aux){
     vector_t r = vec_subtract(body_get_centroid(aux->body1),
                               body_get_centroid(aux->body2));
@@ -48,7 +50,7 @@ void magnet_gravity_creator(param_t *aux){
     body_add_force(aux->body1, force);
 }
 
-//Only applies newtonian gravity to body1
+//Attracts coins to a player with the magnet powerup using one-way gravity.
 void create_magnet_gravity(scene_t *scene, double G, body_t *body1, body_t *body2){
     param_t *force_param = malloc(sizeof(param_t));
     *force_param = (param_t){G, body1, body2};
@@ -59,6 +61,7 @@ void create_magnet_gravity(scene_t *scene, double G, body_t *body1, body_t *body
                                    free);
 }
 
+//Collision handler for when player collects a magnet powerup. Attracts coins to player.
 void magnet_handler(body_t *player, body_t *powerup, vector_t axis, void *aux) {
     powerup_info_t *info = aux;
     *(double *)list_get(info->achievements, 3) =
@@ -78,6 +81,7 @@ void magnet_handler(body_t *player, body_t *powerup, vector_t axis, void *aux) {
     body_remove(powerup);
 }
 
+//Collision handler for when player collects a slow powerup. Slows the scroll speed.
 void slow_handler(body_t *player, body_t *powerup, vector_t axis, void *aux) {
     powerup_info_t *info = aux;
     *(double *)list_get(info->achievements, 3) =
@@ -92,6 +96,7 @@ void slow_handler(body_t *player, body_t *powerup, vector_t axis, void *aux) {
     body_remove(powerup);
 }
 
+//Collision handler for when player collects a jump powerup. Enables multi-jump.
 void jump_handler(body_t *player, body_t *powerup, vector_t axis, void *aux) {
     powerup_info_t *info = aux;
     *(double *)list_get(info->achievements, 3) =
@@ -104,6 +109,7 @@ void jump_handler(body_t *player, body_t *powerup, vector_t axis, void *aux) {
     body_remove(powerup);
 }
 
+//Collision handler for when player collects a coin. Adds the coin's score to total score.
 void coin_handler(body_t *player, body_t *coin, vector_t axis, void *aux) {
     powerup_info_t *info = aux;
     *(info->score) = *(info->score) + COIN_SCORE;
@@ -112,6 +118,7 @@ void coin_handler(body_t *player, body_t *coin, vector_t axis, void *aux) {
     body_remove(coin);
 }
 
+//Creates the body of a powerup and adds it to the scene.
 body_t *spawn_powerup(scene_t *scene, vector_t MIN, vector_t MAX, powerup_info_t *info) {
     vector_t center = {MAX.x + POWERUP_RADIUS,
         rand()%(int)((MAX.y - MIN.y - 2*POWERUP_PADDING) + POWERUP_PADDING)};

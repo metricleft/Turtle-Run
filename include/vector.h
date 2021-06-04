@@ -118,5 +118,4 @@ vector_t vec_unit(vector_t v);
  */
 double vec_mag(vector_t v);
 
-
 #endif // #ifndef __VECTOR_H__
