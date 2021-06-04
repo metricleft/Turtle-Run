@@ -1,9 +1,6 @@
 #ifndef __FRAME_H__
 #define __FRAME_H__
 
-#include "list.h"
-#include "scene.h"
-#include "body.h"
 #include "entity.h"
 #include "shapelib.h"
 #include "sdl_wrapper.h"
