@@ -70,6 +70,7 @@ const double ELASTIC_COLLISION = 1;
 const double INELASTIC_COLLISION = 0;
 
 list_t *get_global_achievements() {
+    // Feteches all achievements from the achievements file.
     list_t *global_achievements = list_init(NUM_ACHIEVEMENTS, free);
     FILE *fp = fopen(ACHIEVEMENTS_FILE, "r");
     if (fp == NULL) {
@@ -90,6 +91,7 @@ list_t *get_global_achievements() {
 
 
 list_t *get_high_scores() {
+    // Fetches all high scores from the high score file.
     list_t *high_scores = list_init(NUM_HIGHSCORES, free);
     FILE *fp = fopen(HIGHSCORES_FILE, "r");
     if (fp == NULL) {
@@ -109,6 +111,7 @@ list_t *get_high_scores() {
 }
 
 double advanced_score_calculation(double dt) {
+    // Perfoerms advanced score calculation based on total time survived.
     assert(dt >= 0);
     if (dt <= 10) {
         return 10;
