@@ -14,6 +14,7 @@
 #include "powerup.h"
 #include "shapelib.h"
 #include "bounds.h"
+#include "forces.h"
 
 const vector_t MIN = {.x = 0, .y = 0};
 const vector_t MAX = {.x = 1000, .y = 500};
