@@ -146,6 +146,7 @@ void body_remove(body_t *body){
 bool body_is_removed(body_t *body){
     return body->remove;
 }
+
 void body_draw(body_t *body){
     if (body->drawer!= NULL){
        body->drawer(body, body->draw_info); 

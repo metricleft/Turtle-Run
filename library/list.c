@@ -3,7 +3,6 @@
 #include "list.h"
 
 const size_t RESIZE_FACTOR = 2;
-
 size_t DEFAULT_LIST_SIZE = 10;
 
 typedef struct list {
