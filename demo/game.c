@@ -6,14 +6,7 @@
 #include <stdio.h>
 #include <float.h>
 
-#include "body.h"
-#include "polygon.h"
-#include "scene.h"
-#include "forces.h"
-#include "entity.h"
-#include "shapelib.h"
 #include "sdl_wrapper.h"
-#include "SDL2/SDL_mouse.h"
 #include "enemy.h"
 #include "frame.h"
 #include "powerup.h"

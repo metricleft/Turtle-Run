@@ -2,9 +2,7 @@
 #define __POWERUP_H__
 
 #include <stdbool.h>
-#include "body.h"
 #include "entity.h"
-#include "scene.h"
 #include "forces.h"
 #include "shapelib.h"
 
