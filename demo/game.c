@@ -312,6 +312,9 @@ void click_to_continue(char key, mouse_event_type_t type, double held_time,
                 SDL_Event *event = malloc(sizeof(event));
                 event->type = SDL_QUIT;
                 SDL_PushEvent(event);
+                sdl_clear();
+                sdl_on_key(NULL);
+                sdl_on_click(NULL);
                 break;
             }
         }
@@ -351,8 +354,9 @@ void display_main_menu(SDL_Window *window) {
     scene_free(scene);
 }
 
-void display_score(list_t *achievements, double *score) {
-    SDL_Window *window = sdl_init(MIN, MAX);
+void display_score(SDL_Window *window, list_t *achievements, double *score) {
+    //SDL_Window *window = sdl_init(MIN, MAX);
+    sdl_clear();
     sdl_on_click((event_handler_t)click_to_continue);
 
     scene_t *scene = scene_init();
@@ -415,11 +419,12 @@ void display_score(list_t *achievements, double *score) {
 
     while (!sdl_is_done(window)) {
     }
-    SDL_DestroyWindow(window);
+    //SDL_DestroyWindow(window);
 }
 
-void menu_play_game() {
-    SDL_Window *window = sdl_init(MIN, MAX);
+void menu_play_game(SDL_Window *window) {
+    //SDL_Window *window = sdl_init(MIN, MAX);
+    sdl_clear();
     sdl_on_key((event_handler_t) player_move);
     sdl_on_click((event_handler_t) player_shoot);
 
@@ -561,13 +566,14 @@ void menu_play_game() {
     sdl_on_click(NULL);
     scene_free(scene);
     free(scroll_speed);
-    SDL_DestroyWindow(window);
+    //SDL_DestroyWindow(window);
 
-    display_score(achievements, score);
+    display_score(window, achievements, score);
 }
 
-void menu_instructions() {
-    SDL_Window *window = sdl_init(MIN, MAX);
+void menu_instructions(SDL_Window *window) {
+    //SDL_Window *window = sdl_init(MIN, MAX);
+    sdl_clear();
     sdl_on_click((event_handler_t)click_to_continue);
 
     scene_t *scene = scene_init();
@@ -617,11 +623,12 @@ void menu_instructions() {
 
     while (!sdl_is_done(window)) {
     }
-    SDL_DestroyWindow(window);
+    //SDL_DestroyWindow(window);
 }
 
-void menu_highscores() {
-    SDL_Window *window = sdl_init(MIN, MAX);
+void menu_highscores(SDL_Window *window) {
+    //SDL_Window *window = sdl_init(MIN, MAX);
+    sdl_clear();
     sdl_on_click((event_handler_t)click_to_continue);
 
     scene_t *scene = scene_init();
@@ -684,7 +691,7 @@ void menu_highscores() {
 
     while (!sdl_is_done(window)) {
     }
-    SDL_DestroyWindow(window);
+    //SDL_DestroyWindow(window);
 }
 
 int is_in_button_bounds(double x, double y, vector_t box, int width) {
@@ -696,8 +703,8 @@ void menu_mouse_handler(char key, mouse_event_type_t type, double held_time,
                         void *window);
 
 void show_window(SDL_Window *window) {
-    sdl_set_window(window);
-    SDL_ShowWindow(window);
+    //sdl_set_window(window);
+    //SDL_ShowWindow(window);
     sdl_on_click((event_handler_t)menu_mouse_handler);
     display_main_menu(window);
 }
@@ -724,18 +731,18 @@ void menu_mouse_handler(char key, mouse_event_type_t type, double held_time,
                 double x = mouse_coords.x;
                 double y = mouse_coords.y;
                 if (is_in_button_bounds(x, y, box1, width1)) {
-                    SDL_HideWindow(window);
-                    menu_play_game();
+                    //SDL_HideWindow(window);
+                    menu_play_game(window);
                     show_window(window);
                 }
                 else if (is_in_button_bounds(x, y, box2, width2)) {
-                    SDL_HideWindow(window);
-                    menu_instructions();
+                    //SDL_HideWindow(window);
+                    menu_instructions(window);
                     show_window(window);
                 }
                 else if (is_in_button_bounds(x, y, box3, width3)) {
-                    SDL_HideWindow(window);
-                    menu_highscores();
+                    //SDL_HideWindow(window);
+                    menu_highscores(window);
                     show_window(window);
                 }
                 else if (is_in_button_bounds(x, y, box4, width4)) {
