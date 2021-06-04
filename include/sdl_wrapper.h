@@ -149,13 +149,6 @@ typedef void (*event_handler_t)(char event, void *type, double held_time,
 SDL_Window *sdl_init(vector_t min, vector_t max);
 
 /**
- * Sets the focused window.
- * 
- * @param window the new window.
- */
-void sdl_set_window(SDL_Window *window);
-
-/**
  * Processes all SDL events and returns whether the window has been closed.
  * This function must be called in order to handle keypresses.
  *

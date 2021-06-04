@@ -238,11 +238,6 @@ SDL_Window *sdl_init(vector_t min, vector_t max) {
     return window;
 }
 
-void sdl_set_window(SDL_Window *new_window) {
-    window = new_window;
-    renderer = SDL_GetRenderer(new_window);
-}
-
 bool sdl_is_done(void *scene) {
     SDL_Event *event = malloc(sizeof(*event));
     assert(event != NULL);

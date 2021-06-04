@@ -73,8 +73,8 @@ const SDL_Rect BACKGROUND_FRAME = {0,0, 256, 128};
 const double ELASTIC_COLLISION = 1;
 const double INELASTIC_COLLISION = 0;
 
+//Returns all achievements from the achievements file as alist of double pointers.
 list_t *get_global_achievements() {
-    // Feteches all achievements from the achievements file.
     list_t *global_achievements = list_init(NUM_ACHIEVEMENTS, free);
     FILE *fp = fopen(ACHIEVEMENTS_FILE, "r");
     if (fp == NULL) {
@@ -94,8 +94,8 @@ list_t *get_global_achievements() {
 }
 
 
+//Returns all high scores from the high score file as a list of double pointers.
 list_t *get_high_scores() {
-    // Fetches all high scores from the high score file.
     list_t *high_scores = list_init(NUM_HIGHSCORES, free);
     FILE *fp = fopen(HIGHSCORES_FILE, "r");
     if (fp == NULL) {
@@ -114,8 +114,8 @@ list_t *get_high_scores() {
     return high_scores;
 }
 
+//Returns advanced score calculation based on total time survived.
 double advanced_score_calculation(double dt) {
-    // Perfoerms advanced score calculation based on total time survived.
     assert(dt >= 0);
     if (dt <= 10) {
         return 10;
@@ -129,8 +129,8 @@ double advanced_score_calculation(double dt) {
     return 50;
 }
 
+//Check if player is gone: lose the game.
 bool check_game_end(scene_t *scene) {
-    //Check if player is gone: lose condition.
     entity_t *entity = body_get_info(scene_get_body(scene, 3));
     if (strcmp(entity_get_type(entity), "PLAYER")) {
         return true;
@@ -138,6 +138,7 @@ bool check_game_end(scene_t *scene) {
     return false;
 }
 
+//Adds a scrolling background to the scene.
 void add_background(scene_t *scene, const char* img, int speed){
     vector_t center = {MAX.x / 2, MAX.y / 2};
     list_t *window = compute_rect_points(center, MAX.x, MAX.y);
@@ -150,6 +151,7 @@ void add_background(scene_t *scene, const char* img, int speed){
     scene_add_body(scene, background);
 }
 
+//Adds text to a scene.
 void add_text(scene_t *scene, vector_t coords, char *text, bool outlined, bool small) {
     char *text_copy = malloc(sizeof(char)*strlen(text)+1);
     strcpy(text_copy, text);
@@ -174,12 +176,14 @@ void add_text(scene_t *scene, vector_t coords, char *text, bool outlined, bool s
     scene_add_body(scene, body);
 }
 
+//Initializes parallax background.
 void initialize_background(scene_t *scene){
     add_background(scene, SKY_IMG, abs((int)DEFAULT_SCROLL_SPEED.x /18));
     add_background(scene, GRASS_IMG, abs((int)DEFAULT_SCROLL_SPEED.x/ 9));
     add_background(scene, WATER_IMG, abs((int)DEFAULT_SCROLL_SPEED.x / 6));
 }
 
+//Initializes player attributes.
 void initialize_player(scene_t *scene) {
     vector_t center = {MAX.x / 2, MAX.y - PLAYER_RADIUS};
     player_entity_t *entity = player_entity_init("PLAYER", false, true);
@@ -196,6 +200,7 @@ void initialize_player(scene_t *scene) {
     create_constant_force(scene, grav, player, free);
 }
 
+//Initializes starter terrain.
 void initialize_terrain(scene_t *scene) {
     body_t *player = scene_get_body(scene, 3);
     vector_t center = (vector_t){MAX.x/2, 10};
@@ -211,6 +216,7 @@ void initialize_terrain(scene_t *scene) {
     body_set_draw(floor, (draw_func_t) sdl_draw_polygon, black, free);
 }
 
+//Adds a bullet to the scene.
 void add_bullet (scene_t *scene, vector_t center, vector_t velocity,
                  entity_t *bullet_entity, char *target_type) {
     body_t *bullet = body_init_with_info(
@@ -231,6 +237,7 @@ void add_bullet (scene_t *scene, vector_t center, vector_t velocity,
     }
 }
 
+//Applies a leftwards velocity to all bodies with the "SCROLLABLE" tag.
 void sidescroll(scene_t *scene, vector_t *scroll_speed, double dt) {
     for (size_t i = 0; i < scene_bodies(scene); i++) {
         body_t *body = scene_get_body(scene, i);
@@ -239,7 +246,6 @@ void sidescroll(scene_t *scene, vector_t *scroll_speed, double dt) {
             sprite_t *sprite = body_get_draw_info(body);
             sprite_set_speed(sprite, (int)abs((int)(scroll_speed->x) *((int)i+1) /18));
         }
-        //Applies a leftwards velocity to all objects with the "SCROLLABLE" tag
         if (entity_get_scrollable(entity) && !entity_is_scrolling(entity)) {
             vector_t scroll = {scroll_speed->x, body_get_velocity(body).y};
             body_set_velocity(body, scroll);
@@ -249,6 +255,7 @@ void sidescroll(scene_t *scene, vector_t *scroll_speed, double dt) {
     }
 }
 
+//Sets player velocity based on keypress.
 void player_move (char key, key_event_type_t type, double held_time, void *scene) {
     Mix_Chunk *jump = loadEffects(JUMP_ADD);
     Mix_Chunk *slide = loadEffects(SLIDE_ADD);
@@ -285,6 +292,7 @@ void player_move (char key, key_event_type_t type, double held_time, void *scene
     body_set_velocity(player, new_velocity);
 }
 
+//Shoots a water drop from the player based on mouse position.
 void player_shoot(char key, mouse_event_type_t type, double held_time, void *scene){
     Mix_Chunk *shot = loadEffects(SHOOT_ADD);
     body_t *player = scene_get_body(scene, 3);
@@ -304,6 +312,7 @@ void player_shoot(char key, mouse_event_type_t type, double held_time, void *sce
     }
 }
 
+//Allows the program to continue when a key is pressed.
 void click_to_continue(char key, mouse_event_type_t type, double held_time,
                         void *window){
     if (type == BUTTON_PRESSED) {
@@ -321,6 +330,7 @@ void click_to_continue(char key, mouse_event_type_t type, double held_time,
     }
 }
 
+//Displays the main menu selection screen.
 void display_main_menu(SDL_Window *window) {
     scene_t *scene = scene_init();
     add_background(scene, BACKGROUND_IMG, 0);
@@ -354,8 +364,8 @@ void display_main_menu(SDL_Window *window) {
     scene_free(scene);
 }
 
+//Displays a player's score after a game.
 void display_score(SDL_Window *window, list_t *achievements, double *score) {
-    //SDL_Window *window = sdl_init(MIN, MAX);
     sdl_clear();
     sdl_on_click((event_handler_t)click_to_continue);
 
@@ -419,11 +429,10 @@ void display_score(SDL_Window *window, list_t *achievements, double *score) {
 
     while (!sdl_is_done(window)) {
     }
-    //SDL_DestroyWindow(window);
 }
 
+//Plays a game of Turtle Run.
 void menu_play_game(SDL_Window *window) {
-    //SDL_Window *window = sdl_init(MIN, MAX);
     sdl_clear();
     sdl_on_key((event_handler_t) player_move);
     sdl_on_click((event_handler_t) player_shoot);
@@ -566,13 +575,12 @@ void menu_play_game(SDL_Window *window) {
     sdl_on_click(NULL);
     scene_free(scene);
     free(scroll_speed);
-    //SDL_DestroyWindow(window);
 
     display_score(window, achievements, score);
 }
 
+//Displays the instructions for Turtle Run.
 void menu_instructions(SDL_Window *window) {
-    //SDL_Window *window = sdl_init(MIN, MAX);
     sdl_clear();
     sdl_on_click((event_handler_t)click_to_continue);
 
@@ -623,11 +631,10 @@ void menu_instructions(SDL_Window *window) {
 
     while (!sdl_is_done(window)) {
     }
-    //SDL_DestroyWindow(window);
 }
 
+//Displays the highscores and lifetime achievements for Turtle Run.
 void menu_highscores(SDL_Window *window) {
-    //SDL_Window *window = sdl_init(MIN, MAX);
     sdl_clear();
     sdl_on_click((event_handler_t)click_to_continue);
 
@@ -691,24 +698,25 @@ void menu_highscores(SDL_Window *window) {
 
     while (!sdl_is_done(window)) {
     }
-    //SDL_DestroyWindow(window);
 }
 
+//Checks whether an x and y coordinate are within given bounds.
 int is_in_button_bounds(double x, double y, vector_t box, int width) {
     return x > box.x && x < box.x+width &&
            y > box.y-TEXT_HEIGHT && y < box.y;
 }
 
+//Declaration for menu mouse handler.
 void menu_mouse_handler(char key, mouse_event_type_t type, double held_time,
                         void *window);
 
+//Focuses on and shows the main menu screen.
 void show_window(SDL_Window *window) {
-    //sdl_set_window(window);
-    //SDL_ShowWindow(window);
     sdl_on_click((event_handler_t)menu_mouse_handler);
     display_main_menu(window);
 }
 
+//Handles mouse selections on the main menu screen.
 void menu_mouse_handler(char key, mouse_event_type_t type, double held_time,
                         void *window){
     vector_t box1 = {sdl_text_center(MIN, MAX, "Play Game", DEFAULT_FONT, TEXT_HEIGHT),
@@ -731,17 +739,14 @@ void menu_mouse_handler(char key, mouse_event_type_t type, double held_time,
                 double x = mouse_coords.x;
                 double y = mouse_coords.y;
                 if (is_in_button_bounds(x, y, box1, width1)) {
-                    //SDL_HideWindow(window);
                     menu_play_game(window);
                     show_window(window);
                 }
                 else if (is_in_button_bounds(x, y, box2, width2)) {
-                    //SDL_HideWindow(window);
                     menu_instructions(window);
                     show_window(window);
                 }
                 else if (is_in_button_bounds(x, y, box3, width3)) {
-                    //SDL_HideWindow(window);
                     menu_highscores(window);
                     show_window(window);
                 }
