@@ -666,7 +666,7 @@ void menu_highscores() {
 
     text = malloc(sizeof(char)*(strlen("Lifetime powerups: ") + DBL_DIG+1));
     snprintf(text, strlen("Lifetime powerups: ") + DBL_DIG + 1,
-             "Lifetime powerups: %.0f", fmax(0, *(double *)list_get(achievements, 2)));
+             "Lifetime powerups: %.0f", fmax(0, *(double *)list_get(achievements, 3)));
     center = (vector_t){(MAX.x-MIN.x)/2+TEXT_OFFSET, SMALL_TEXT_SPACING*8};
     add_text(scene, center, text, true, true);
     free(text);
