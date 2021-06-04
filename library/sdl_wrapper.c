@@ -5,7 +5,7 @@
 #include <string.h>
 #include "sdl_wrapper.h"
 
-const char WINDOW_TITLE[] = "CS 3";
+const char WINDOW_TITLE[] = "TURTLE RUN";
 const int WINDOW_WIDTH = 1000;
 const int WINDOW_HEIGHT = 500;
 const double MS_PER_S = 1e3;
@@ -151,6 +151,7 @@ char get_keycode(SDL_Keycode key) {
     }
 }
 
+/** Gets the character code corresponding to a mouse click.*/
 char get_mousecode(SDL_MouseButtonEvent mouse) {
     switch (mouse.button) {
         case SDL_BUTTON_LEFT:   return LEFT_CLICK;
@@ -212,7 +213,6 @@ void sprite_set_dt(sprite_t *sprite, double dt){
     sprite->dt = dt;
 }
 
-
 SDL_Window *sdl_init(vector_t min, vector_t max) {
     // Check parameters
     assert(min.x < max.x);
@@ -221,7 +221,7 @@ SDL_Window *sdl_init(vector_t min, vector_t max) {
     center = vec_multiply(0.5, vec_add(min, max));
     max_diff = vec_subtract(max, center);
     SDL_Init(SDL_INIT_EVERYTHING);
-    //SDL_SetHint(SDL_HINT_RENDER_DRIVER, "opengl");
+    SDL_SetHint(SDL_HINT_RENDER_DRIVER, "opengl");
     TTF_Init();
     Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048);
     window = SDL_CreateWindow(
