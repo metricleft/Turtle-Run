@@ -121,9 +121,9 @@ typedef struct {
 } collision_param_t;
 
 void collision_param_free(collision_param_t *param) {
-    // if (param->aux != NULL) {
-    //     param->aux_freer(param->aux);
-    // }
+    if (param->aux != NULL) {
+        param->aux_freer(param->aux);
+    }
     free(param);
 }
 
