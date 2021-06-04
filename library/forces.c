@@ -9,7 +9,9 @@
 #include "collision.h"
 #include "entity.h"
 
+//Gravity is not applied when two bodies are closer than this distance to each other.
 const double SMALL_DISTANCE = 10;
+//Normal force is not applied when two bodies are closer than this distance to each other.
 const double SMALL_VALUE = 1e-6;
 
 /**
@@ -378,5 +380,4 @@ void create_normal_collision(scene_t *scene, vector_t grav,
                                         body2, grav_param, false, free};
     scene_add_bodies_force_creator(scene, normal_handler, force_param,
                                         bodies, normal_param_free);
-
 }

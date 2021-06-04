@@ -60,8 +60,8 @@ const int TEXT_OFFSET = 10;
 
 const int NUM_HIGHSCORES = 5;
 const int NUM_ACHIEVEMENTS = 4;
-const char *HIGHSCORES_FILE = "saves/highscore.txt";
-const char *ACHIEVEMENTS_FILE = "saves/lifetime.txt";
+const char *HIGHSCORES_FILE = "saves/highscore.tr";
+const char *ACHIEVEMENTS_FILE = "saves/lifetime.tr";
 
 const char *SKY_IMG = "static/background_sky.png";
 const char *GRASS_IMG = "static/background_grass.png";
@@ -72,12 +72,8 @@ const SDL_Rect BACKGROUND_FRAME = {0,0, 256, 128};
 const double ELASTIC_COLLISION = 1;
 const double INELASTIC_COLLISION = 0;
 
-double basic_score_calculation(double dt) {
-    assert(dt >= 0);
-    return dt * 10.0;
-}
-
 list_t *get_global_achievements() {
+    // Feteches all achievements from the achievements file.
     list_t *global_achievements = list_init(NUM_ACHIEVEMENTS, free);
     FILE *fp = fopen(ACHIEVEMENTS_FILE, "r");
     if (fp == NULL) {
@@ -98,6 +94,7 @@ list_t *get_global_achievements() {
 
 
 list_t *get_high_scores() {
+    // Fetches all high scores from the high score file.
     list_t *high_scores = list_init(NUM_HIGHSCORES, free);
     FILE *fp = fopen(HIGHSCORES_FILE, "r");
     if (fp == NULL) {
@@ -117,6 +114,7 @@ list_t *get_high_scores() {
 }
 
 double advanced_score_calculation(double dt) {
+    // Perfoerms advanced score calculation based on total time survived.
     assert(dt >= 0);
     if (dt <= 10) {
         return 10;
@@ -671,7 +669,7 @@ void menu_highscores() {
 
     text = malloc(sizeof(char)*(strlen("Lifetime powerups: ") + DBL_DIG+1));
     snprintf(text, strlen("Lifetime powerups: ") + DBL_DIG + 1,
-             "Lifetime powerups: %.0f", fmax(0, *(double *)list_get(achievements, 2)));
+             "Lifetime powerups: %.0f", fmax(0, *(double *)list_get(achievements, 3)));
     center = (vector_t){(MAX.x-MIN.x)/2+TEXT_OFFSET, SMALL_TEXT_SPACING*8};
     add_text(scene, center, text, true, true);
     free(text);
