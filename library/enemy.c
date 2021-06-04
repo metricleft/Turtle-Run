@@ -4,8 +4,11 @@
 #include <math.h>
 
 #include "sdl_wrapper.h"
-#include "enemy.h"
 #include "bounds.h"
+#include "enemy.h"
+#include "entity.h"
+#include "forces.h"
+#include "shapelib.h"
 
 const int GAME_ENEMY_MASS = 10;
 const int ENEMY_RADIUS = 20;

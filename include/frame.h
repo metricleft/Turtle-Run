@@ -1,12 +1,7 @@
 #ifndef __FRAME_H__
 #define __FRAME_H__
 
-#include "entity.h"
-#include "shapelib.h"
-#include "sdl_wrapper.h"
-#include "forces.h"
-
-#include <stdlib.h>
+#include "scene.h"
 
 /**
  * Spawns a random frame of terrain and enemies from a certain point

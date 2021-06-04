@@ -2,10 +2,7 @@
 #define __ENEMY_H__
 
 #include <stdbool.h>
-#include "entity.h"
 #include "scene.h"
-#include "forces.h"
-#include "shapelib.h"
 
 /**
  * Spawns a random enemy beyond the right side of the screen.

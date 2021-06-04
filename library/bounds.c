@@ -1,4 +1,7 @@
 #include "bounds.h"
+#include "entity.h"
+#include "forces.h"
+#include "shapelib.h"
 
 const int BOUNDS_THICKNESS = 30;
 

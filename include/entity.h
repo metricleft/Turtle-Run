@@ -2,7 +2,6 @@
 #define __ENTITY_H__
 
 #include <stdbool.h>
-#include "body.h"
 
 /**
  * A number of tags that a body may have if it is an entity in a game.

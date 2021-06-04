@@ -8,8 +8,11 @@
 
 #include "sdl_wrapper.h"
 #include "enemy.h"
+#include "entity.h"
 #include "frame.h"
+#include "entity.h"
 #include "powerup.h"
+#include "shapelib.h"
 #include "bounds.h"
 
 const vector_t MIN = {.x = 0, .y = 0};

@@ -1,6 +1,14 @@
+#include <stdlib.h>
 #include "frame.h"
+
 #include "bounds.h"
+#include "color.h"
+#include "entity.h"
+#include "forces.h"
 #include "powerup.h"
+#include "sdl_wrapper.h"
+#include "shapelib.h"
+
 
 const int TERRAIN_HEIGHT = 50;
 const int PLATFORM_HEIGHT = 10;

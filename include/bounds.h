@@ -2,11 +2,7 @@
 #define __BOUNDS_H__
 
 #include <stdbool.h>
-#include "body.h"
-#include "entity.h"
 #include "scene.h"
-#include "forces.h"
-#include "shapelib.h"
 
 /**
  * Creates three sets of 4 walls that destroy bodies when they fully go off-screen.

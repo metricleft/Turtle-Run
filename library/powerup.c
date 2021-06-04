@@ -6,6 +6,9 @@
 #include "sdl_wrapper.h"
 #include "powerup.h"
 #include "bounds.h"
+#include "entity.h"
+#include "forces.h"
+#include "shapelib.h"
 
 const double POWERUP_MASS = 10;
 const double POWERUP_RADIUS = 20;

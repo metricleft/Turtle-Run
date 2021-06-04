@@ -2,11 +2,12 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <math.h>
+#include <stdio.h>
+#include <string.h>
+
 #include "forces.h"
 #include "collision.h"
 #include "entity.h"
-
-#include <stdio.h>
 
 const double SMALL_DISTANCE = 10;
 const double SMALL_VALUE = 1e-6;

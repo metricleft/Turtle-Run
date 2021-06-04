@@ -2,9 +2,7 @@
 #define __POWERUP_H__
 
 #include <stdbool.h>
-#include "entity.h"
-#include "forces.h"
-#include "shapelib.h"
+#include "scene.h"
 
 /**
  * Spawns a random powerup beyond the right side of the screen.
