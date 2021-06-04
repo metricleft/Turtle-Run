@@ -138,7 +138,6 @@ bool check_game_end(scene_t *scene) {
     //Check if player is gone: lose condition.
     entity_t *entity = body_get_info(scene_get_body(scene, 3));
     if (strcmp(entity_get_type(entity), "PLAYER")) {
-        //game_end();
         return true;
     }
     return false;
@@ -162,7 +161,7 @@ void add_text(scene_t *scene, vector_t coords, char *text, bool outlined, bool s
     text_info_t *info;
     if (outlined) 
     {
-        info = outlined_text_info_init(text_copy, DEFAULT_FONT, ORANGE, BROWN,
+        info = outlined_text_info_init(text_copy, DEFAULT_FONT, LIME, BLACK,
                                        small? SMALL_TEXT_HEIGHT:TEXT_HEIGHT,
                                        small? THIN_OUTLINE:THICK_OUTLINE,
                                        coords);
