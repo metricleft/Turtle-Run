@@ -19,6 +19,7 @@ void create_terrain_collisions(scene_t *scene, body_t *terrain_body) {
     create_oneway_destructive_collision(scene, 0, scene_get_body(scene, 4), terrain_body);
 }
 
+//Create four permanent off-screen walls.
 void create_bounds(scene_t *scene, vector_t min, vector_t max, double radius) {
     //Left:
     vector_t center = (vector_t){-radius*2 - BOUNDS_THICKNESS/2, (max.y-min.y)/2};
