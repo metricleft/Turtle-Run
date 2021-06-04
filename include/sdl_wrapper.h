@@ -2,9 +2,7 @@
 #define __SDL_WRAPPER_H__
 
 #include <stdbool.h>
-#include "list.h"
 #include "scene.h"
-#include "vector.h"
 #include "color.h"
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_mixer.h>
