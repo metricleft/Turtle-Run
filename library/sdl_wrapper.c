@@ -221,7 +221,9 @@ SDL_Window *sdl_init(vector_t min, vector_t max) {
     center = vec_multiply(0.5, vec_add(min, max));
     max_diff = vec_subtract(max, center);
     SDL_Init(SDL_INIT_EVERYTHING);
-    //SDL_SetHint(SDL_HINT_RENDER_DRIVER, "opengl"); //For Mac optimization
+    if (!strcmp(SDL_GetPlatform(), "Mac OS X")) {
+        SDL_SetHint(SDL_HINT_RENDER_DRIVER, "opengl"); //For Mac optimization
+    }
     TTF_Init();
     Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048);
     window = SDL_CreateWindow(
