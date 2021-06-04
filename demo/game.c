@@ -69,11 +69,6 @@ const SDL_Rect BACKGROUND_FRAME = {0,0, 256, 128};
 const double ELASTIC_COLLISION = 1;
 const double INELASTIC_COLLISION = 0;
 
-double basic_score_calculation(double dt) {
-    assert(dt >= 0);
-    return dt * 10.0;
-}
-
 list_t *get_global_achievements() {
     list_t *global_achievements = list_init(NUM_ACHIEVEMENTS, free);
     FILE *fp = fopen(ACHIEVEMENTS_FILE, "r");
