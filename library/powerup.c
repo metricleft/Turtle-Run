@@ -11,7 +11,7 @@
 const double POWERUP_MASS = 10;
 const double POWERUP_RADIUS = 20;
 const int POWERUP_PADDING = 50;
-const double COIN_SCORE = 100;
+const double COIN_SCORE = 10000;
 const double GRAVITY_CONST = 10000000;
 const char* MAGNET = "static/magnet_powerup.png";
 const char* SLOW = "static/slow_powerup.png";
