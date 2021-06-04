@@ -2,15 +2,16 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include "scene.h"
- 
+
+const size_t DEFAULT_CAPACITY = 30;
+
+//Stores a force that acts on a list of bodies.
 typedef struct force {
     void *info;
     force_creator_t force;
     free_func_t info_freer;
     list_t *force_bodies;
 } force_t;
-
-const size_t DEFAULT_CAPACITY = 30;
 
 typedef struct scene {
     list_t *bodies;

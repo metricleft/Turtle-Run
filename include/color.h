@@ -56,12 +56,4 @@ rgb_color_t random_color();
  */
 rgb_color_t next_rainbow_color(rgb_color_t color);
 
-/**
- * Returns the same color with decreased intensity.
- * 
- * @param color the current color
- * @returns a current color with decreased intensity
- */
-rgb_color_t decrease_intensity(rgb_color_t color);
-
 #endif // #ifndef __COLOR_H__

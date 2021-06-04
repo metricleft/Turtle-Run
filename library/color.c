@@ -23,9 +23,6 @@ rgb_color_t BLACK = {0, 0, 0};
 rgb_color_t WHITE = {1, 1, 1};
 rgb_color_t BROWN = {0.361, 0.173, 0.024};
 
-const float INTENSITY_SCALING = 2.0;
-const float INTENSITY_RATIO = 3.5;
-
 bool color_equals(rgb_color_t color1, rgb_color_t color2) {
     return color1.r == color2.r && color1.g == color2.g && color1.b == color2.b;
 }
@@ -72,10 +69,4 @@ rgb_color_t next_rainbow_color(rgb_color_t color) {
         return RED;
     }
     return BLACK;
-}
-
-rgb_color_t decrease_intensity(rgb_color_t color) {
-    return (rgb_color_t){(color.r + INTENSITY_SCALING)/INTENSITY_RATIO, 
-                         (color.g + INTENSITY_SCALING)/INTENSITY_RATIO,
-                         (color.b + INTENSITY_SCALING)/INTENSITY_RATIO};
 }

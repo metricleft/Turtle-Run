@@ -3,16 +3,15 @@
 #include <stdbool.h>
 #include <math.h>
 #include "forces.h"
-#include "test_util.h"
-#include "test_util.h"
 #include "collision.h"
 #include "entity.h"
 
-#include <stdio.h>
-
+//Gravity is not applied when two bodies are closer than this distance to each other.
 const double SMALL_DISTANCE = 10;
+//Normal force is not applied when two bodies are closer than this distance to each other.
 const double SMALL_VALUE = 1e-6;
 
+//A struct that stores info needed to create forces.
 typedef struct param {
     void *constant;
     body_t *body1;
@@ -20,7 +19,7 @@ typedef struct param {
     free_func_t const_freer;
 } param_t;
 
-
+//Frees a param_t.
 void param_free(param_t *param) {
     param->const_freer(param->constant);
     free(param);
@@ -38,7 +37,8 @@ double calculate_reduced_mass(body_t *body1, body_t *body2) {
     }
     return reduced_mass;
 }
- 
+
+//Applies a two-way gravity between two bodies.
 void gravity_creator(param_t *aux){
     vector_t r = vec_subtract(body_get_centroid(aux->body1),
                               body_get_centroid(aux->body2));
@@ -63,6 +63,7 @@ void create_newtonian_gravity(scene_t *scene, void *G, body_t *body1, body_t *bo
                                    param_free);
 }
 
+//Applies a constant force between two bodies.
 void const_force_creator(param_t *aux){
     vector_t force = vec_multiply(body_get_mass(aux->body1), *(vector_t *) aux->constant);
     body_add_force(aux->body1, force);
@@ -75,9 +76,9 @@ void create_constant_force(scene_t *scene, void *A, body_t *body, free_func_t fr
     list_add(bodies, body);
     scene_add_bodies_force_creator(scene, const_force_creator, force_param, bodies,
                                    param_free);
-
 }
 
+//Applies a spring force between two bodies.
 void spring_creator(param_t *aux){
     vector_t r = vec_subtract(body_get_centroid(aux->body1),
                               body_get_centroid(aux->body2));
@@ -97,6 +98,7 @@ void create_spring(scene_t *scene, void *k, body_t *body1, body_t *body2,
                                    param_free);
 }
 
+//Applies drag to a body.
 void drag_creator(param_t *aux){
     vector_t force = vec_multiply(- *(double *) aux->constant,
                                   body_get_velocity(aux->body1));
@@ -111,6 +113,7 @@ void create_drag(scene_t *scene, void *gamma, body_t *body, free_func_t freer){
     scene_add_bodies_force_creator(scene, drag_creator, force_param, bodies, param_free);
 }
 
+//A struct to aid in collisions.
 typedef struct {
     collision_handler_t handler;
     body_t *body1;
@@ -120,6 +123,7 @@ typedef struct {
     free_func_t aux_freer;
 } collision_param_t;
 
+//Frees a collision_param_t.
 void collision_param_free(collision_param_t *param) {
     if (param->aux != NULL) {
         param->aux_freer(param->aux);
@@ -127,6 +131,7 @@ void collision_param_free(collision_param_t *param) {
     free(param);
 }
 
+//Creates a collision between two bodies.
 void collision_force_creator(collision_param_t *param) {
     list_t *shape1 = body_get_shape(param->body1);
     list_t *shape2 = body_get_shape(param->body2);
@@ -153,7 +158,7 @@ void create_collision(scene_t *scene, body_t *body1, body_t *body2,
                                         bodies, collision_param_free);
 }
 
-
+//Applies impulses to two non-destructively colliding bodies.
 void physics_collision_handler(body_t *body1, body_t *body2,
                                 vector_t axis, void *aux) {
     double reduced_mass = calculate_reduced_mass(body1, body2);
@@ -172,6 +177,7 @@ void physics_collision_handler(body_t *body1, body_t *body2,
     }
 }
 
+//A struct to aid in normal forces.
 typedef struct normal_param {
     normal_handler_t handler;
     body_t *body1;
@@ -181,11 +187,13 @@ typedef struct normal_param {
     free_func_t aux_freer;
 } normal_param_t;
 
+//Frees a normal_param_t.
 void normal_param_free(normal_param_t *param) {
     param->aux_freer(param->aux);
     free(param);
 }
 
+//Applies a normal force between two bodies.
 void normal_handler(normal_param_t *param){
     list_t *shape1 = body_get_shape(param->body1);
     list_t *shape2 = body_get_shape(param->body2);
@@ -257,6 +265,7 @@ void normal_handler(normal_param_t *param){
     free(shape2);
 }
 
+//Applies a newtonian impulse to body1 and destroys body2.
 void one_way_destroy_handler(body_t *body1, body_t *body2,
                                 vector_t axis, void *aux) {
     physics_collision_handler(body1, body2, axis, aux);
@@ -302,5 +311,4 @@ void create_normal_collision(scene_t *scene, vector_t grav,
                                         body2, grav_param, false, free};
     scene_add_bodies_force_creator(scene, normal_handler, force_param,
                                         bodies, normal_param_free);
-
 }
