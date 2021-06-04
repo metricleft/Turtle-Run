@@ -57,8 +57,8 @@ const int TEXT_OFFSET = 10;
 
 const int NUM_HIGHSCORES = 5;
 const int NUM_ACHIEVEMENTS = 4;
-const char *HIGHSCORES_FILE = "saves/highscore.txt";
-const char *ACHIEVEMENTS_FILE = "saves/lifetime.txt";
+const char *HIGHSCORES_FILE = "saves/highscore.tr";
+const char *ACHIEVEMENTS_FILE = "saves/lifetime.tr";
 
 const char *SKY_IMG = "static/background_sky.png";
 const char *GRASS_IMG = "static/background_grass.png";
