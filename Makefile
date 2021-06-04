@@ -1,7 +1,7 @@
 # List of demo programs
 DEMOS = game
 # List of C files in "libraries" that we provide
-STAFF_LIBS = test_util sdl_wrapper
+STAFF_LIBS = sdl_wrapper
 # List of C files in "libraries" that you will write.
 # This also defines the order in which the tests are run.
 STUDENT_LIBS = vector list polygon color body scene forces collision entity shapelib enemy frame powerup bounds
@@ -30,12 +30,10 @@ LIBS = $(LIB_MATH) $(shell sdl2-config --libs) -lSDL2_gfx -lSDL2_image -lSDL2_mi
 # Don't worry about the syntax; it's just adding "out/" to the start
 # and ".o" to the end of each value in STUDENT_LIBS.
 STUDENT_OBJS = $(addprefix out/,$(STUDENT_LIBS:=.o))
-# List of test suite executables, e.g. "bin/test_suite_vector"
-TEST_BINS = $(addprefix bin/test_suite_,$(STUDENT_LIBS))
 # List of demo executables, i.e. "bin/bounce".
 DEMO_BINS = $(addprefix bin/,$(DEMOS))
 # All executables (the concatenation of TEST_BINS and DEMO_BINS)
-BINS = $(TEST_BINS) $(DEMO_BINS)
+BINS = $(DEMO_BINS)
 
 # The first Make rule. It is relatively simple:
 # "To build 'all', make sure all files in BINS are up to date."
@@ -57,61 +55,12 @@ out/%.o: library/%.c # source file may be found in "library"
 	$(CC) -c $(CFLAGS) $^ -o $@
 out/%.o: demo/%.c # or "demo"
 	$(CC) -c $(CFLAGS) $^ -o $@
-out/%.o: tests/%.c # or "tests"
-	$(CC) -c $(CFLAGS) $^ -o $@
 
 # Builds bin/bounce by linking the necessary .o files.
 # Unlike the out/%.o rule, this uses the LIBS flags and omits the -c flag,
 # since it is building a full executable.
-bin/bounce: out/bounce.o out/sdl_wrapper.o $(STUDENT_OBJS)
-	$(CC) $(CFLAGS) $(LIBS) $^ -o $@
-
-bin/gravity: out/gravity.o out/sdl_wrapper.o $(STUDENT_OBJS)
-	$(CC) $(CFLAGS) $(LIBS) $^ -o $@
-
-bin/pacman: out/pacman.o out/sdl_wrapper.o $(STUDENT_OBJS)
-	$(CC) $(CFLAGS) $(LIBS) $^ -o $@
-
-bin/nbodies: out/nbodies.o out/sdl_wrapper.o $(STUDENT_OBJS)
-	$(CC) $(CFLAGS) $(LIBS) $^ -o $@
-
-bin/damping: out/damping.o out/sdl_wrapper.o $(STUDENT_OBJS)
-		$(CC) $(CFLAGS) $(LIBS) $^ -o $@
-
-bin/spaceinvaders: out/spaceinvaders.o out/sdl_wrapper.o $(STUDENT_OBJS)
-		$(CC) $(CFLAGS) $(LIBS) $^ -o $@
-
-bin/pegs: out/pegs.o out/sdl_wrapper.o $(STUDENT_OBJS)
-		$(CC) $(CFLAGS) $(LIBS) $^ -o $@
-
-bin/breakout: out/breakout.o out/sdl_wrapper.o $(STUDENT_OBJS)
-		$(CC) $(CFLAGS) $(LIBS) $^ -o $@
-
 bin/game: out/game.o out/sdl_wrapper.o $(STUDENT_OBJS)
 		$(CC) $(CFLAGS) $(LIBS) $^ -o $@
-bin/imgtest: out/imgtest.o $(STUDENT_OBJS)
-		$(CC) $(CFLAGS) $(LIBS) $^ -o $@
-# Builds the test suite executables from the corresponding test .o file
-# and the library .o files. The only difference from the demo build command
-# is that it doesn't link the SDL libraries.
-bin/test_suite_%: out/test_suite_%.o out/test_util.o $(STUDENT_OBJS)
-	$(CC) $(CFLAGS) $(LIB_MATH) $^ -o $@
-
-
-bin/student_tests: out/student_tests.o out/test_util.o $(STUDENT_OBJS)
-	$(CC) $(CFLAGS) $(LIB_MATH) $^ -o $@
-
-# Runs the tests. "$(TEST_BINS)" requires the test executables to be up to date.
-# The command is a simple shell script:
-# "set -e" configures the shell to exit if any of the tests fail
-# "for f in $(TEST_BINS); do ...; done" loops over the test executables,
-#    assigning the variable f to each one
-# "echo $$f" prints the test suite
-# "$$f" runs the test; "$$" escapes the $ character,
-#   and "$f" tells the shell to substitute the value of the variable f
-# "echo" prints a newline after each test's output, for readability
-test: $(TEST_BINS)
-	set -e; for f in $(TEST_BINS); do echo $$f; $$f; echo; done
 
 # Removes all compiled files.
 # find <dir> is the command to find files in a directory
@@ -184,8 +133,6 @@ LINKEROPTS += -NODEFAULTLIB:msvcrt.lib
 # Don't worry about the syntax; it's just adding "out/" to the start
 # and ".obj" to the end of each value in STUDENT_LIBS.
 STUDENT_OBJS = $(addprefix out/,$(STUDENT_LIBS:=.obj))
-# List of test suite executables, e.g. "bin/test_suite_vector.exe"
-TEST_BINS = $(addsuffix .exe,$(addprefix bin/test_suite_,$(STUDENT_LIBS)))
 # List of demo executables, i.e. "bin/bounce.exe".
 DEMO_BINS = $(addsuffix .exe,$(addprefix bin/,$(DEMOS)))
 # All executables (the concatenation of TEST_BINS and DEMO_BINS)
@@ -211,73 +158,12 @@ out/%.obj: library/%.c # source file may be found in "library"
 	$(CC) -c $^ $(CFLAGS) -Fo"$@"
 out/%.obj: demo/%.c # or "demo"
 	$(CC) -c $^ $(CFLAGS) -Fo"$@"
-out/%.obj: tests/%.c # or "tests"
-	$(CC) -c $^ $(CFLAGS) -Fo"$@"
-
-bin/bounce.exe bin\bounce.exe: out/bounce.obj out/sdl_wrapper.obj $(STUDENT_OBJS)
-	$(CC) $^ $(CFLAGS) -link $(LINKEROPTS) $(LIBS) -out:"$@"
-
-bin/gravity.exe bin\gravity.exe: out/gravity.obj out/sdl_wrapper.obj $(STUDENT_OBJS)
-	$(CC) $^ $(CFLAGS) -link $(LINKEROPTS) $(LIBS) -out:"$@"
-
-bin/pacman.exe bin\pacman.exe: out/pacman.obj out/sdl_wrapper.obj $(STUDENT_OBJS)
-	$(CC) $^ $(CFLAGS) -link $(LINKEROPTS) $(LIBS) -out:"$@"
-
-bin/nbodies.exe: out/nbodies.obj out/sdl_wrapper.obj $(STUDENT_OBJS)
-	$(CC) $^ $(CFLAGS) -link $(LINKEROPTS) $(LIBS) -out:"$@"
-
-bin/damping.exe: out/damping.obj out/sdl_wrapper.obj $(STUDENT_OBJS)
-	$(CC) $^ $(CFLAGS) -link $(LINKEROPTS) $(LIBS) -out:"$@"
-
-bin/spaceinvaders.exe: out/spaceinvaders.obj out/sdl_wrapper.obj $(STUDENT_OBJS)
-	$(CC) $^ $(CFLAGS) -link $(LINKEROPTS) $(LIBS) -out:"$@"
-
-bin/pegs.exe: out/pegs.obj out/sdl_wrapper.obj $(STUDENT_OBJS)
-	$(CC) $^ $(CFLAGS) -link $(LINKEROPTS) $(LIBS) -out:"$@"
-
-bin/breakout.exe: out/breakout.obj out/sdl_wrapper.obj $(STUDENT_OBJS)
-	$(CC) $^ $(CFLAGS) -link $(LINKEROPTS) $(LIBS) -out:"$@"
 
 bin/game.exe: out/game.obj out/sdl_wrapper.obj $(STUDENT_OBJS)
 	$(CC) $^ $(CFLAGS) -link $(LINKEROPTS) $(LIBS) -out:"$@"
-bin/imgtest.exe: out/imgtest.obj  $(STUDENT_OBJS)
-	$(CC) $^ $(CFLAGS) -link $(LINKEROPTS) $(LIBS) -out:"$@"
-
-# Builds the test suite executables from the corresponding test .o file
-# and the library .o files. The only difference from the demo build command
-# is that it doesn't link the SDL libraries.
-bin/test_suite_%.exe bin\test_suite_%.exe: out/test_suite_%.obj out/test_util.obj $(STUDENT_OBJS)
-	$(CC) $^ $(CFLAGS) -link $(LINKEROPTS) -out:"$@"
 
 # Empty recipes for cross-OS task compatibility.
-bin/bounce bin\bounce: bin/bounce.exe ;
-bin/gravity bin\gravity: bin/gravity.exe ;
-bin/pacman bin\pacman: bin/pacman.exe ;
-bin/nbodies bin\nbodies: bin/nbodies.exe; 
-bin/damping bin\damping: bin/damping.exe; 
-bin/spaceinvaders bin\spaceinvaders: bin/spaceinvaders.exe;
-bin/pegs bin\pegs: bin/pegs.exe;
-bin/breakout bin\breakout: bin/breakout.exe;
 bin/game bin\game: bin/game.exe;
-bin/imgtest bin\imgtest: bin/imgtest.exe;
-
-
-bin/test_suite_% bin\test_suite_%: bin/test_suite_%.exe ;
-
-# CMD commands to test and clean
-
-bin/student_tests.exe: out/student_tests.obj out/test_util.obj $(STUDENT_OBJS)
-	$(CC) $(CFLAGS) $(LIB_MATH) $^ -o $@
-
-# "$(subst /,\, $(TEST_BINS))" replaces "/" with "\" for
-#	Windows paths,
-# "echo %%i.exe" prints the test suite,
-# "cmd /c %%i.exe" runs the test,
-# "|| exit /b" causes the session to exit if any of the tests fail,
-# "echo." prints a newline.
-test: $(TEST_BINS)
-	for %%i in ($(subst /,\, $(TEST_BINS))) \
-	do ((echo %%i) && ((cmd /c %%i) || exit /b) && (echo.))
 
 # Explicitly iterate on files in out\* and bin\*, and
 # delete if it's not .gitignore
