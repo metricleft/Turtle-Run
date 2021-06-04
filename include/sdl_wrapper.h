@@ -223,6 +223,9 @@ void sdl_render_scene(scene_t *scene);
  * so those functions should not be called directly.
  *
  * @param scene the scene to draw
+ * @param score_text information containing the score's text
+ * @param coins_text information containing the number of coins
+ * @param powerup_text information containing the current powerup
  */
 void sdl_render_scene_with_score(scene_t *scene, text_info_t *score_text,
     text_info_t *coins_text, text_info_t *powerup_text);

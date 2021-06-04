@@ -152,6 +152,18 @@ void create_physics_collision(
     body_t *body2
 );
 
+/**
+ * Adds a force creator to a scene that acts as a normal force when the
+ * player collides with it. For terrain bodies, the player collides with the
+ * side walls and bottom of the hitbox. For platforms, the player lands on
+ * top of the platform, but experiences no forces when hitting the platform from
+ * the side or bottom.
+ * 
+ * @param scene the scene to add the force to
+ * @param grav a vector describing the gravity of the scene
+ * @param body1 the body of the player
+ * @param body2 the body of the terrain
+ */
 void create_normal_collision(
     scene_t *scene,
     vector_t grav,

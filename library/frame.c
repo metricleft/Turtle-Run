@@ -189,20 +189,6 @@ void frame_spawn_random(scene_t *scene, vector_t frame, double frame_start,
     int frame_num;
 
     frame_num = rand() % 7;
-    /* //Stuff for debugging frames
-    printf("%d\n",frame_num);
-
-    vector_t debug_center = (vector_t) {frame_start, 50};
-    entity_t *debug_entity = entity_init("TERRAIN",true,false);
-    list_t *debug_coords = compute_rect_points(debug_center, 10, 50);
-    body_t *debug_body = body_init_with_info(debug_coords, INFINITY, debug_entity, entity_free);
-    rgb_color_t *red = malloc(sizeof(rgb_color_t));
-    *red = RED;
-    body_set_draw(debug_body, sdl_draw_polygon, red, free);
-    scene_add_body(scene, debug_body);
-    create_terrain_collisions(scene,debug_body);
-    */
-    //frame_6(scene,frame,frame_start,score);
     
     if (frame_num == 0) {
         frame_0(scene, frame, frame_start, score, achievements);
