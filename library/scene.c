@@ -2,7 +2,6 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include "scene.h"
-
  
 typedef struct force {
     void *info;

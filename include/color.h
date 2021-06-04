@@ -12,6 +12,9 @@ typedef struct {
     float b;
 } rgb_color_t;
 
+/**
+ * Built-in color codes.
+ */
 extern rgb_color_t RED;
 extern rgb_color_t ORANGE;
 extern rgb_color_t YELLOW;

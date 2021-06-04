@@ -189,7 +189,6 @@ void frame_spawn_random(scene_t *scene, vector_t frame, double frame_start,
     int frame_num;
 
     frame_num = rand() % 7;
-    
     if (frame_num == 0) {
         frame_0(scene, frame, frame_start, score, achievements);
     }
@@ -211,5 +210,4 @@ void frame_spawn_random(scene_t *scene, vector_t frame, double frame_start,
     if (frame_num == 6) {
         frame_6(scene, frame, frame_start, score, achievements);
     }
-    
 }

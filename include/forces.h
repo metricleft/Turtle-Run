@@ -128,6 +128,7 @@ void create_destructive_collision(scene_t *scene, body_t *body1, body_t *body2);
  */
 void create_oneway_destructive_collision(scene_t *scene, double elasticity, 
                                             body_t *body1, body_t *body2);
+
 /**
  * Adds a force creator to a scene that applies impulses
  * to resolve collisions between two bodies in the scene.

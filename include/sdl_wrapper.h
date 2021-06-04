@@ -265,7 +265,6 @@ void sdl_on_key(event_handler_t handler);
  *
  * @param handler the function to call with each button press
  */
-
 void sdl_on_click(event_handler_t handler);
 
 /**
@@ -273,7 +272,6 @@ void sdl_on_click(event_handler_t handler);
  *
  * @return vector_t of the mouse position
  */
-
 vector_t sdl_mouse_pos();    
 
 /**
@@ -328,7 +326,6 @@ void sdl_draw_text(body_t *body, text_info_t *info);
  * @param body an unused body
  * @param info a pointer returned from outlined_text_info_init
  */
-                            
 void sdl_draw_outlined_text(body_t *body, text_info_t *info);
 
 /**

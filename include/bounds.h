@@ -9,10 +9,10 @@
 #include "shapelib.h"
 
 /**
- * Creates three sets of bounds that destroy bodies when they fully go off-screen.
+ * Creates three sets of 4 walls that destroy bodies when they fully go off-screen.
  * Terrain bounds, 30-radius bounds, 10-radius bounds.
- * Terrain bounds destroys terrain. 30-radius destroys player,/enemies/powerups/coins.
- * 10-radius destroys fly enemiesand player bullets.
+ * Terrain bounds destroys terrain. 30-radius destroys player/enemies/powerups/coins.
+ * 10-radius destroys fly enemies and player bullets.
  * 
  * @param scene a pointer to a scene
  * @param MIN the coordinates of the bottom-left corner of the screen
